@@ -1,0 +1,2744 @@
+[
+  {
+    "sample_number": "BRG-2109-P897",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER BLACK パリスティック 1680D AIR",
+    "date": "2021.11.18",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "W180×H150×D80mm"
+    },
+    "outer_material": {
+      "fabric": "1680D AIR",
+      "color": "橙"
+    },
+    "lining_material": {
+      "fabric": "ボア",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "45×15",
+      "detail": "マグネット式"
+    },
+    "color_scheme": {
+      "main_color": "橙",
+      "tapes": {
+        "webbing_45mm": "黒",
+        "nylon_25mm": "黒",
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "刺繍：黒 w=75、刺繍：黒 w=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "黒",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2109-P897 パターカバーFIDLOCK.pdf",
+      "image_file": "BRG-2109-P897_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2109-P900",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET PUTTER COVER バリスティック 1680D AIR",
+    "date": "2021.11.18",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "1680D AIR（バリスティック）",
+      "color": "オレンジ"
+    },
+    "lining_material": {
+      "fabric": "テンダーロン、メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": "円形マグネット"
+    },
+    "color_scheme": {
+      "main_color": "オレンジ",
+      "tapes": {
+        "webbing_45mm": "黒",
+        "nylon_25mm": "黒",
+        "nylon_20mm": "黒",
+        "grosgrain": "黒"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "黒色刺繍、W=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "黒",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2109-P900 MALLET PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2109-P900_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2109-P901",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET CR PUTTER-2 パリスティック 1680D AIR",
+    "date": "2021.11.18",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "1680D AIR",
+      "color": "オレンジ"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": "FIDLOCK付きベルトとマグネット併用"
+    },
+    "color_scheme": {
+      "main_color": "オレンジ",
+      "tapes": {
+        "webbing_45mm": "黒",
+        "nylon_25mm": "黒",
+        "nylon_20mm": "黒",
+        "grosgrain": "黒"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [
+        25,
+        75
+      ],
+      "embroidery_detail": "BRIEFINGロゴとBマーク刺繍"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "黒",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2109-P901 MALLET CS PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2109-P901_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2109-P911",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER PADLOCK",
+    "date": "2021.11.18",
+    "shape": {
+      "head_type": "ブレード",
+      "head_type_confidence": "high",
+      "head_type_reason": "細長い四角形のブレード型形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "W180×H150×D80mm"
+    },
+    "outer_material": {
+      "fabric": "1680D AIR",
+      "color": "黒"
+    },
+    "lining_material": {
+      "fabric": "ボア",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "45×15",
+      "detail": "マグネット式"
+    },
+    "color_scheme": {
+      "main_color": "黒",
+      "tapes": {
+        "webbing_45mm": "オレンジ",
+        "nylon_25mm": "オレンジ",
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "#2201橙 W=75, #2201橙 W=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "オレンジ",
+      "pantone": "#2201"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2109-P911 パターカバーFIDLOCK.pdf",
+      "image_file": "BRG-2109-P911_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2109-P914",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET PUTTER COVER",
+    "date": "2021.11.18",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "大型で後方が丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "1680D AIR",
+      "color": "橙"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "円形マグネット",
+      "detail": null
+    },
+    "color_scheme": {
+      "main_color": "橙",
+      "tapes": {
+        "webbing_45mm": "橙",
+        "nylon_25mm": "橙",
+        "nylon_20mm": "橙",
+        "grosgrain": "橙"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [
+        75
+      ],
+      "embroidery_detail": "BRIEFINGロゴ刺繍"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "橙",
+      "pantone": "#2201"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2109-P914 MALLET PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2109-P914_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2109-P915",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET S PUTTER COVER-2",
+    "date": "2021.11.18",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "1680D AIR",
+      "color": "BLACK"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": null
+    },
+    "color_scheme": {
+      "main_color": "BLACK",
+      "tapes": {
+        "webbing_45mm": "橙",
+        "nylon_25mm": "橙",
+        "nylon_20mm": "橙",
+        "grosgrain": "橙"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [
+        75,
+        25
+      ],
+      "embroidery_detail": "#2201 橙 W=75, #2201 橙 W=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "橙",
+      "pantone": "#2201"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2109-P915 MALLET CS PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2109-P915_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2109-P925",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER BLACK POLY CORDURA 305P",
+    "date": "2021.11.12",
+    "shape": {
+      "head_type": "ブレード",
+      "head_type_confidence": "high",
+      "head_type_reason": "細長い形状でフラット"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "W180×H150×D80mm"
+    },
+    "outer_material": {
+      "fabric": "CORDURA ポリエステル",
+      "color": "浅青"
+    },
+    "lining_material": {
+      "fabric": "ボア",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "45×15",
+      "detail": null
+    },
+    "color_scheme": {
+      "main_color": "浅青",
+      "tapes": {
+        "webbing_45mm": "L.GRAY 浅灰",
+        "nylon_25mm": "L.GRAY 浅灰",
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "#2425 浅灰 W=75, W=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "浅灰",
+      "pantone": "#2425"
+    },
+    "packaging": "PO 袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2109-P925 パターカバーFIDLOCK.pdf",
+      "image_file": "BRG-2109-P925_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2109-P928",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET PUTTER COVER POLY CORDURA 305P",
+    "date": "2021.11.16",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "CORDURAポリエステル",
+      "color": "浅青"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "円形マグネット",
+      "detail": null
+    },
+    "color_scheme": {
+      "main_color": "浅青",
+      "tapes": {
+        "webbing_45mm": "L.GRAY浅灰",
+        "nylon_25mm": "L.GRAY浅灰",
+        "nylon_20mm": "L.GRAY浅灰",
+        "grosgrain": "L.GRAY浅灰"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [
+        25,
+        75
+      ],
+      "embroidery_detail": "#2425浅灰 W=25, W=75"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "浅灰",
+      "pantone": "#2425"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2109-P928 MALLET PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2109-P928_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2109-P929",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET SP48 PUTTER",
+    "date": "2021.11.16",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "CORDURA ポリエステル",
+      "color": "浅青"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": null
+    },
+    "color_scheme": {
+      "main_color": "浅青",
+      "tapes": {
+        "webbing_45mm": "L.GRAY 浅灰",
+        "nylon_25mm": "L.GRAY 浅灰",
+        "nylon_20mm": "L.GRAY 浅灰",
+        "grosgrain": "L.GRAY 浅灰"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": null,
+      "embroidery_detail": "#2425 浅灰 W=75, #2425 浅灰 W=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "グレー",
+      "pantone": "#2425"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2109-P929 MALLET CS PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2109-P929_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2109-P936",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER BLACK POLY CORDURA 305P",
+    "date": "2021.11.16",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "W180×H150×D80mm"
+    },
+    "outer_material": {
+      "fabric": "CORDURA ポリエステル",
+      "color": "橙"
+    },
+    "lining_material": {
+      "fabric": "ボア",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "45×15",
+      "detail": "マグネット式"
+    },
+    "color_scheme": {
+      "main_color": "オレンジ",
+      "tapes": {
+        "webbing_45mm": "L.GRAY 浅灰",
+        "nylon_25mm": "L.GRAY 浅灰",
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [
+        25,
+        75
+      ],
+      "embroidery_detail": "#2425 浅灰 刺繍"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "浅灰",
+      "pantone": "#2425"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2109-P936 パターカバーFIDLOCK.pdf",
+      "image_file": "BRG-2109-P936_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2109-P939",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET PUTTER COVER",
+    "date": "2021.11.18",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "CORDURAポリエステル",
+      "color": "橙"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "円形マグネット",
+      "detail": null
+    },
+    "color_scheme": {
+      "main_color": "橙",
+      "tapes": {
+        "webbing_45mm": "L.GRAY 浅灰",
+        "nylon_25mm": "L.GRAY 浅灰",
+        "nylon_20mm": "L.GRAY 浅灰",
+        "grosgrain": "L.GRAY 浅灰"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "プリント",
+      "print_widths": [
+        25,
+        75
+      ],
+      "embroidery_detail": null
+    },
+    "logo": {
+      "type": "プリント",
+      "color": "#2425 浅灰",
+      "pantone": "#2425"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2109-P939 MALLET PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2109-P939_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2109-P940",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET CS PUTTER COVER",
+    "date": "2021.11.18",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "CORDURA ポリエステル",
+      "color": "オレンジ"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": null
+    },
+    "color_scheme": {
+      "main_color": "オレンジ",
+      "tapes": {
+        "webbing_45mm": "L.GRAY 浅灰",
+        "nylon_25mm": "L.GRAY 浅灰",
+        "nylon_20mm": "L.GRAY 浅灰",
+        "grosgrain": "L.GRAY 浅灰"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "#2425 浅灰 W=75, #2425 浅灰 W=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "浅灰",
+      "pantone": "#2425"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2109-P940 MALLET CS PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2109-P940_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1006",
+    "client": "ユニオンゲート",
+    "item_name": "HALF MALLET CS PUTTER COVER FIDLOCK",
+    "date": "2022.3.18",
+    "shape": {
+      "head_type": "セミマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "HALF MALLETと明記されており、形状も後方がやや張り出している"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅130×高さ120（蓋開時）×マチ50mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "NAVY"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "紺"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": "長方形マグネットと円形マグネットの組み合わせ"
+    },
+    "color_scheme": {
+      "main_color": "NAVY",
+      "tapes": {
+        "webbing_45mm": "NAVY",
+        "nylon_25mm": "NAVY",
+        "nylon_20mm": "NAVY",
+        "grosgrain": "NAVY"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "BRIEFINGロゴ刺繍（白）、Bロゴ刺繍（白）"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1006 HALF MALLET CS PUTTER COVER FIDLOCK .pdf",
+      "image_file": "BRG-2111-P1006_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1007",
+    "client": "ユニオンゲート",
+    "item_name": "HALF MALLET PUTTER COVER FIDLOCK",
+    "date": "2022.3.18",
+    "shape": {
+      "head_type": "セミマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "HALF MALLETと明記されている"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅130×高さ120（蓋開時）×マチ50mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "NAVY"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "紺"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "長方形マグネット・円形マグネット",
+      "detail": "FIDLOCK付き"
+    },
+    "color_scheme": {
+      "main_color": "NAVY",
+      "tapes": {
+        "webbing_45mm": "NAVY",
+        "nylon_25mm": "NAVY",
+        "nylon_20mm": "NAVY",
+        "grosgrain": "NAVY"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [
+        25,
+        75
+      ],
+      "embroidery_detail": "白色刺繍"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1007 HALF MALLET PUTTER COVER FIDLOCK .pdf",
+      "image_file": "BRG-2111-P1007_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1017",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER BLACK ECO TWILL",
+    "date": "2022.3.8",
+    "shape": {
+      "head_type": "ブレード",
+      "head_type_confidence": "high",
+      "head_type_reason": "細長い四角形状で小ぶりなブレード型"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "W180×H150×D80mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "BLACK"
+    },
+    "lining_material": {
+      "fabric": "ボア",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "45×15",
+      "detail": "マグネット式"
+    },
+    "color_scheme": {
+      "main_color": "BLACK",
+      "tapes": {
+        "webbing_45mm": "BLACK",
+        "nylon_25mm": "BLACK",
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "#2050赤 W=100, W=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "赤",
+      "pantone": "#2050"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1017 パターカバーFIDLOCK.pdf",
+      "image_file": "BRG-2111-P1017_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1019",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET PUTTER COVER-2 ECO TWILL",
+    "date": "2022.3.9",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "BLACK"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "円形マグネット",
+      "detail": null
+    },
+    "color_scheme": {
+      "main_color": "BLACK",
+      "tapes": {
+        "webbing_45mm": "BLACK",
+        "nylon_25mm": "BLACK",
+        "nylon_20mm": "BLACK",
+        "grosgrain": "BLACK"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "#2050赤、W=75、W=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "赤",
+      "pantone": "#2050"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1019 MALLET PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2111-P1019_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1020",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET CS PUTTER COVER-2 ECO TWILL",
+    "date": "2022.3.9",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "大型で丸みのある形状が確認できる"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "BLACK"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": null
+    },
+    "color_scheme": {
+      "main_color": "BLACK",
+      "tapes": {
+        "webbing_45mm": "BLACK",
+        "nylon_25mm": "BLACK",
+        "nylon_20mm": "BLACK",
+        "grosgrain": "BLACK"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [
+        75,
+        25
+      ],
+      "embroidery_detail": "#2050 赤"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "赤",
+      "pantone": "#2050"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1020 MALLET CS PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2111-P1020_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1027",
+    "client": "ユニオンゲート",
+    "item_name": "HALF MALLET CS PUTTER COVER FIDLOCK ECO TWILL",
+    "date": "2022.3.18",
+    "shape": {
+      "head_type": "セミマレット",
+      "head_type_confidence": "medium",
+      "head_type_reason": "HALF MALLETの名称から判定"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅130×高さ120（蓋開時）×マチ50mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "BLACK"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "長方形マグネット・円形マグネット",
+      "detail": "FIDLOCK付きベルト・25mm赤ラインテープ・支給タグ（ベース：黒・ロゴ：赤）"
+    },
+    "color_scheme": {
+      "main_color": "BLACK",
+      "tapes": {
+        "webbing_45mm": "BLACK",
+        "nylon_25mm": "BLACK",
+        "nylon_20mm": "BLACK",
+        "grosgrain": "BLACK"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "プリント",
+      "print_widths": [
+        25,
+        75
+      ],
+      "embroidery_detail": null
+    },
+    "logo": {
+      "type": "プリント",
+      "color": "赤",
+      "pantone": "#2050"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1027 HALF MALLET CS PUTTER COVER FIDLOCK .pdf",
+      "image_file": "BRG-2111-P1027_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1028",
+    "client": "ユニオンゲート",
+    "item_name": "HALF MALLET PUTTER COVER FIDLOCK ECO TWILL",
+    "date": "2022.3.18",
+    "shape": {
+      "head_type": "セミマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "商品名にHALF MALLETと明記されている"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅130×高さ120（蓋開時）×マチ50mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "BLACK"
+    },
+    "lining_material": {
+      "fabric": "テンウーロン、メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": "長方形マグネットと円形マグネット、一周ヘリ巻式"
+    },
+    "color_scheme": {
+      "main_color": "BLACK",
+      "tapes": {
+        "webbing_45mm": "BLACK",
+        "nylon_25mm": "BLACK",
+        "nylon_20mm": "BLACK",
+        "grosgrain": "BLACK"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "なし",
+      "print_widths": [],
+      "embroidery_detail": null
+    },
+    "logo": {
+      "type": "プリント",
+      "color": "赤",
+      "pantone": "#2050"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1028 HALF MALLET PUTTER COVER FIDLOCK .pdf",
+      "image_file": "BRG-2111-P1028_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1038",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER WITH FIDLOCK",
+    "date": "2022.3.8",
+    "shape": {
+      "head_type": "ブレード",
+      "head_type_confidence": "high",
+      "head_type_reason": "細長い三角形状でフラットな形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "W180×H150×D80mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "L.GRAY"
+    },
+    "lining_material": {
+      "fabric": "ボア",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "45×15",
+      "detail": "FIDLOCK付きベルト"
+    },
+    "color_scheme": {
+      "main_color": "L.GRAY",
+      "tapes": {
+        "webbing_45mm": "L.GRAY",
+        "nylon_25mm": "L.GRAY",
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "白刺繍 W=100、W=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1038 パターカバーFIDLOCK.pdf",
+      "image_file": "BRG-2111-P1038_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1040",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET PUTTER COVER-2",
+    "date": "2022.3.8",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "L.GRAY"
+    },
+    "lining_material": {
+      "fabric": "デンザーロン・メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": "円形マグネット"
+    },
+    "color_scheme": {
+      "main_color": "L.GRAY",
+      "tapes": {
+        "webbing_45mm": "L.GRAY",
+        "nylon_25mm": "L.GRAY",
+        "nylon_20mm": "L.GRAY",
+        "grosgrain": "L.GRAY"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "白刺繍 W=75, 白刺繍 W=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1040 MALLET PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2111-P1040_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1041",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET CS PUTTER COVER-2",
+    "date": "2022.3.9",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出している典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "GRAY"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": null
+    },
+    "color_scheme": {
+      "main_color": "GRAY",
+      "tapes": {
+        "webbing_45mm": "L.GRAY 浅灰",
+        "nylon_25mm": "L.GRAY 浅灰",
+        "nylon_20mm": "L.GRAY 浅灰",
+        "grosgrain": "L.GRAY 浅灰"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "白色刺繍、幅75mm、25mm"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1041 MALLET CS PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2111-P1041_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1048",
+    "client": "ユニオンゲート",
+    "item_name": "HALF MALLET CS PUTTER COVER FIDLOCK",
+    "date": "2022.3.18",
+    "shape": {
+      "head_type": "セミマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "HALF MALLETの商品名記載"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅130×高さ120（蓋開時）×マチ50mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "GRAY"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "長方形マグネット、円形マグネット",
+      "detail": "FIDLOCK付きベルト構造"
+    },
+    "color_scheme": {
+      "main_color": "GRAY",
+      "tapes": {
+        "webbing_45mm": "L.GRAY",
+        "nylon_25mm": "L.GRAY",
+        "nylon_20mm": "L.GRAY",
+        "grosgrain": "L.GRAY"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [
+        25,
+        75
+      ],
+      "embroidery_detail": "白刺繍"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1048 HALF MALLET CS PUTTER COVER FIDLOCK .pdf",
+      "image_file": "BRG-2111-P1048_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1049",
+    "client": "ユニオンゲート",
+    "item_name": "HALF MALLET PUTTER COVER FIDLOCK ECO TWILL",
+    "date": "2022.3.18",
+    "shape": {
+      "head_type": "セミマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "HALF MALLETの表記とカバー形状から判定"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅130×高さ120（蓋開時）×マチ50mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "GRAY"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "FIDLOCK",
+      "size": null,
+      "detail": "磁気留め具"
+    },
+    "color_scheme": {
+      "main_color": "GRAY",
+      "tapes": {
+        "webbing_45mm": "L.GRAY",
+        "nylon_25mm": "L.GRAY",
+        "nylon_20mm": "L.GRAY",
+        "grosgrain": "L.GRAY"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "白糸刺繍 w=75, w=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1049 HALF MALLET PUTTER COVER FIDLOCK .pdf",
+      "image_file": "BRG-2111-P1049_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1059",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER BLACK ECO TWILL",
+    "date": "2022.3.8",
+    "shape": {
+      "head_type": "セミマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "丸みのある形状で後方がやや張り出している"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "W180×H150×D80mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "PC GREEN"
+    },
+    "lining_material": {
+      "fabric": "ボア",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "45×15",
+      "detail": "マグネット式"
+    },
+    "color_scheme": {
+      "main_color": "グリーン",
+      "tapes": {
+        "webbing_45mm": "L.GRAY",
+        "nylon_25mm": "L.GRAY",
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": null,
+      "embroidery_detail": "BRIEFING白刺繍、W=100"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1059 パターカバーFIDLOCK.pdf",
+      "image_file": "BRG-2111-P1059_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1061",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET PUTTER COVER-2",
+    "date": "2022.3.9",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出している形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "PC.GREEN"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "円形マグネット",
+      "detail": null
+    },
+    "color_scheme": {
+      "main_color": "PC.GREEN",
+      "tapes": {
+        "webbing_45mm": "L.GRAY",
+        "nylon_25mm": "L.GRAY",
+        "nylon_20mm": "L.GRAY",
+        "grosgrain": "L.GRAY"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "白色刺繍、W=25、W=75"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1061 MALLET PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2111-P1061_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1062",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET CS PUTTER COVER-2",
+    "date": "2022.3.9",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "PC.GREEN"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": null
+    },
+    "color_scheme": {
+      "main_color": "ECO TWILL PC.GREEN",
+      "tapes": {
+        "webbing_45mm": "L.GRAY 浅灰",
+        "nylon_25mm": "L.GRAY 浅灰",
+        "nylon_20mm": "L.GRAY 浅灰",
+        "grosgrain": "L.GRAY 浅灰"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [
+        25,
+        75
+      ],
+      "embroidery_detail": "白刺繍でロゴマーク"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1062 MALLET CS PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2111-P1062_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1069",
+    "client": "ユニオンゲート",
+    "item_name": "HALF MALLET CS PUTTER COVER FIDLOCK ECO TWILL",
+    "date": "2022.3.18",
+    "shape": {
+      "head_type": "セミマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "HALF MALLETの名称と画像形状から判定"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅130×高さ120（蓋開時）×マチ50mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "PC.GREEN"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "長方形マグネット、円形マグネット",
+      "detail": "FIDLOCK付きベルト構造"
+    },
+    "color_scheme": {
+      "main_color": "PC.GREEN",
+      "tapes": {
+        "webbing_45mm": "L.GRAY",
+        "nylon_25mm": "L.GRAY",
+        "nylon_20mm": "L.GRAY",
+        "grosgrain": "L.GRAY"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": null,
+      "embroidery_detail": "刺繍：白 w=75、刺繍：白 w=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1069 HALF MALLET CS PUTTER COVER FIDLOCK .pdf",
+      "image_file": "BRG-2111-P1069_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P1070",
+    "client": "ユニオンゲート",
+    "item_name": "HALF MALLET PUTTER COVER FIDLOCK ECO TWILL",
+    "date": "2022.3.18",
+    "shape": {
+      "head_type": "セミマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "HALF MALLETと明記されており、画像でも適度な丸みを確認"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅130×高さ120（蓋開時）×マチ50mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "PC.GREEN"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "長方形マグネット、円形マグネット",
+      "detail": "FIDLOCK付き、一周ヘリ巻式"
+    },
+    "color_scheme": {
+      "main_color": "PC.GREEN",
+      "tapes": {
+        "webbing_45mm": "L.GRAY",
+        "nylon_25mm": "L.GRAY",
+        "nylon_20mm": "L.GRAY",
+        "grosgrain": "L.GRAY"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": null,
+      "embroidery_detail": "刺繍：白、w=75、w=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P1070 HALF MALLET PUTTER COVER FIDLOCK .pdf",
+      "image_file": "BRG-2111-P1070_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P996",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER THICK ECO TWILL",
+    "date": "2022.3.8",
+    "shape": {
+      "head_type": "ブレード",
+      "head_type_confidence": "high",
+      "head_type_reason": "細長い四角形状で小ぶりでフラット"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "W180×H150×D60mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "NAVY"
+    },
+    "lining_material": {
+      "fabric": "ボア",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "45×15",
+      "detail": "マグネット式"
+    },
+    "color_scheme": {
+      "main_color": "NAVY",
+      "tapes": {
+        "webbing_45mm": "NAVY",
+        "nylon_25mm": "NAVY",
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": null,
+      "embroidery_detail": "白色刺繍、W=100"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": null,
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P996 パターカバーFIDLOCK.pdf",
+      "image_file": "BRG-2111-P996_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P998",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET PUTTER COVER-2 ECO TWILL",
+    "date": "2022.3.8",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "NAVY"
+    },
+    "lining_material": {
+      "fabric": "メッシュ",
+      "color": "紺"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": "円形マグネット"
+    },
+    "color_scheme": {
+      "main_color": "NAVY",
+      "tapes": {
+        "webbing_45mm": "NAVY",
+        "nylon_25mm": "NAVY",
+        "nylon_20mm": "NAVY",
+        "grosgrain": "NAVY"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "白刺繍 W=25, W=75"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P998 MALLET PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2111-P998_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2111-P999",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET CS PUTTER COVER-2 ECO TWILL",
+    "date": "2022.3.9",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "ECO TWILL",
+      "color": "NAVY"
+    },
+    "lining_material": {
+      "fabric": "テンウーロン",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": null
+    },
+    "color_scheme": {
+      "main_color": "NAVY",
+      "tapes": {
+        "webbing_45mm": "NAVY",
+        "nylon_25mm": "NAVY",
+        "nylon_20mm": "NAVY",
+        "grosgrain": "NAVY"
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [
+        25,
+        75
+      ],
+      "embroidery_detail": "刺繍：白"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2111-P999 MALLET CS PUTTER COVER-2 .pdf",
+      "image_file": "BRG-2111-P999_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2506-P2226",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER カーボンシリーズ",
+    "date": "2025.10.14",
+    "shape": {
+      "head_type": "ブレード",
+      "head_type_confidence": "high",
+      "head_type_reason": "細長いL字型の形状"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "W=180 H=150 D=80"
+    },
+    "outer_material": {
+      "fabric": "CORDURA1680D air 黒 × カーボンシート",
+      "color": "黒"
+    },
+    "lining_material": {
+      "fabric": "羊毛絨",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "ベルクロ",
+      "size": "55mm",
+      "detail": "ウェービングテープ 赤耳なし"
+    },
+    "color_scheme": {
+      "main_color": "黒",
+      "tapes": {
+        "webbing_45mm": null,
+        "nylon_25mm": null,
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": null
+    },
+    "decoration": {
+      "type": "プリント",
+      "print_widths": [],
+      "embroidery_detail": null
+    },
+    "logo": {
+      "type": "プリント",
+      "color": "グレー",
+      "pantone": null
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2506-P2226 カーボンシリーズ パターカバー.pdf",
+      "image_file": "BRG-2506-P2226_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2509-P2313",
+    "client": "ユニオンゲート",
+    "item_name": "デジカモシリーズ パターカバー",
+    "date": "2025.2.16",
+    "shape": {
+      "head_type": "ブレード",
+      "head_type_confidence": "high",
+      "head_type_reason": "細長い形状で小ぶりなデザイン"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅180×高さ150×厚さ80"
+    },
+    "outer_material": {
+      "fabric": "デジカモFOLIAGE(灰)ナイロン",
+      "color": "灰"
+    },
+    "lining_material": {
+      "fabric": "ホフの黒",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": "GRIMLOCK:黒、FIDLOCK:黒"
+    },
+    "color_scheme": {
+      "main_color": "灰",
+      "tapes": {
+        "webbing_45mm": null,
+        "nylon_25mm": null,
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "なし",
+      "print_widths": [],
+      "embroidery_detail": null
+    },
+    "logo": {
+      "type": "プリント",
+      "color": "白ロゴ",
+      "pantone": null
+    },
+    "packaging": null,
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2509-P2313 P2320 デジカモ シリーズ 灰 紺 PC.pdf",
+      "image_file": "BRG-2509-P2313_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2509-P2320",
+    "client": "ユニオンゲート",
+    "item_name": "デジカモシリーズ パターカバー",
+    "date": "2025.2.16",
+    "shape": {
+      "head_type": "ブレード",
+      "head_type_confidence": "high",
+      "head_type_reason": "細長い形状でフラットな外観"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "幅180×高さ150×厚さ80"
+    },
+    "outer_material": {
+      "fabric": "デジカモ NAVY(紺) ナイロン",
+      "color": "NAVY(紺)"
+    },
+    "lining_material": {
+      "fabric": "ボアの黒",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": "GRIMLOCK:黒、FIDLOCK:黒"
+    },
+    "color_scheme": {
+      "main_color": "NAVY(紺)",
+      "tapes": {
+        "webbing_45mm": null,
+        "nylon_25mm": null,
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "なし",
+      "print_widths": [],
+      "embroidery_detail": null
+    },
+    "logo": {
+      "type": "プリント",
+      "color": "青",
+      "pantone": null
+    },
+    "packaging": null,
+    "meta": {
+      "source_pdf": "[最終仕様書]BRG-2509-P2313 P2320 デジカモ シリーズ 灰 紺 PC.pdf",
+      "image_file": "BRG-2509-P2313_p2.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2002-P431",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER SP",
+    "date": "2020.5.18",
+    "shape": {
+      "head_type": "ブレード",
+      "head_type_confidence": "high",
+      "head_type_reason": "細長い四角形状で小ぶりなブレード型パター用"
+    },
+    "size": {
+      "reference_spec": "BRG-1911-P345",
+      "dimensions_noted": null
+    },
+    "outer_material": {
+      "fabric": "スペクトラ",
+      "color": "黒"
+    },
+    "lining_material": {
+      "fabric": "羊毛絨",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "45×15",
+      "detail": "マグネット式"
+    },
+    "color_scheme": {
+      "main_color": "黒",
+      "tapes": {
+        "webbing_45mm": "BLACK黒",
+        "nylon_25mm": "BLACK黒",
+        "nylon_20mm": "BLACK黒",
+        "grosgrain": "BLACK黒"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "プリント",
+      "print_widths": [
+        25,
+        75
+      ],
+      "embroidery_detail": null
+    },
+    "logo": {
+      "type": "プリント",
+      "color": "赤",
+      "pantone": "187C"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "［最終仕様書］ BRG-PC-SP.pdf",
+      "image_file": "BRG-PC-SP_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2002-P432",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER SP",
+    "date": "2020.5.18",
+    "shape": {
+      "head_type": "ブレード",
+      "head_type_confidence": "high",
+      "head_type_reason": "細長い四角形で小ぶりなフラット形状"
+    },
+    "size": {
+      "reference_spec": "BRG-1911-P345",
+      "dimensions_noted": null
+    },
+    "outer_material": {
+      "fabric": "スペクトラ",
+      "color": "浅灰"
+    },
+    "lining_material": {
+      "fabric": "羊毛絨",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "45×15",
+      "detail": "マグネット式"
+    },
+    "color_scheme": {
+      "main_color": "浅灰",
+      "tapes": {
+        "webbing_45mm": "FOLIAGE 浅灰",
+        "nylon_25mm": "FOLIAGE 浅灰",
+        "nylon_20mm": "FOLIAGE 浅灰",
+        "grosgrain": "FOLIAGE 浅灰"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "プリント",
+      "print_widths": [
+        25,
+        75
+      ],
+      "embroidery_detail": null
+    },
+    "logo": {
+      "type": "プリント",
+      "color": "赤",
+      "pantone": "187C"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "［最終仕様書］ BRG-PC-SP.pdf",
+      "image_file": "BRG-PC-SP_p2.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2004-P449",
+    "client": "ユニオンゲート",
+    "item_name": "MALLETS PUTTER COVER FIDLOCK 2つ目",
+    "date": "2020.6.30",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "MALLETSと明記され、後方が丸く張り出した形状"
+    },
+    "size": {
+      "reference_spec": "SEL-1807-P282",
+      "dimensions_noted": "幅120×高さ200（蓋開いた時）×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "1000D CORDURA No.66",
+      "color": "GREEN（緑）"
+    },
+    "lining_material": {
+      "fabric": "天ウーロン、メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "蓋部分20*8*2mm×2pcs、本体部分20*3mm円形",
+      "detail": "Fidlock IF-5450F、IF-5010M"
+    },
+    "color_scheme": {
+      "main_color": "緑",
+      "tapes": {
+        "webbing_45mm": "ライトグレー",
+        "nylon_25mm": "ライトグレー",
+        "nylon_20mm": "ライトグレー",
+        "grosgrain": "ライトグレー"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": null,
+      "embroidery_detail": "ライトグレー浅灰（#2425）W=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "ライトグレー浅灰",
+      "pantone": "#2425"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "［最終仕様書］BRG-MALLET_CS_PUTTER_COVER_FIDLOCK.pdf",
+      "image_file": "BRG-MALLET_CS_PUTTER_COVER_FIDLOCK_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2004-P454",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET CS PUTTER COVER FIDLOCK",
+    "date": "2020.6.30",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "後方が大きく丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": "SEL-1807-P282",
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "1000D CORDURA No.7 RED",
+      "color": "赤"
+    },
+    "lining_material": {
+      "fabric": "天竹ーロン、メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "蓋部分 20*8*2mm×2pcs、本体部分 20*3mm 円形",
+      "detail": "Fidlock IF-5450F、IF-5010M使用"
+    },
+    "color_scheme": {
+      "main_color": "赤",
+      "tapes": {
+        "webbing_45mm": "ライトグレー",
+        "nylon_25mm": "ライトグレー",
+        "nylon_20mm": "ライトグレー",
+        "grosgrain": "ライトグレー"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": null,
+      "embroidery_detail": "ライトグレー浅灰 #2425、W=25とW=75の2箇所"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "白",
+      "pantone": null
+    },
+    "packaging": null,
+    "meta": {
+      "source_pdf": "［最終仕様書］BRG-MALLET_CS_PUTTER_COVER_FIDLOCK.pdf",
+      "image_file": "BRG-MALLET_CS_PUTTER_COVER_FIDLOCK_p2.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2004-P448",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET PUTTER COVER FIDLOCK",
+    "date": "2020.6.30",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "丸型で後方が大きく張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": "SEL-1807-P282",
+      "dimensions_noted": "幅120×高さ200（蓋開いた時）×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "1000D CORDURA No.66 GREEN",
+      "color": "緑"
+    },
+    "lining_material": {
+      "fabric": "天ウーロン、メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "蓋部分35*10*2.5mm×2pcs、本体部分20*3mm円形",
+      "detail": "Fidlock（IF-5450F、IF-5010M）"
+    },
+    "color_scheme": {
+      "main_color": "緑",
+      "tapes": {
+        "webbing_45mm": "ライトグレー",
+        "nylon_25mm": "ライトグレー",
+        "nylon_20mm": "ライトグレー",
+        "grosgrain": "ライトグレー"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [
+        25,
+        75
+      ],
+      "embroidery_detail": "ライトグレー浅次（#2425）"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "ライトグレー",
+      "pantone": "#2425"
+    },
+    "packaging": "袋巻き含まず",
+    "meta": {
+      "source_pdf": "［最終仕様書］BRG-MALLET_PUTTER_COVER_FIDLOCK.pdf",
+      "image_file": "BRG-MALLET_PUTTER_COVER_FIDLOCK_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2004-P453",
+    "client": "ユニオンゲート",
+    "item_name": "MALLET PUTTER COVER OKK1つ目",
+    "date": "2020.6.30",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "丸みのある大型マレット形状"
+    },
+    "size": {
+      "reference_spec": "SEL-1807-P282",
+      "dimensions_noted": "幅120×高さ200×マチ40mm"
+    },
+    "outer_material": {
+      "fabric": "1000D CORDURA No.7 RED",
+      "color": "赤"
+    },
+    "lining_material": {
+      "fabric": "天ウーロン、メッシュ",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "蓋部分35*10*2.5mm×2pcs、本体部分20*3mm円形",
+      "detail": "一周ヘリまき式"
+    },
+    "color_scheme": {
+      "main_color": "赤",
+      "tapes": {
+        "webbing_45mm": "ライトグレー",
+        "nylon_25mm": "ライトグレー",
+        "nylon_20mm": "ライトグレー",
+        "grosgrain": "ライトグレー"
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [
+        25,
+        75
+      ],
+      "embroidery_detail": "BRIEFING文字刺繍"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "ライトグレー浅灰",
+      "pantone": "#2425"
+    },
+    "packaging": null,
+    "meta": {
+      "source_pdf": "［最終仕様書］BRG-MALLET_PUTTER_COVER_FIDLOCK.pdf",
+      "image_file": "BRG-MALLET_PUTTER_COVER_FIDLOCK_p2.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2002-P442",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER AIR",
+    "date": "2020.5.18",
+    "shape": {
+      "head_type": "ブレード",
+      "head_type_confidence": "high",
+      "head_type_reason": "細長い形状で薄型のブレード型パター用"
+    },
+    "size": {
+      "reference_spec": "BRG-1909-P282",
+      "dimensions_noted": null
+    },
+    "outer_material": {
+      "fabric": "1680Dバリスティック Air",
+      "color": "黒"
+    },
+    "lining_material": {
+      "fabric": "羊毛絨",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": "本体磁石: 四角、フタ磁石: 丸"
+    },
+    "color_scheme": {
+      "main_color": "黒",
+      "tapes": {
+        "webbing_45mm": "BLACK 黒",
+        "nylon_25mm": "BLACK 黒",
+        "nylon_20mm": null,
+        "grosgrain": "BLACK 黒"
+      },
+      "hardware_color": null
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "赤 (#2050) W=75"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "赤",
+      "pantone": "#2050"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "［最終仕様書］BRG-PC-AIR.pdf",
+      "image_file": "BRG-PC-AIR_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2002-P442",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER AIR",
+    "date": "2020.5.18",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "大型で後方が丸く張り出した典型的なマレット形状"
+    },
+    "size": {
+      "reference_spec": "BRG-1909-P282",
+      "dimensions_noted": null
+    },
+    "outer_material": {
+      "fabric": "1680Dバリスティック Air ライトグレー",
+      "color": "ライトグレー"
+    },
+    "lining_material": {
+      "fabric": "羊毛绒",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": null,
+      "detail": "本体磁石：四角、フタ磁石：丸"
+    },
+    "color_scheme": {
+      "main_color": "ライトグレー",
+      "tapes": {
+        "webbing_45mm": "ライトグレー",
+        "nylon_25mm": "ライトグレー",
+        "nylon_20mm": null,
+        "grosgrain": "ライトグレー"
+      },
+      "hardware_color": null
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": null,
+      "embroidery_detail": "刺繍 浅灰 (#2425) W=75"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "浅灰",
+      "pantone": "#2425"
+    },
+    "packaging": null,
+    "meta": {
+      "source_pdf": "［最終仕様書］BRG-PC-AIR.pdf",
+      "image_file": "BRG-PC-AIR_p2.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2004-P446",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER",
+    "date": "2020.6.30",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "大型で丸みのある形状"
+    },
+    "size": {
+      "reference_spec": "BRG-1901-P027",
+      "dimensions_noted": null
+    },
+    "outer_material": {
+      "fabric": "1000D CORDURA",
+      "color": "No.66 GREEN"
+    },
+    "lining_material": {
+      "fabric": "羊毛絨",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "45×15",
+      "detail": "マグネット式"
+    },
+    "color_scheme": {
+      "main_color": "緑",
+      "tapes": {
+        "webbing_45mm": "ライトグレー",
+        "nylon_25mm": "ライトグレー",
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "ライトグレー浅吹 W=75, ライトグレー浅吹 W=25"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "ライトグレー",
+      "pantone": "#2425"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "［最終仕様書］BRG-PUTTER_COVER_FIDLOCK.pdf",
+      "image_file": "BRG-PUTTER_COVER_FIDLOCK_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2004-P451",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER",
+    "date": "2020.6.30",
+    "shape": {
+      "head_type": "ブレード",
+      "head_type_confidence": "high",
+      "head_type_reason": "細長い形状でBRIEFINGロゴが横に配置されている"
+    },
+    "size": {
+      "reference_spec": "BRG-1901-P027",
+      "dimensions_noted": null
+    },
+    "outer_material": {
+      "fabric": "1000D CORDURA",
+      "color": "赤"
+    },
+    "lining_material": {
+      "fabric": "羊毛絨",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "45×15",
+      "detail": "マグネット式"
+    },
+    "color_scheme": {
+      "main_color": "赤",
+      "tapes": {
+        "webbing_45mm": "ライトグレー",
+        "nylon_25mm": "ライトグレー",
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "電着黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "ライトグレー浅灰 #2425 W=75"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "ライトグレー",
+      "pantone": "#2425"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "［最終仕様書］BRG-PUTTER_COVER_FIDLOCK.pdf",
+      "image_file": "BRG-PUTTER_COVER_FIDLOCK_p2.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2005-H470",
+    "client": "ユニオンゲート",
+    "item_name": "HEAD COVER VORTEX",
+    "date": "2020.9.29",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "丸みを帯びた形状で後方が張り出している"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "#1: 幅130×高さ290, #FW: 幅105×高さ240, #UT: 幅85×高さ210"
+    },
+    "outer_material": {
+      "fabric": "VORTEX CANVAS",
+      "color": "GREEN CAMO"
+    },
+    "lining_material": {
+      "fabric": "羊毛絨",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "20mm幅Dカン",
+      "detail": "プラスチック黒"
+    },
+    "color_scheme": {
+      "main_color": "GREEN CAMO",
+      "tapes": {
+        "webbing_45mm": null,
+        "nylon_25mm": null,
+        "nylon_20mm": "MOSS浅緑",
+        "grosgrain": null
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "赤糸(#2050)刺繍、両面対応"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "赤",
+      "pantone": "#2050"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "［最終仕様書］BRG-VORTEX_HC_PC.pdf",
+      "image_file": "BRG-VORTEX_HC_PC_p1.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2006-H570",
+    "client": "ユニオンゲート",
+    "item_name": "HEAD COVER VORTEX (VORTEX CANVAS STEEL) (DRIVER, FAIRWAY, UTILITY)",
+    "date": "2020.9.29",
+    "shape": {
+      "head_type": "ブレード",
+      "head_type_confidence": "medium",
+      "head_type_reason": "細長い形状だがドライバー・フェアウェイ・ユーティリティ用のため判定が曖昧"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "#1: 幅130×高さ290, #FW: 幅105×高さ240, #UT: 幅85×高さ210"
+    },
+    "outer_material": {
+      "fabric": "VORTEX CANVAS STEEL",
+      "color": "グレー"
+    },
+    "lining_material": {
+      "fabric": "羊毛絨",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "マグネット",
+      "size": "20mm幅Dカン",
+      "detail": "プラスチック 黒"
+    },
+    "color_scheme": {
+      "main_color": "グレー",
+      "tapes": {
+        "webbing_45mm": null,
+        "nylon_25mm": null,
+        "nylon_20mm": "黒",
+        "grosgrain": null
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "赤 #2050 両面 H=17"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "赤",
+      "pantone": "#2050"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "［最終仕様書］BRG-VORTEX_HC_PC.pdf",
+      "image_file": "BRG-VORTEX_HC_PC_p2.jpg",
+      "needs_review": true,
+      "review_reason": "複数クラブ用ヘッドカバーのため形状判定が困難"
+    }
+  },
+  {
+    "sample_number": "BRG-2006-P541",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER VORTEX",
+    "date": "2020.9.29",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "丸みのある大型形状で後方が大きく張り出している"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "W180×H150×D80mm"
+    },
+    "outer_material": {
+      "fabric": "VORTEX CANVAS",
+      "color": "GREEN CAMO"
+    },
+    "lining_material": {
+      "fabric": "羊毛絨",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "ベルクロ",
+      "size": "ナイロンテープ25mm",
+      "detail": "MOSS浅緑"
+    },
+    "color_scheme": {
+      "main_color": "GREEN CAMO",
+      "tapes": {
+        "webbing_45mm": null,
+        "nylon_25mm": "赤",
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": [],
+      "embroidery_detail": "赤ライン刺繍、W=100"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "赤",
+      "pantone": "#2050"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "［最終仕様書］BRG-VORTEX_HC_PC.pdf",
+      "image_file": "BRG-VORTEX_HC_PC_p3.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  },
+  {
+    "sample_number": "BRG-2007-P571",
+    "client": "ユニオンゲート",
+    "item_name": "PUTTER COVER VORTEX",
+    "date": "2020.9.29",
+    "shape": {
+      "head_type": "フルマレット",
+      "head_type_confidence": "high",
+      "head_type_reason": "丸みのある大型形状で後方が張り出している"
+    },
+    "size": {
+      "reference_spec": null,
+      "dimensions_noted": "W180×H150×D80mm"
+    },
+    "outer_material": {
+      "fabric": "VORTEX CANVAS STEEL",
+      "color": "黒"
+    },
+    "lining_material": {
+      "fabric": "羊毛绒",
+      "color": "黒"
+    },
+    "closure": {
+      "type": "ベルト",
+      "size": "25mm",
+      "detail": "FIDLOCK付きベルト、FIDLOCK (JF-5450,JF-5010M)、グリムロック：黒、ボタンホック：電着黒"
+    },
+    "color_scheme": {
+      "main_color": "黒",
+      "tapes": {
+        "webbing_45mm": "55mm黒",
+        "nylon_25mm": "25mm黒",
+        "nylon_20mm": null,
+        "grosgrain": null
+      },
+      "hardware_color": "黒"
+    },
+    "decoration": {
+      "type": "刺繍",
+      "print_widths": null,
+      "embroidery_detail": "赤（#2050）W=100、1500ニット（黒）"
+    },
+    "logo": {
+      "type": "刺繍",
+      "color": "赤",
+      "pantone": "#2050"
+    },
+    "packaging": "PO袋",
+    "meta": {
+      "source_pdf": "［最終仕様書］BRG-VORTEX_HC_PC.pdf",
+      "image_file": "BRG-VORTEX_HC_PC_p4.jpg",
+      "needs_review": false,
+      "review_reason": null
+    }
+  }
+]
