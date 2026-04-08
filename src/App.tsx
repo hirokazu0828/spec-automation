@@ -4,6 +4,7 @@ import Step2 from './components/Step2';
 import Step3 from './components/Step3';
 import Step4 from './components/Step4';
 import SampleBook from './components/SampleBook/SampleBook';
+import AuthGate from './components/SampleBook/AuthGate';
 import { initialSpecData } from './types';
 import type { SpecData } from './types';
 import './index.css';
@@ -38,6 +39,7 @@ function App() {
   };
 
   return (
+    <AuthGate>
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header / Tabs - Hidden when printing */}
       <div className="bg-white shadow print:hidden">
@@ -89,6 +91,7 @@ function App() {
         </div>
       </main>
     </div>
+    </AuthGate>
   );
 }
 
