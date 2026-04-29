@@ -1,7 +1,13 @@
-import { useState } from 'react';
 import { PrinterIcon, ArrowPathIcon, ArrowLeftIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { SpecData } from '../types';
-import specJson from '../data/putter_cover_parametric_v3.json';
+import { specJson } from '../data/spec';
+import {
+  getLabel,
+  getColorHex,
+  SHAPE_LABELS_JA,
+  POSITION_LABELS_JA,
+} from '../utils/specHelpers';
+import { useToast } from './Toast';
 
 interface Props {
   data: SpecData;
@@ -10,121 +16,10 @@ interface Props {
   onBack: () => void;
 }
 
-export default function Step4({ data, updateData, onReset, onBack }: Props) {
-  const handlePrint = () => {
-    window.print();
-  };
+const colLabel = (index: number) => String.fromCharCode(65 + index);
 
-  const [localRevisions, setLocalRevisions] = useState(() => {
-    if (data.revisionHistory && data.revisionHistory.length > 0) return data.revisionHistory;
-    return [{ date: new Date().toISOString().split('T')[0], content: '' }];
-  });
-  const [localParts, setLocalParts] = useState(data.fabricParts || []);
-  const [localEmbroideries, setLocalEmbroideries] = useState(data.embroideryDetails || []);
-  const [localPhotos, setLocalPhotos] = useState(() => {
-    if (data.productPhotos && data.productPhotos.length > 0) return data.productPhotos;
-    return [
-      { name: '正面', dataUrl: '' },
-      { name: '側面', dataUrl: '' },
-      { name: '背面', dataUrl: '' },
-    ];
-  });
-  
-  const [showToast, setShowToast] = useState(false);
-
-  const recalculateFabricParts = () => {
-    const getColorCode = (colorValue: string) => {
-      const map: Record<string, string> = {
-        black: '#1A1A1A', white: '#F5F5F5', gray: '#888780', light_gray: '#C4C2BA',
-        navy: '#1B2A4A', black_navy: '#0D1520', sax_blue: '#7BAFD4', burgundy: '#7B2035',
-        pink: '#F4A0B0', green: '#2D6A4F', red: '#CC2200',
-      };
-      return map[colorValue] || '#000000';
-    };
-    const cCode = data.colorCode || getColorCode(data.bodyColor || '');
-    const colorNameJp = getLabel(specJson.parameters.body_color, data.bodyColor || '');
-
-    const newFabricParts = [
-      { id: "A", label: "A", usage: "本体生地・縁巻き", material: getLabel(specJson.parameters.body_fabric, data.bodyFabric || ''), partNumber: "", quantity: "", colorName: colorNameJp, colorSwatch: cCode, threadNumber: "" },
-      { id: "B", label: "B", usage: "本体生地・切替", material: "", partNumber: "", quantity: "", colorName: colorNameJp, colorSwatch: cCode, threadNumber: "" },
-      { id: "C", label: "C", usage: "裏地", material: getLabel(specJson.parameters.lining, data.lining || ''), partNumber: "", quantity: "", colorName: "ホワイト", colorSwatch: "#ffffff", threadNumber: "" },
-      { id: "D", label: "D", usage: "留め具", material: getLabel(specJson.parameters.closure, data.closure || ''), partNumber: "", quantity: "1組", colorName: getLabel(specJson.parameters.hardware_finish, data.hardwareFinish || ''), colorSwatch: "#cccccc", threadNumber: "" },
-    ];
-    
-    if (data.piping && data.piping !== 'なし' && data.piping !== 'none') {
-      newFabricParts.push({ id: "E", label: "E", usage: "パイピング", material: getLabel(specJson.parameters.piping, data.piping || ''), partNumber: "", quantity: "", colorName: colorNameJp, colorSwatch: cCode, threadNumber: "" });
-    }
-    
-    const fLabel = newFabricParts.length === 4 ? "E" : "F";
-    newFabricParts.push({ id: "F", label: fLabel, usage: "刺繍・装飾", material: getLabel(specJson.parameters.embroidery, data.embroidery || ''), partNumber: "", quantity: "", colorName: "", colorSwatch: "#cccccc", threadNumber: "" });
-
-    updateParts(newFabricParts);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2000);
-  };
-
-  const updateRevisions = (newRevs: typeof data.revisionHistory) => {
-    setLocalRevisions(newRevs);
-    updateData({ revisionHistory: newRevs });
-  }
-
-  const updateParts = (newParts: typeof data.fabricParts) => {
-    setLocalParts(newParts);
-    updateData({ fabricParts: newParts });
-  }
-
-  const updateEmbroideries = (newEmbs: typeof data.embroideryDetails) => {
-    setLocalEmbroideries(newEmbs);
-    updateData({ embroideryDetails: newEmbs });
-  }
-
-  const updatePhotos = (newPhotos: typeof data.productPhotos) => {
-    setLocalPhotos(newPhotos);
-    updateData({ productPhotos: newPhotos });
-  }
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target?.result as string;
-      const newPhotos = [...localPhotos];
-      newPhotos[index].dataUrl = dataUrl;
-      updatePhotos(newPhotos);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const getLabel = (paramMap: any, value: string) => {
-    if (!value) return '-';
-    const opt = paramMap.options?.find((o: any) => o.value === value);
-    if (opt) return opt.label;
-    
-    if (paramMap.options_by_fabric_type) {
-      for (const group of Object.values(paramMap.options_by_fabric_type)) {
-        const item = (group as any[]).find((o: any) => o.value === value);
-        if (item) return item.label;
-      }
-    }
-    return value;
-  };
-
-  const shapeMap: Record<string, string> = {
-    pin: 'ピン型（ブレード型）',
-    mallet: 'マレット型',
-    neo_mallet: 'ネオマレット（大型マレット）'
-  };
-  const posMap: Record<string, string> = {
-    luxury: '★★★高級',
-    standard: '★★☆スタンダード',
-    casual: '★☆☆カジュアル'
-  };
-
-  const getColLabel = (index: number) => String.fromCharCode(65 + index); // 0 -> A, 1 -> B ...
-
-  // -- Page Header Component --
-  const PrintHeader = ({ pageNum, totalPages }: { pageNum: number, totalPages: number }) => (
+function PrintHeader({ data, pageNum, totalPages }: { data: SpecData; pageNum: number; totalPages: number }) {
+  return (
     <div className="mb-[20px]">
       <table className="w-full border-collapse" style={{ tableLayout: 'auto' }}>
         <tbody>
@@ -150,14 +45,65 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
       </div>
     </div>
   );
+}
+
+export default function Step4({ data, updateData, onReset, onBack }: Props) {
+  const { showToast, ToastView } = useToast();
+
+  const handlePrint = () => window.print();
+
+  const recalculateFabricParts = () => {
+    const cCode = data.colorCode || getColorHex(data.bodyColor);
+    const colorNameJp = getLabel(specJson.parameters.body_color, data.bodyColor || '');
+
+    const newFabricParts = [
+      { id: 'A', label: 'A', usage: '本体生地・縁巻き', material: getLabel(specJson.parameters.body_fabric, data.bodyFabric || ''), partNumber: '', quantity: '', colorName: colorNameJp, colorSwatch: cCode, threadNumber: '' },
+      { id: 'B', label: 'B', usage: '本体生地・切替', material: '', partNumber: '', quantity: '', colorName: colorNameJp, colorSwatch: cCode, threadNumber: '' },
+      { id: 'C', label: 'C', usage: '裏地', material: getLabel(specJson.parameters.lining, data.lining || ''), partNumber: '', quantity: '', colorName: 'ホワイト', colorSwatch: '#ffffff', threadNumber: '' },
+      { id: 'D', label: 'D', usage: '留め具', material: getLabel(specJson.parameters.closure, data.closure || ''), partNumber: '', quantity: '1組', colorName: getLabel(specJson.parameters.hardware_finish, data.hardwareFinish || ''), colorSwatch: '#cccccc', threadNumber: '' },
+    ];
+
+    if (data.piping && data.piping !== 'なし' && data.piping !== 'none') {
+      newFabricParts.push({ id: 'E', label: 'E', usage: 'パイピング', material: getLabel(specJson.parameters.piping, data.piping || ''), partNumber: '', quantity: '', colorName: colorNameJp, colorSwatch: cCode, threadNumber: '' });
+    }
+
+    const fLabel = newFabricParts.length === 4 ? 'E' : 'F';
+    newFabricParts.push({ id: 'F', label: fLabel, usage: '刺繍・装飾', material: getLabel(specJson.parameters.embroidery, data.embroidery || ''), partNumber: '', quantity: '', colorName: '', colorSwatch: '#cccccc', threadNumber: '' });
+
+    updateData({ fabricParts: newFabricParts });
+    showToast('再反映しました');
+  };
+
+  const setRevisions = (next: SpecData['revisionHistory']) => updateData({ revisionHistory: next });
+  const setParts = (next: SpecData['fabricParts']) => updateData({ fabricParts: next });
+  const setEmbroideries = (next: SpecData['embroideryDetails']) => updateData({ embroideryDetails: next });
+  const setPhotos = (next: SpecData['productPhotos']) => updateData({ productPhotos: next });
+
+  const revisions = data.revisionHistory;
+  const parts = data.fabricParts;
+  const embroideries = data.embroideryDetails;
+  const photos = data.productPhotos;
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      const next = photos.map((p, i) => (i === index ? { ...p, dataUrl } : p));
+      setPhotos(next);
+    };
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div className="space-y-12 animate-fade-in fade-in" id="spec-sheet">
-      
+      <ToastView />
+
       {/* ======================= PAGE 1 ======================= */}
       <div className="border border-gray-800 rounded-sm p-[24px_32px] bg-white print:border-none print:p-0 page-break-after">
-        <PrintHeader pageNum={1} totalPages={3} />
-        
+        <PrintHeader data={data} pageNum={1} totalPages={3} />
+
         <div className="mb-[20px] flex items-center gap-4">
           <span className="bg-[#16a34a] text-white px-4 py-1 font-bold text-lg inline-block print-bg-green">1. パラメーター一覧</span>
         </div>
@@ -166,11 +112,11 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
           <tbody>
             <tr className="border-b border-gray-800">
               <th className="w-1/4 bg-gray-100 p-2 border-r border-gray-800 print-bg-gray">形状</th>
-              <td className="w-3/4 p-2 font-bold">{shapeMap[data.headShape] || '-'}</td>
+              <td className="w-3/4 p-2 font-bold">{SHAPE_LABELS_JA[data.headShape] || '-'}</td>
             </tr>
             <tr className="border-b border-gray-800">
               <th className="bg-gray-100 p-2 border-r border-gray-800 print-bg-gray">ポジション</th>
-              <td className="p-2 font-bold">{posMap[data.position] || '-'}</td>
+              <td className="p-2 font-bold">{POSITION_LABELS_JA[data.position] || '-'}</td>
             </tr>
             <tr className="border-b-4 border-gray-800">
               <th className="bg-gray-100 p-2 border-r border-gray-800 align-top print-bg-gray">コンセプト</th>
@@ -203,20 +149,20 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
             <tr className="border-b border-gray-800">
               <th className="bg-gray-100 p-2 border-r border-gray-800 print-bg-gray">本体カラー</th>
               <td className="p-2">
-                {getLabel(specJson.parameters.body_color, data.bodyColor)} 
+                {getLabel(specJson.parameters.body_color, data.bodyColor)}
                 {data.colorCode && <span className="ml-2 text-gray-500">（コード: {data.colorCode}）</span>}
               </td>
             </tr>
             <tr className="border-b border-gray-800">
               <th className="bg-gray-100 p-2 border-r border-gray-800 align-top print-bg-gray">部位別</th>
               <td className="p-2 text-xs">
-                {data.fabricParts && data.fabricParts.length > 0
-                  ? data.fabricParts.map((part) => (
+                {parts && parts.length > 0
+                  ? parts.map((part) => (
                       <div key={part.id} className="mb-0.5">
-                        <span className="font-bold">{part.id}:</span> {part.usage || "-"} ／ {part.material || "-"} ／ {part.colorName || "-"}
+                        <span className="font-bold">{part.id}:</span> {part.usage || '-'} ／ {part.material || '-'} ／ {part.colorName || '-'}
                       </div>
                     ))
-                  : "-"}
+                  : '-'}
               </td>
             </tr>
             <tr className="border-b-4 border-gray-800">
@@ -229,7 +175,7 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
 
       {/* ======================= PAGE 2 ======================= */}
       <div className="border border-gray-800 rounded-sm p-[24px_32px] bg-white print:border-none print:p-0 page-break-before page-break-after">
-        <PrintHeader pageNum={2} totalPages={3} />
+        <PrintHeader data={data} pageNum={2} totalPages={3} />
 
         <div className="mb-[20px] flex gap-[8px] items-center">
           <span className="bg-[#16a34a] text-white px-4 py-1 font-bold text-lg inline-block print-bg-green">2. 生地仕様</span>
@@ -247,25 +193,43 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
               </tr>
             </thead>
             <tbody>
-              {localRevisions.map((rev, idx) => (
+              {revisions.map((rev, idx) => (
                 <tr key={idx}>
                   <td className="border border-[#333] p-0 text-center relative max-w-[120px]">
-                    <input type="date" className="w-full border-none p-[6px] text-center text-sm bg-transparent print:bg-transparent" value={rev.date} onChange={(e) => {
-                      const n = [...localRevisions]; n[idx].date = e.target.value; updateRevisions(n);
-                    }} />
+                    <input
+                      type="date"
+                      aria-label={`改訂 ${idx + 1} の日付`}
+                      className="w-full border-none p-[6px] text-center text-sm bg-transparent print:bg-transparent"
+                      value={rev.date}
+                      onChange={(e) => setRevisions(revisions.map((r, i) => (i === idx ? { ...r, date: e.target.value } : r)))}
+                    />
                   </td>
                   <td className="border border-[#333] p-0 relative">
-                    <input type="text" className="w-full border-none p-[6px] text-sm bg-transparent px-2 print:bg-transparent" placeholder="例: 修正①D菅付けテープをなるべく短くする" value={rev.content} onChange={(e) => {
-                      const n = [...localRevisions]; n[idx].content = e.target.value; updateRevisions(n);
-                    }} />
-                    <button onClick={() => updateRevisions(localRevisions.filter((_, i) => i !== idx))} className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 print:hidden bg-white rounded-full"><XMarkIcon className="w-4 h-4"/></button>
+                    <input
+                      type="text"
+                      aria-label={`改訂 ${idx + 1} の内容`}
+                      className="w-full border-none p-[6px] text-sm bg-transparent px-2 print:bg-transparent"
+                      placeholder="例: 修正①D菅付けテープをなるべく短くする"
+                      value={rev.content}
+                      onChange={(e) => setRevisions(revisions.map((r, i) => (i === idx ? { ...r, content: e.target.value } : r)))}
+                    />
+                    <button
+                      onClick={() => setRevisions(revisions.filter((_, i) => i !== idx))}
+                      aria-label={`改訂 ${idx + 1} を削除`}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 print:hidden bg-white rounded-full"
+                    >
+                      <XMarkIcon className="w-4 h-4" />
+                    </button>
                   </td>
                 </tr>
               ))}
               <tr>
                 <td colSpan={2} className="border border-[#333] p-2 print:hidden bg-[#f9f9f9]">
-                  <button onClick={() => updateRevisions([...localRevisions, { date: new Date().toISOString().split('T')[0], content: '' }])} className="text-indigo-600 text-sm font-bold flex items-center justify-center w-full hover:underline">
-                    <PlusIcon className="w-4 h-4 mr-1"/> 改訂を追加
+                  <button
+                    onClick={() => setRevisions([...revisions, { date: new Date().toISOString().split('T')[0], content: '' }])}
+                    className="text-indigo-600 text-sm font-bold flex items-center justify-center w-full hover:underline"
+                  >
+                    <PlusIcon className="w-4 h-4 mr-1" /> 改訂を追加
                   </button>
                 </td>
               </tr>
@@ -273,69 +237,85 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
           </table>
         </div>
 
-        {/* 縫製注意事項エリア */}
+        {/* 縫製注意事項 */}
         <div className="mb-[20px] border-t border-[#ddd] pt-[16px]">
           <h4 className="font-bold mb-2">縫製注意事項</h4>
           <textarea
+            aria-label="縫製注意事項"
             className="w-full border border-gray-400 p-2 min-h-[60px] print:border-gray-400 print:resize-none"
             placeholder="例: 磁石式/磁石位置,磁力注意"
             value={data.sewingNotes}
-            onChange={e => updateData({ sewingNotes: e.target.value })}
+            onChange={(e) => updateData({ sewingNotes: e.target.value })}
           />
         </div>
 
-        {/* 寸法入力エリア */}
+        {/* 寸法 */}
         <div className="mb-[20px] border-t border-[#ddd] pt-[16px]">
           <h4 className="font-bold mb-2">寸法</h4>
           <div className="flex flex-wrap gap-4">
-            <label className="flex items-center gap-2 text-sm"><span className="font-bold">全長</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionLength} onChange={e => updateData({dimensionLength: e.target.value})} /> mm</label>
-            <label className="flex items-center gap-2 text-sm"><span className="font-bold">幅</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionWidth} onChange={e => updateData({dimensionWidth: e.target.value})} /> mm</label>
-            <label className="flex items-center gap-2 text-sm"><span className="font-bold">高さ</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionHeight} onChange={e => updateData({dimensionHeight: e.target.value})} /> mm</label>
-            <label className="flex items-center gap-2 text-sm"><span className="font-bold">縁巻き幅</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionPiping} onChange={e => updateData({dimensionPiping: e.target.value})} /> mm</label>
-            <label className="flex items-center gap-2 text-sm"><span className="font-bold">刺繍位置</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionEmbroidery} onChange={e => updateData({dimensionEmbroidery: e.target.value})} /> mm</label>
+            <label className="flex items-center gap-2 text-sm"><span className="font-bold">全長</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionLength} onChange={(e) => updateData({ dimensionLength: e.target.value })} /> mm</label>
+            <label className="flex items-center gap-2 text-sm"><span className="font-bold">幅</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionWidth} onChange={(e) => updateData({ dimensionWidth: e.target.value })} /> mm</label>
+            <label className="flex items-center gap-2 text-sm"><span className="font-bold">高さ</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionHeight} onChange={(e) => updateData({ dimensionHeight: e.target.value })} /> mm</label>
+            <label className="flex items-center gap-2 text-sm"><span className="font-bold">縁巻き幅</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionPiping} onChange={(e) => updateData({ dimensionPiping: e.target.value })} /> mm</label>
+            <label className="flex items-center gap-2 text-sm"><span className="font-bold">刺繍位置</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionEmbroidery} onChange={(e) => updateData({ dimensionEmbroidery: e.target.value })} /> mm</label>
           </div>
         </div>
 
-        {/* 写真エリア */}
+        {/* 写真 */}
         <div className="mb-[20px] border-t border-[#ddd] pt-[16px]">
           <h4 className="font-bold mb-2">製品写真</h4>
           <div className="flex flex-wrap gap-[12px]">
-            {localPhotos.map((photo, i) => (
+            {photos.map((photo, i) => (
               <div key={i} className={`flex flex-col w-[200px] relative ${!photo.dataUrl ? 'print:hidden' : ''}`}>
                 <label className="w-[200px] h-[160px] border-2 border-dashed border-[#999] bg-[#f9f9f9] cursor-pointer flex items-center justify-center relative overflow-hidden group print:border-none print:bg-transparent">
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, i)} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    aria-label={`${photo.name || `写真 ${i + 1}`} を追加`}
+                    className="hidden"
+                    onChange={(e) => handleImageUpload(e, i)}
+                  />
                   {photo.dataUrl ? (
                     <img src={photo.dataUrl} alt={photo.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="text-center text-[#666] text-[12px] print:hidden">
-                      クリックして<br/>写真を追加
+                      クリックして<br />写真を追加
                     </div>
                   )}
                 </label>
-                <input type="text" className="mt-2 w-full text-center border border-gray-300 p-1 text-sm print:border-none print:bg-transparent print:font-bold" value={photo.name} onChange={(e) => {
-                  const n = [...localPhotos]; n[i].name = e.target.value; updatePhotos(n);
-                }} placeholder="写真名 例: 正面" />
-                <button onClick={() => updatePhotos(localPhotos.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 text-red-500 bg-white rounded-full print:hidden shadow-sm hover:bg-red-50"><XMarkIcon className="w-5 h-5"/></button>
+                <input
+                  type="text"
+                  aria-label={`写真 ${i + 1} の名前`}
+                  className="mt-2 w-full text-center border border-gray-300 p-1 text-sm print:border-none print:bg-transparent print:font-bold"
+                  value={photo.name}
+                  onChange={(e) => setPhotos(photos.map((p, idx) => (idx === i ? { ...p, name: e.target.value } : p)))}
+                  placeholder="写真名 例: 正面"
+                />
+                <button
+                  onClick={() => setPhotos(photos.filter((_, idx) => idx !== i))}
+                  aria-label={`写真 ${i + 1} を削除`}
+                  className="absolute top-1 right-1 text-red-500 bg-white rounded-full print:hidden shadow-sm hover:bg-red-50"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
               </div>
             ))}
           </div>
-          {localPhotos.length < 6 && (
-            <button onClick={() => updatePhotos([...localPhotos, { name: '', dataUrl: '' }])} className="text-indigo-600 text-sm font-bold flex items-center mt-3 print:hidden hover:underline">
-              <PlusIcon className="w-4 h-4 mr-1"/> 写真を追加
+          {photos.length < 6 && (
+            <button
+              onClick={() => setPhotos([...photos, { name: '', dataUrl: '' }])}
+              className="text-indigo-600 text-sm font-bold flex items-center mt-3 print:hidden hover:underline"
+            >
+              <PlusIcon className="w-4 h-4 mr-1" /> 写真を追加
             </button>
           )}
         </div>
 
         {/* 部位別仕様表 */}
         <div className="mb-[20px] border-t border-[#ddd] pt-[16px] relative">
-          {showToast && (
-            <div className="absolute top-[-30px] right-0 bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg z-10 transition-opacity duration-200 print:hidden animate-fade-in fade-in">
-              再反映しました
-            </div>
-          )}
           <div className="flex justify-between items-center mb-2 print:hidden">
             <h4 className="font-bold">部位別仕様表</h4>
-            <button 
+            <button
               onClick={recalculateFabricParts}
               className="flex items-center text-sm bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1.5 rounded shadow-sm hover:bg-indigo-100 font-bold transition-colors"
             >
@@ -347,16 +327,21 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
               <thead>
                 <tr>
                   <th className="w-[90px] min-w-[90px] bg-[#e8e8e8] border border-[#333] p-[6px_8px] print-bg-e8"></th>
-                  {localParts.map((part) => (
+                  {parts.map((part) => (
                     <th key={part.id} className="min-w-[120px] h-[32px] bg-[#c8e6c9] border border-[#333] font-bold text-[13px] text-center relative print-bg-c8">
                       {part.label}
-                      <button onClick={() => updateParts(localParts.filter(p => p.id !== part.id))} className="absolute top-1 right-1 text-red-600 print:hidden" title="列を削除"><XMarkIcon className="w-4 h-4"/></button>
+                      <button
+                        onClick={() => setParts(parts.filter((p) => p.id !== part.id))}
+                        aria-label={`部位 ${part.label} を削除`}
+                        className="absolute top-1 right-1 text-red-600 print:hidden"
+                      >
+                        <XMarkIcon className="w-4 h-4" />
+                      </button>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {/* 使用箇所 / 素材名 */}
                 <tr className="h-[80px]">
                   <th className="w-[90px] min-w-[90px] bg-[#e8e8e8] font-bold text-[12px] p-0 text-center border border-[#333] print-bg-e8 align-middle">
                     <div className="flex flex-col h-full justify-center">
@@ -364,20 +349,33 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
                       <div className="flex-1 flex items-center justify-center">素材名</div>
                     </div>
                   </th>
-                  {localParts.map((part, idx) => (
+                  {parts.map((part, idx) => (
                     <td key={part.id} className="border border-[#333] p-0 min-w-[120px] align-top bg-white">
                       <div className="flex flex-col h-full">
                         <div className="h-[30px] bg-[#f5f5f5] print-bg-f5 border-b border-[#ddd]">
-                          <input type="text" className="w-full h-full text-center border-none p-1 bg-transparent text-[11px] font-bold outline-none" value={part.usage} onChange={e => { const n = [...localParts]; n[idx].usage = e.target.value; updateParts(n); }} placeholder="例: 本体生地" />
+                          <input
+                            type="text"
+                            aria-label={`部位 ${part.label} 使用箇所`}
+                            className="w-full h-full text-center border-none p-1 bg-transparent text-[11px] font-bold outline-none"
+                            value={part.usage}
+                            onChange={(e) => setParts(parts.map((p, i) => (i === idx ? { ...p, usage: e.target.value } : p)))}
+                            placeholder="例: 本体生地"
+                          />
                         </div>
                         <div className="flex-1 h-[50px]">
-                          <textarea className="w-full h-full text-center border-none p-1 bg-transparent text-[11px] resize-none leading-[1.3] outline-none" rows={2} value={part.material} onChange={e => { const n = [...localParts]; n[idx].material = e.target.value; updateParts(n); }} placeholder="例: マットしぼ / PU" />
+                          <textarea
+                            aria-label={`部位 ${part.label} 素材`}
+                            className="w-full h-full text-center border-none p-1 bg-transparent text-[11px] resize-none leading-[1.3] outline-none"
+                            rows={2}
+                            value={part.material}
+                            onChange={(e) => setParts(parts.map((p, i) => (i === idx ? { ...p, material: e.target.value } : p)))}
+                            placeholder="例: マットしぼ / PU"
+                          />
                         </div>
                       </div>
                     </td>
                   ))}
                 </tr>
-                {/* 本体カラー / カラー指示 */}
                 <tr className="h-[80px]">
                   <th className="w-[90px] min-w-[90px] bg-[#e8e8e8] font-bold text-[12px] p-0 text-center border border-[#333] print-bg-e8 align-middle">
                     <div className="flex flex-col h-full justify-center">
@@ -385,14 +383,34 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
                       <div className="flex-1 flex items-center justify-center">/ カラー指示</div>
                     </div>
                   </th>
-                  {localParts.map((part, idx) => (
+                  {parts.map((part, idx) => (
                     <td key={part.id} className="border border-[#333] p-0 min-w-[120px] align-top bg-white">
                       <div className="flex flex-col items-center justify-center h-full gap-[2px] py-1">
-                        <input type="text" className="w-full text-center border-none p-0 bg-transparent text-[11px] font-bold outline-none h-[20px]" value={part.colorName} onChange={e => { const n = [...localParts]; n[idx].colorName = e.target.value; updateParts(n); }} placeholder="ブラック" />
+                        <input
+                          type="text"
+                          aria-label={`部位 ${part.label} カラー名`}
+                          className="w-full text-center border-none p-0 bg-transparent text-[11px] font-bold outline-none h-[20px]"
+                          value={part.colorName}
+                          onChange={(e) => setParts(parts.map((p, i) => (i === idx ? { ...p, colorName: e.target.value } : p)))}
+                          placeholder="ブラック"
+                        />
                         <div className="flex justify-center items-center h-[24px]">
-                          <input type="color" className="w-[20px] h-[20px] border border-[#999] p-0 block cursor-pointer" value={part.colorSwatch} onChange={e => { const n = [...localParts]; n[idx].colorSwatch = e.target.value; updateParts(n); }} />
+                          <input
+                            type="color"
+                            aria-label={`部位 ${part.label} カラーサンプル`}
+                            className="w-[20px] h-[20px] border border-[#999] p-0 block cursor-pointer"
+                            value={part.colorSwatch}
+                            onChange={(e) => setParts(parts.map((p, i) => (i === idx ? { ...p, colorSwatch: e.target.value } : p)))}
+                          />
                         </div>
-                        <input type="text" className="w-full text-center border-none p-0 bg-transparent text-[11px] text-gray-600 outline-none h-[20px]" value={part.threadNumber} onChange={e => { const n = [...localParts]; n[idx].threadNumber = e.target.value; updateParts(n); }} placeholder="例: #92" />
+                        <input
+                          type="text"
+                          aria-label={`部位 ${part.label} 糸番号`}
+                          className="w-full text-center border-none p-0 bg-transparent text-[11px] text-gray-600 outline-none h-[20px]"
+                          value={part.threadNumber}
+                          onChange={(e) => setParts(parts.map((p, i) => (i === idx ? { ...p, threadNumber: e.target.value } : p)))}
+                          placeholder="例: #92"
+                        />
                       </div>
                     </td>
                   ))}
@@ -400,22 +418,41 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
               </tbody>
             </table>
           </div>
-          {localParts.length < 8 && (
-            <button onClick={() => updateParts([...localParts, { id: Date.now().toString(), label: getColLabel(localParts.length), usage: '', material: '', partNumber: '', quantity: '', colorName: '', threadNumber: '', colorSwatch: '#cccccc' }])} className="text-indigo-600 text-sm font-bold flex items-center mt-3 print:hidden"><PlusIcon className="w-4 h-4 mr-1"/> 部位を追加</button>
+          {parts.length < 8 && (
+            <button
+              onClick={() =>
+                setParts([
+                  ...parts,
+                  {
+                    id: Date.now().toString(),
+                    label: colLabel(parts.length),
+                    usage: '',
+                    material: '',
+                    partNumber: '',
+                    quantity: '',
+                    colorName: '',
+                    threadNumber: '',
+                    colorSwatch: '#cccccc',
+                  },
+                ])
+              }
+              className="text-indigo-600 text-sm font-bold flex items-center mt-3 print:hidden"
+            >
+              <PlusIcon className="w-4 h-4 mr-1" /> 部位を追加
+            </button>
           )}
         </div>
       </div>
 
       {/* ======================= PAGE 3 ======================= */}
       <div className="border border-gray-800 rounded-sm p-[24px_32px] bg-white print:border-none print:p-0 page-break-before">
-        <PrintHeader pageNum={3} totalPages={3} />
+        <PrintHeader data={data} pageNum={3} totalPages={3} />
 
         <div className="mb-[20px] flex gap-[8px] items-center">
           <span className="bg-[#16a34a] text-white px-4 py-1 font-bold text-lg inline-block print-bg-green">3. 刺繍・プリント・高周波</span>
           <span className="font-bold text-gray-700">刺绣・印刷等</span>
         </div>
 
-        {/* 刺繍指示テーブル */}
         <div className="mb-[20px]">
           <table className="w-full text-sm text-center border-collapse border border-[#333]">
             <thead>
@@ -430,11 +467,16 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
               </tr>
             </thead>
             <tbody>
-              {localEmbroideries.map((emb, idx) => (
+              {embroideries.map((emb, idx) => (
                 <tr key={emb.id}>
                   <td className="border border-[#333] p-1 font-bold">{idx + 1}</td>
                   <td className="border border-[#333] p-1">
-                    <select className="w-full border-none bg-transparent" value={emb.technique} onChange={e => { const n = [...localEmbroideries]; n[idx].technique = e.target.value; updateEmbroideries(n); }}>
+                    <select
+                      aria-label={`刺繍 ${idx + 1} 技法`}
+                      className="w-full border-none bg-transparent"
+                      value={emb.technique}
+                      onChange={(e) => setEmbroideries(embroideries.map((r, i) => (i === idx ? { ...r, technique: e.target.value } : r)))}
+                    >
                       <option value=""></option>
                       <option value="普通刺繍">普通刺繍</option>
                       <option value="普通刺繍・振り刺繍">普通刺繍・振り刺繍</option>
@@ -446,7 +488,12 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
                     </select>
                   </td>
                   <td className="border border-[#333] p-1">
-                    <select className="w-full border-none bg-transparent" value={emb.threadType} onChange={e => { const n = [...localEmbroideries]; n[idx].threadType = e.target.value; updateEmbroideries(n); }}>
+                    <select
+                      aria-label={`刺繍 ${idx + 1} 糸種`}
+                      className="w-full border-none bg-transparent"
+                      value={emb.threadType}
+                      onChange={(e) => setEmbroideries(embroideries.map((r, i) => (i === idx ? { ...r, threadType: e.target.value } : r)))}
+                    >
                       <option value=""></option>
                       <option value="銀杏">銀杏</option>
                       <option value="メタリック糸">メタリック糸</option>
@@ -454,33 +501,62 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
                     </select>
                   </td>
                   <td className="border border-[#333] p-1">
-                    <input type="text" className="w-full text-center border-none p-1 bg-transparent" value={emb.threadNumber} onChange={e => { const n = [...localEmbroideries]; n[idx].threadNumber = e.target.value; updateEmbroideries(n); }} placeholder="例: #2173(オフホワイト)" />
+                    <input
+                      type="text"
+                      aria-label={`刺繍 ${idx + 1} 糸番号`}
+                      className="w-full text-center border-none p-1 bg-transparent"
+                      value={emb.threadNumber}
+                      onChange={(e) => setEmbroideries(embroideries.map((r, i) => (i === idx ? { ...r, threadNumber: e.target.value } : r)))}
+                      placeholder="例: #2173(オフホワイト)"
+                    />
                   </td>
                   <td className="border border-[#333] p-1">
-                    <input type="number" className="w-full text-center border-none p-1 bg-transparent" value={emb.size} onChange={e => { const n = [...localEmbroideries]; n[idx].size = e.target.value; updateEmbroideries(n); }} />
+                    <input
+                      type="number"
+                      aria-label={`刺繍 ${idx + 1} サイズ`}
+                      className="w-full text-center border-none p-1 bg-transparent"
+                      value={emb.size}
+                      onChange={(e) => setEmbroideries(embroideries.map((r, i) => (i === idx ? { ...r, size: e.target.value } : r)))}
+                    />
                   </td>
                   <td className="border border-[#333] p-1">
-                    <input type="text" className="w-full text-center border-none p-1 bg-transparent" value={emb.placement} onChange={e => { const n = [...localEmbroideries]; n[idx].placement = e.target.value; updateEmbroideries(n); }} placeholder="例: 前面" />
+                    <input
+                      type="text"
+                      aria-label={`刺繍 ${idx + 1} 配置`}
+                      className="w-full text-center border-none p-1 bg-transparent"
+                      value={emb.placement}
+                      onChange={(e) => setEmbroideries(embroideries.map((r, i) => (i === idx ? { ...r, placement: e.target.value } : r)))}
+                      placeholder="例: 前面"
+                    />
                   </td>
                   <td className="border-none text-left print:hidden">
-                    <button onClick={() => updateEmbroideries(localEmbroideries.filter(e => e.id !== emb.id))} className="text-red-500 ml-2" title="行を削除"><XMarkIcon className="w-5 h-5"/></button>
+                    <button
+                      onClick={() => setEmbroideries(embroideries.filter((e) => e.id !== emb.id))}
+                      aria-label={`刺繍 ${idx + 1} を削除`}
+                      className="text-red-500 ml-2"
+                    >
+                      <XMarkIcon className="w-5 h-5" />
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <button onClick={() => updateEmbroideries([...localEmbroideries, { id: Date.now().toString(), technique: '', threadType: '', threadNumber: '', size: '', placement: '' }])} className="text-indigo-600 text-sm font-bold flex items-center mt-3 print:hidden">
-            <PlusIcon className="w-4 h-4 mr-1"/> 刺繍を追加
+          <button
+            onClick={() => setEmbroideries([...embroideries, { id: Date.now().toString(), technique: '', threadType: '', threadNumber: '', size: '', placement: '' }])}
+            className="text-indigo-600 text-sm font-bold flex items-center mt-3 print:hidden"
+          >
+            <PlusIcon className="w-4 h-4 mr-1" /> 刺繍を追加
           </button>
         </div>
 
-        {/* 縫製注意事項エリア共通（P3） */}
         <div className="mb-[20px] border-t border-[#ddd] pt-[16px]">
           <h4 className="font-bold mb-2">縫製注意事項（刺繍・プリントなど共通）</h4>
           <textarea
+            aria-label="刺繍・プリント縫製注意事項"
             className="w-full border border-gray-400 p-2 min-h-[80px] print:border-gray-400 print:resize-none"
             value={data.sewingNotes}
-            onChange={e => updateData({ sewingNotes: e.target.value })}
+            onChange={(e) => updateData({ sewingNotes: e.target.value })}
           />
         </div>
       </div>
@@ -508,31 +584,28 @@ export default function Step4({ data, updateData, onReset, onBack }: Props) {
           </button>
         </div>
       </div>
-      
-      {/* 印刷用CSS */}
+
       <style>{`
         @media print {
           @page { size: A4; margin: 15mm; }
           body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          
+
           .page-break-before { page-break-before: always; }
           .page-break-after { page-break-after: always; }
-          
+
           .print-bg-green { background-color: #16a34a !important; color: white !important; }
           .print-bg-c8 { background-color: #c8e6c9 !important; }
           .print-bg-e8 { background-color: #e8e8e8 !important; }
           .print-bg-f5 { background-color: #f5f5f5 !important; }
           .print-bg-gray { background-color: #f3f4f6 !important; }
           .print-bg-red { background-color: #cc0000 !important; color: white !important; }
-          
-          /* Form styling in print mode */
+
           input[type="text"], input[type="number"], input[type="date"], select, textarea {
             border: 1px solid #ccc !important;
             background: transparent !important;
             color: black !important;
             box-shadow: none !important;
           }
-          /* override border where none is needed */
           table input.border-none {
             border: none !important;
           }

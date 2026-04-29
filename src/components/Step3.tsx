@@ -1,7 +1,13 @@
 import { useMemo, useState } from 'react';
 import { DocumentDuplicateIcon, CheckIcon, CpuChipIcon } from '@heroicons/react/24/outline';
 import type { SpecData } from '../types';
-import specJson from '../data/putter_cover_parametric_v3.json';
+import { specJson } from '../data/spec';
+import {
+  getLabel,
+  SHAPE_LABELS_JA,
+  POSITION_LABELS_LONG_JA,
+  POSITION_PROMPT_EN,
+} from '../utils/specHelpers';
 
 interface Props {
   data: SpecData;
@@ -13,60 +19,29 @@ export default function Step3({ data, onNext, onBack }: Props) {
   const [copied, setCopied] = useState(false);
 
   const promptText = useMemo(() => {
-    // Helper to find english term from json
-    const getEn = (paramMap: any, value: string) => {
-      if (!value) return '';
-      const opt = paramMap.options.find((o: any) => o.value === value);
-      return opt ? opt.en : '';
-    };
-
-    const shapeEn = (specJson.midjourney.shape_en as any)[data.headShape] || '';
-    const fabricEn = getEn(specJson.parameters.body_fabric, data.bodyFabric);
-    const colorEn = getEn(specJson.parameters.body_color, data.bodyColor);
-    const embroideryEn = getEn(specJson.parameters.embroidery, data.embroidery);
-
-    let positionEn = '';
-    if (data.position === 'luxury') positionEn = 'luxury, premium quality, sophisticated craftsmanship';
-    else if (data.position === 'standard') positionEn = 'premium, clean design, quality craftsmanship';
-    else if (data.position === 'casual') positionEn = 'casual, sporty, colorful, fun';
+    const shapeEn = specJson.midjourney.shape_en[data.headShape] || '';
+    const fabricEn = getLabel(specJson.parameters.body_fabric, data.bodyFabric, 'en');
+    const colorEn = getLabel(specJson.parameters.body_color, data.bodyColor, 'en');
+    const embroideryEn = getLabel(specJson.parameters.embroidery, data.embroidery, 'en');
+    const positionEn = POSITION_PROMPT_EN[data.position] ?? '';
 
     const parts = [shapeEn, fabricEn, colorEn, positionEn, embroideryEn].filter(Boolean);
-    const prefix = parts.join(', ');
-    return `${prefix}, ${specJson.midjourney.suffix}`;
+    return `${parts.join(', ')}, ${specJson.midjourney.suffix}`;
   }, [data]);
 
   const jpDescription = useMemo(() => {
-    // Helper to find JP label
-    const getLabel = (paramMap: any, value: string) => {
-      if (!value) return '';
-      const opt = paramMap.options?.find((o: any) => o.value === value);
-      return opt ? opt.label : '';
-    };
-    const getShapeLabel = (val: string) => {
-      if (val === 'pin') return 'ピン型（ブレード型）';
-      if (val === 'mallet') return 'マレット型';
-      if (val === 'neo_mallet') return 'ネオマレット（大型マレット）';
-      return '';
-    };
-    const getPosLabel = (val: string) => {
-      if (val === 'luxury') return '高級ライン';
-      if (val === 'standard') return 'スタンダードライン';
-      if (val === 'casual') return 'カジュアルライン';
-      return '';
-    };
-
-    const s = getShapeLabel(data.headShape);
+    const s = SHAPE_LABELS_JA[data.headShape] ?? '';
     const f = getLabel(specJson.parameters.body_fabric, data.bodyFabric);
     const c = getLabel(specJson.parameters.body_color, data.bodyColor);
-    const p = getPosLabel(data.position);
+    const p = POSITION_LABELS_LONG_JA[data.position] ?? '';
     const e = getLabel(specJson.parameters.embroidery, data.embroidery);
 
     const parts = [
       s && `${s}パターカバー`,
-      f && `${f}素材`,
-      c && `${c}カラー`,
-      p && p,
-      e && `${e}のイメージ`
+      f !== '-' && f && `${f}素材`,
+      c !== '-' && c && `${c}カラー`,
+      p,
+      e !== '-' && e && `${e}のイメージ`,
     ].filter(Boolean);
 
     return `${parts.join('、')}で生成します。`;
@@ -92,7 +67,7 @@ export default function Step3({ data, onNext, onBack }: Props) {
           <button
             onClick={handleCopy}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              copied 
+              copied
                 ? 'bg-green-100 text-green-700 border border-green-200'
                 : 'bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50'
             }`}

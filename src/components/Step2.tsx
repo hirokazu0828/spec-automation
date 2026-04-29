@@ -1,7 +1,16 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useMemo, useEffect } from 'react';
 import { SparklesIcon, ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import type { SpecData } from '../types';
-import specJson from '../data/putter_cover_parametric_v3.json';
+import { specJson } from '../data/spec';
+import {
+  getLabel,
+  getColorHex,
+  COLOR_HEX_MAP,
+  SHAPE_LABELS_SHORT_JA,
+  POSITION_LABELS_JA,
+} from '../utils/specHelpers';
+import { useToast } from './Toast';
+import { useStep2Proposals } from '../hooks/useStep2Proposals';
 
 interface Props {
   data: SpecData;
@@ -11,211 +20,58 @@ interface Props {
 }
 
 export default function Step2({ data, updateData, onNext, onBack }: Props) {
-  const [proposals, setProposals] = useState<Partial<SpecData>[] | null>(null);
-  const [currentProposalIndex, setCurrentProposalIndex] = useState(0);
-  const [showToast, setShowToast] = useState(false);
-
-  const shapeMap: Record<string, string> = {
-    pin: 'ピン型',
-    mallet: 'マレット型',
-    neo_mallet: 'ネオマレット型'
-  };
-  const posMap: Record<string, string> = {
-    luxury: '★★★高級',
-    standard: '★★☆スタンダード',
-    casual: '★☆☆カジュアル'
-  };
-
-  const getLabel = (paramMap: any, value: string) => {
-    if (!value) return '-';
-    const opt = paramMap.options?.find((o: any) => o.value === value);
-    if (opt) return opt.label;
-    if (paramMap.options_by_fabric_type) {
-      for (const group of Object.values(paramMap.options_by_fabric_type)) {
-        const item = (group as any[]).find((o: any) => o.value === value);
-        if (item) return item.label;
-      }
-    }
-    return value;
-  };
-
-  const generateProposals = () => {
-    let shapeKey = data.headShape;
-    if (shapeKey === 'neo_mallet') shapeKey = 'neo';
-    const key = `${data.position}_${shapeKey}`;
-    const baseAutoFill = (specJson.auto_fill as any)[key];
-    
-    if (!baseAutoFill) {
-      alert('推奨データが見つかりませんでした。');
-      return;
-    }
-
-    const p1: Partial<SpecData> = {
-      bodyFabric: baseAutoFill.body_fabric || '',
-      texture: baseAutoFill.texture || '',
-      lining: baseAutoFill.lining || '',
-      piping: baseAutoFill.piping || '',
-      closure: baseAutoFill.closure || '',
-      embroidery: baseAutoFill.embroidery || '',
-      hardwareFinish: baseAutoFill.hardware_finish || '',
-      bodyColor: baseAutoFill.body_color || '',
-    };
-
-    const alternativeColors = ['black', 'navy', 'white', 'black_navy', 'red', 'green'];
-    let p2Color = alternativeColors.find(c => c !== p1.bodyColor) || 'black';
-    const p2 = { ...p1, bodyColor: p2Color };
-
-    const p3 = { ...p1, bodyFabric: p1.bodyFabric === 'pu_smooth' ? 'pu_shibo' : 'pu_smooth', texture: '' };
-
-    const p4 = { ...p1, embroidery: 'tatami_3d', hardwareFinish: p1.hardwareFinish === 'silver_matte' ? 'gold' : 'silver_matte' };
-
-    const shiftMap: Record<string, string> = { luxury: 'standard', standard: 'luxury', casual: 'standard' };
-    const shiftedPos = shiftMap[data.position] || 'standard';
-    const p5Base = (specJson.auto_fill as any)[`${shiftedPos}_${shapeKey}`];
-    const p5 = p5Base ? {
-      bodyFabric: p5Base.body_fabric || '',
-      texture: p5Base.texture || '',
-      lining: p5Base.lining || '',
-      piping: p5Base.piping || '',
-      closure: p5Base.closure || '',
-      embroidery: p5Base.embroidery || '',
-      hardwareFinish: p5Base.hardware_finish || '',
-      bodyColor: p5Base.body_color || '',
-    } : { ...p1, closure: 'magnet' };
-
-    setProposals([p1, p2, p3, p4, p5]);
-    setCurrentProposalIndex(0);
-  };
+  const { showToast, ToastView } = useToast();
+  const {
+    proposals,
+    currentProposalIndex,
+    setCurrentProposalIndex,
+    generateProposals,
+    regenerateProposals,
+    getProposalWarnings,
+  } = useStep2Proposals(data, {
+    onNoBaseAutoFill: () => showToast('推奨データが見つかりませんでした', 'error'),
+    onRegenerated: () => showToast('再生成しました'),
+    onRegenerateFailed: () => showToast('新しいパターンを生成できませんでした', 'error'),
+  });
 
   const applyProposal = () => {
     if (!proposals) return;
     const proposal = proposals[currentProposalIndex];
-    
-    const getColorCode = (colorValue: string) => {
-      const map: Record<string, string> = {
-        black: '#1A1A1A', white: '#F5F5F5', gray: '#888780', light_gray: '#C4C2BA',
-        navy: '#1B2A4A', black_navy: '#0D1520', sax_blue: '#7BAFD4', burgundy: '#7B2035',
-        pink: '#F4A0B0', green: '#2D6A4F', red: '#CC2200',
-      };
-      return map[colorValue] || '#000000';
-    };
 
     const colorNameJp = getLabel(specJson.parameters.body_color, proposal.bodyColor || '');
-    const cCode = getColorCode(proposal.bodyColor || '');
+    const cCode = getColorHex(proposal.bodyColor);
 
     const newFabricParts = [
-      { id: "A", label: "A", usage: "本体生地・縁巻き", material: getLabel(specJson.parameters.body_fabric, proposal.bodyFabric || ''), partNumber: "", quantity: "", colorName: colorNameJp, colorSwatch: cCode, threadNumber: "" },
-      { id: "B", label: "B", usage: "本体生地・切替", material: "", partNumber: "", quantity: "", colorName: colorNameJp, colorSwatch: cCode, threadNumber: "" },
-      { id: "C", label: "C", usage: "裏地", material: getLabel(specJson.parameters.lining, proposal.lining || ''), partNumber: "", quantity: "", colorName: "ホワイト", colorSwatch: "#ffffff", threadNumber: "" },
-      { id: "D", label: "D", usage: "留め具", material: getLabel(specJson.parameters.closure, proposal.closure || ''), partNumber: "", quantity: "1組", colorName: getLabel(specJson.parameters.hardware_finish, proposal.hardwareFinish || ''), colorSwatch: "#cccccc", threadNumber: "" },
+      { id: 'A', label: 'A', usage: '本体生地・縁巻き', material: getLabel(specJson.parameters.body_fabric, proposal.bodyFabric || ''), partNumber: '', quantity: '', colorName: colorNameJp, colorSwatch: cCode, threadNumber: '' },
+      { id: 'B', label: 'B', usage: '本体生地・切替', material: '', partNumber: '', quantity: '', colorName: colorNameJp, colorSwatch: cCode, threadNumber: '' },
+      { id: 'C', label: 'C', usage: '裏地', material: getLabel(specJson.parameters.lining, proposal.lining || ''), partNumber: '', quantity: '', colorName: 'ホワイト', colorSwatch: '#ffffff', threadNumber: '' },
+      { id: 'D', label: 'D', usage: '留め具', material: getLabel(specJson.parameters.closure, proposal.closure || ''), partNumber: '', quantity: '1組', colorName: getLabel(specJson.parameters.hardware_finish, proposal.hardwareFinish || ''), colorSwatch: '#cccccc', threadNumber: '' },
     ];
-    
+
     if (proposal.piping && proposal.piping !== 'なし' && proposal.piping !== 'none') {
-      newFabricParts.push({ id: "E", label: "E", usage: "パイピング", material: getLabel(specJson.parameters.piping, proposal.piping || ''), partNumber: "", quantity: "", colorName: colorNameJp, colorSwatch: cCode, threadNumber: "" });
+      newFabricParts.push({ id: 'E', label: 'E', usage: 'パイピング', material: getLabel(specJson.parameters.piping, proposal.piping || ''), partNumber: '', quantity: '', colorName: colorNameJp, colorSwatch: cCode, threadNumber: '' });
     }
-    
-    const fLabel = newFabricParts.length === 4 ? "E" : "F";
-    newFabricParts.push({ id: "F", label: fLabel, usage: "刺繍・装飾", material: getLabel(specJson.parameters.embroidery, proposal.embroidery || ''), partNumber: "", quantity: "", colorName: "", colorSwatch: "#cccccc", threadNumber: "" });
+
+    const fLabel = newFabricParts.length === 4 ? 'E' : 'F';
+    newFabricParts.push({ id: 'F', label: fLabel, usage: '刺繍・装飾', material: getLabel(specJson.parameters.embroidery, proposal.embroidery || ''), partNumber: '', quantity: '', colorName: '', colorSwatch: '#cccccc', threadNumber: '' });
 
     updateData({ ...proposal, colorCode: cCode, fabricParts: newFabricParts });
   };
 
-  const getProposalWarnings = (proposal: Partial<SpecData>) => {
-    const warnings = [];
-    const fabric = specJson.parameters.body_fabric.options.find(
-      (opt) => opt.value === proposal.bodyFabric
-    );
-    const fabricType = fabric?.type || 'pu';
-
-    if (fabricType === 'knit' && (proposal.piping === 'pu_10' || proposal.piping === 'pu_15')) {
-      warnings.push('NG');
-    }
-    if (proposal.bodyColor === 'white' && (proposal.hardwareFinish === 'gold' || proposal.hardwareFinish === 'black_nickel')) {
-      warnings.push('NG');
-    }
-    return warnings;
-  };
-
-  const regenerateProposals = () => {
-    let shapeKey = data.headShape;
-    if (shapeKey === 'neo_mallet') shapeKey = 'neo';
-    const key = `${data.position}_${shapeKey}`;
-    const baseAutoFill = (specJson.auto_fill as any)[key] || {};
-    
-    const newProposals: Partial<SpecData>[] = [];
-    const fabrics = specJson.parameters.body_fabric.options;
-    const colors = specJson.parameters.body_color.options;
-    const embroideries = specJson.parameters.embroidery.options;
-    
-    const getRandom = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)].value;
-    
-    let attempts = 0;
-    while (newProposals.length < 5 && attempts < 200) {
-      attempts++;
-      const rFabric = getRandom(fabrics);
-      const fabricType = fabrics.find((f: any) => f.value === rFabric)?.type || 'pu';
-      
-      if (data.position === 'luxury' && fabricType === 'knit') continue;
-      
-      const rColor = getRandom(colors);
-      const rEmbroidery = getRandom(embroideries);
-      
-      const p: Partial<SpecData> = {
-        bodyFabric: rFabric,
-        bodyColor: rColor,
-        embroidery: rEmbroidery,
-        texture: baseAutoFill.texture || '',
-        lining: baseAutoFill.lining || '',
-        piping: baseAutoFill.piping || '',
-        closure: baseAutoFill.closure || '',
-        hardwareFinish: baseAutoFill.hardware_finish || '',
-      };
-      
-      if (getProposalWarnings(p).length > 0) continue;
-      
-      if (newProposals.some(existing => 
-        existing.bodyFabric === p.bodyFabric && 
-        existing.bodyColor === p.bodyColor && 
-        existing.embroidery === p.embroidery)) {
-        continue;
-      }
-      
-      newProposals.push(p);
-    }
-    
-    if (newProposals.length > 0) {
-      setProposals(newProposals);
-      setCurrentProposalIndex(0);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 500);
-    } else {
-      alert("新しいパターンを生成できませんでした。");
-    }
-  };
-
-  // Derived properties for current form state
   const fabricType = useMemo(() => {
-    const fabric = specJson.parameters.body_fabric.options.find(
-      (opt) => opt.value === data.bodyFabric
-    );
+    const fabric = specJson.parameters.body_fabric.options?.find((opt) => opt.value === data.bodyFabric);
     return fabric?.type || 'pu';
   }, [data.bodyFabric]);
 
   const textureOptions = useMemo(() => {
-    return (specJson.parameters.texture.options_by_fabric_type as any)[fabricType] || [];
+    return specJson.parameters.texture.options_by_fabric_type?.[fabricType] ?? [];
   }, [fabricType]);
 
   useEffect(() => {
-    if (data.texture && !textureOptions.find((o: any) => o.value === data.texture)) {
+    if (data.texture && !textureOptions.find((o) => o.value === data.texture)) {
       updateData({ texture: '' });
     }
   }, [fabricType, textureOptions, data.texture, updateData]);
-
-  const colorHexMap: Record<string, string> = {
-    black: '#1A1A1A', white: '#F5F5F5', gray: '#888780', light_gray: '#C4C2BA',
-    navy: '#1B2A4A', black_navy: '#0D1520', sax_blue: '#7BAFD4', burgundy: '#7B2035',
-    pink: '#F4A0B0', green: '#2D6A4F', red: '#CC2200',
-  };
 
   const ngWarnings = useMemo(() => {
     const warnings: string[] = [];
@@ -228,8 +84,12 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
     return warnings;
   }, [fabricType, data]);
 
+  const canProceed =
+    !!data.bodyFabric && !!data.lining && !!data.closure && !!data.embroidery && !!data.bodyColor && !!data.hardwareFinish;
+
   return (
     <div className="space-y-8 animate-fade-in fade-in pb-12">
+      <ToastView />
       {/* AI Proposal Section */}
       <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-xl border border-indigo-100 flex flex-col">
         <div className="flex items-center justify-between">
@@ -239,7 +99,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
               AI組み合わせ提案
             </h3>
             <p className="text-sm text-indigo-700 mt-1">
-              {shapeMap[data.headShape]} × {posMap[data.position]} の推奨パターンを提案します
+              {SHAPE_LABELS_SHORT_JA[data.headShape]} × {POSITION_LABELS_JA[data.position]} の推奨パターンを提案します
             </p>
           </div>
           <button
@@ -252,15 +112,18 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
 
         {proposals && proposals.length > 0 && (
           <div className="mt-6">
-            <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
+            <div className="flex gap-4 overflow-x-auto pb-4 snap-x" role="radiogroup" aria-label="AI 提案リスト">
               {proposals.map((p, idx) => {
                 const isSelected = currentProposalIndex === idx;
                 const hasWarning = getProposalWarnings(p).length > 0;
                 return (
-                  <div 
-                    key={idx} 
+                  <button
+                    type="button"
+                    key={idx}
                     onClick={() => setCurrentProposalIndex(idx)}
-                    className={`min-w-[260px] max-w-[280px] snap-center cursor-pointer border-2 rounded-lg p-4 relative transition-all ${isSelected ? 'border-indigo-500 bg-indigo-50 shadow-md transform scale-100' : 'border-gray-200 bg-white hover:border-indigo-300 transform scale-95 opacity-80 hover:opacity-100'}`}
+                    role="radio"
+                    aria-checked={isSelected}
+                    className={`text-left min-w-[260px] max-w-[280px] snap-center cursor-pointer border-2 rounded-lg p-4 relative transition-all ${isSelected ? 'border-indigo-500 bg-indigo-50 shadow-md transform scale-100' : 'border-gray-200 bg-white hover:border-indigo-300 transform scale-95 opacity-80 hover:opacity-100'}`}
                   >
                     <h4 className={`font-bold mb-3 ${isSelected ? 'text-indigo-800' : 'text-gray-600'}`}>
                       提案 {idx + 1} {isSelected && <span className="ml-2 text-xs bg-indigo-200 text-indigo-800 px-2 py-1 rounded-full">選択中</span>}
@@ -276,20 +139,15 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
                       <div><span className="text-gray-500 inline-block w-12">金具:</span> <span className="font-medium text-gray-800">{getLabel(specJson.parameters.hardware_finish, p.hardwareFinish || '')}</span></div>
                       <div><span className="text-gray-500 inline-block w-12">カラー:</span> <span className="font-medium text-gray-800">{getLabel(specJson.parameters.body_color, p.bodyColor || '')}</span></div>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
             <div className="flex flex-col gap-4 mt-2 border-t border-indigo-200 pt-4 relative">
-              {showToast && (
-                <div className="absolute top-[-40px] left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg z-10 transition-opacity duration-200">
-                  再生成しました
-                </div>
-              )}
               <div className="flex justify-between items-center w-full">
                 <div className="flex items-center gap-4">
-                  <button 
-                    onClick={() => setCurrentProposalIndex(prev => Math.max(0, prev - 1))}
+                  <button
+                    onClick={() => setCurrentProposalIndex(Math.max(0, currentProposalIndex - 1))}
                     disabled={currentProposalIndex === 0}
                     className="text-indigo-600 font-bold disabled:text-gray-400 hover:text-indigo-800 transition-colors"
                   >
@@ -298,22 +156,22 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
                   <span className="text-xs text-indigo-800 font-bold bg-indigo-100 px-3 py-1 rounded-full">
                     {currentProposalIndex + 1} / {proposals.length}
                   </span>
-                  <button 
-                    onClick={() => setCurrentProposalIndex(prev => Math.min(proposals.length - 1, prev + 1))}
+                  <button
+                    onClick={() => setCurrentProposalIndex(Math.min(proposals.length - 1, currentProposalIndex + 1))}
                     disabled={currentProposalIndex === proposals.length - 1}
                     className="text-indigo-600 font-bold disabled:text-gray-400 hover:text-indigo-800 transition-colors"
                   >
                     次の提案 →
                   </button>
                 </div>
-                <button 
+                <button
                   onClick={applyProposal}
                   className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full shadow transition-transform transform hover:scale-105"
                 >
                   この提案を適用する
                 </button>
               </div>
-              
+
               <div className="flex justify-start">
                 <button
                   onClick={regenerateProposals}
@@ -329,7 +187,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
 
       {/* NG Warnings for current form state */}
       {ngWarnings.length > 0 && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm">
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm" role="alert">
           <div className="flex">
             <div className="flex-shrink-0">
               <ExclamationTriangleIcon className="h-5 w-5 text-red-500" aria-hidden="true" />
@@ -350,8 +208,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
 
       {/* Individual Selectors */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-        
-        {/* 生地・素材 */}
+
         <div className="space-y-4">
           <h4 className="font-bold text-gray-800 border-b pb-2">■ 生地・素材</h4>
           <div>
@@ -362,7 +219,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
               onChange={(e) => updateData({ bodyFabric: e.target.value })}
             >
               <option value="">選択してください</option>
-              {specJson.parameters.body_fabric.options.map((o) => (
+              {specJson.parameters.body_fabric.options?.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
@@ -375,7 +232,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
               onChange={(e) => updateData({ texture: e.target.value })}
             >
               <option value="">選択してください</option>
-              {textureOptions.map((o: any) => (
+              {textureOptions.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
@@ -388,7 +245,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
               onChange={(e) => updateData({ lining: e.target.value })}
             >
               <option value="">選択してください</option>
-              {specJson.parameters.lining.options.map((o) => (
+              {specJson.parameters.lining.options?.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
@@ -401,14 +258,13 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
               onChange={(e) => updateData({ piping: e.target.value })}
             >
               <option value="">選択してください</option>
-              {specJson.parameters.piping.options.map((o) => (
+              {specJson.parameters.piping.options?.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* 開閉・留め具 */}
         <div className="space-y-4">
           <h4 className="font-bold text-gray-800 border-b pb-2">■ 開閉・留め具</h4>
           <div>
@@ -419,14 +275,13 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
               onChange={(e) => updateData({ closure: e.target.value })}
             >
               <option value="">選択してください</option>
-              {specJson.parameters.closure.options.map((o) => (
+              {specJson.parameters.closure.options?.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* 刺繍・装飾 */}
         <div className="space-y-4">
           <h4 className="font-bold text-gray-800 border-b pb-2">■ 刺繍・装飾</h4>
           <div>
@@ -437,14 +292,13 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
               onChange={(e) => updateData({ embroidery: e.target.value })}
             >
               <option value="">選択してください</option>
-              {specJson.parameters.embroidery.options.map((o) => (
+              {specJson.parameters.embroidery.options?.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* カラー指示 */}
         <div className="space-y-4">
           <h4 className="font-bold text-gray-800 border-b pb-2">■ カラー指示</h4>
           <div>
@@ -456,14 +310,14 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
                 onChange={(e) => updateData({ bodyColor: e.target.value })}
               >
                 <option value="">選択してください</option>
-                {specJson.parameters.body_color.options.map((o) => (
+                {specJson.parameters.body_color.options?.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
-              {data.bodyColor && colorHexMap[data.bodyColor] && (
+              {data.bodyColor && COLOR_HEX_MAP[data.bodyColor] && (
                 <span
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border border-gray-300 shadow-sm"
-                  style={{ backgroundColor: colorHexMap[data.bodyColor] }}
+                  style={{ backgroundColor: COLOR_HEX_MAP[data.bodyColor] }}
                 ></span>
               )}
             </div>
@@ -477,56 +331,25 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
               onChange={(e) => updateData({ colorCode: e.target.value })}
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block text-xs text-gray-500">部位A</label>
-              <input type="text" className="w-full border p-1 text-sm rounded" 
-                value={data.fabricParts?.find(p => p.id === "A" || p.label === "A")?.colorName || ""} 
-                onChange={(e) => {
-                  const parts = [...(data.fabricParts || [])];
-                  const idx = parts.findIndex(p => p.id === "A" || p.label === "A");
-                  if (idx >= 0) parts[idx] = { ...parts[idx], colorName: e.target.value };
-                  else parts.push({ id: "A", label: "A", usage: "", material: "", partNumber: "", quantity: "", colorName: e.target.value, colorSwatch: "#ccc", threadNumber: "" });
-                  updateData({ fabricParts: parts });
-                }} />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500">部位B</label>
-              <input type="text" className="w-full border p-1 text-sm rounded" 
-                value={data.fabricParts?.find(p => p.id === "B" || p.label === "B")?.colorName || ""} 
-                onChange={(e) => {
-                  const parts = [...(data.fabricParts || [])];
-                  const idx = parts.findIndex(p => p.id === "B" || p.label === "B");
-                  if (idx >= 0) parts[idx] = { ...parts[idx], colorName: e.target.value };
-                  else parts.push({ id: "B", label: "B", usage: "", material: "", partNumber: "", quantity: "", colorName: e.target.value, colorSwatch: "#ccc", threadNumber: "" });
-                  updateData({ fabricParts: parts });
-                }} />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500">部位C</label>
-              <input type="text" className="w-full border p-1 text-sm rounded" 
-                value={data.fabricParts?.find(p => p.id === "C" || p.label === "C")?.colorName || ""} 
-                onChange={(e) => {
-                  const parts = [...(data.fabricParts || [])];
-                  const idx = parts.findIndex(p => p.id === "C" || p.label === "C");
-                  if (idx >= 0) parts[idx] = { ...parts[idx], colorName: e.target.value };
-                  else parts.push({ id: "C", label: "C", usage: "", material: "", partNumber: "", quantity: "", colorName: e.target.value, colorSwatch: "#ccc", threadNumber: "" });
-                  updateData({ fabricParts: parts });
-                }} />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500">部位D</label>
-              <input type="text" className="w-full border p-1 text-sm rounded" 
-                value={data.fabricParts?.find(p => p.id === "D" || p.label === "D")?.colorName || ""} 
-                onChange={(e) => {
-                  const parts = [...(data.fabricParts || [])];
-                  const idx = parts.findIndex(p => p.id === "D" || p.label === "D");
-                  if (idx >= 0) parts[idx] = { ...parts[idx], colorName: e.target.value };
-                  else parts.push({ id: "D", label: "D", usage: "", material: "", partNumber: "", quantity: "", colorName: e.target.value, colorSwatch: "#ccc", threadNumber: "" });
-                  updateData({ fabricParts: parts });
-                }} />
-            </div>
+            {(['A', 'B', 'C', 'D'] as const).map((label) => (
+              <div key={label}>
+                <label className="block text-xs text-gray-500">部位{label}</label>
+                <input
+                  type="text"
+                  className="w-full border p-1 text-sm rounded"
+                  value={data.fabricParts?.find((p) => p.id === label || p.label === label)?.colorName || ''}
+                  onChange={(e) => {
+                    const parts = [...(data.fabricParts || [])];
+                    const idx = parts.findIndex((p) => p.id === label || p.label === label);
+                    if (idx >= 0) parts[idx] = { ...parts[idx], colorName: e.target.value };
+                    else parts.push({ id: label, label, usage: '', material: '', partNumber: '', quantity: '', colorName: e.target.value, colorSwatch: '#ccc', threadNumber: '' });
+                    updateData({ fabricParts: parts });
+                  }}
+                />
+              </div>
+            ))}
           </div>
 
           <div>
@@ -537,7 +360,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
               onChange={(e) => updateData({ hardwareFinish: e.target.value })}
             >
               <option value="">選択してください</option>
-              {specJson.parameters.hardware_finish.options.map((o) => (
+              {specJson.parameters.hardware_finish.options?.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
@@ -554,7 +377,8 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
         </button>
         <button
           onClick={onNext}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg shadow transition-colors"
+          disabled={!canProceed}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg shadow disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           STEP3へ進む →
         </button>

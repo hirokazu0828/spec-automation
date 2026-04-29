@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import type { PutterSample } from './types'
 import samplesData from '../../data/samples.json'
 
@@ -140,9 +140,20 @@ function Modal({ sample, onClose }: { sample: PutterSample; onClose: () => void 
   const [imgError, setImgError] = useState(false)
   const icon = SHAPE_ICONS[sample.shape.head_type] ?? '◻'
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
   return (
     <div
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={sample.item_name}
       style={{
         position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
         display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
@@ -166,6 +177,7 @@ function Modal({ sample, onClose }: { sample: PutterSample; onClose: () => void 
           </div>
           <button
             onClick={onClose}
+            aria-label="閉じる"
             style={{ fontSize: 18, cursor: 'pointer', background: 'none', border: 'none', color: 'var(--color-text-secondary)', lineHeight: 1, padding: 2 }}
           >
             ✕

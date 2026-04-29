@@ -44,21 +44,27 @@ function App() {
       {/* Header / Tabs - Hidden when printing */}
       <div className="bg-white shadow print:hidden">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex border-b border-gray-200">
-            {steps.map((step) => (
-              <button
-                key={step.id}
-                onClick={() => setCurrentStep(step.id)}
-                className={`flex-1 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors ${
-                  currentStep === step.id
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {step.name}
-              </button>
-            ))}
-          </div>
+          <nav className="flex border-b border-gray-200" aria-label="進行ステップ">
+            {steps.map((step) => {
+              const isCurrent = currentStep === step.id;
+              const isComplete = step.id < currentStep && step.id <= 4;
+              return (
+                <button
+                  key={step.id}
+                  onClick={() => setCurrentStep(step.id)}
+                  aria-current={isCurrent ? 'step' : undefined}
+                  className={`flex-1 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors ${
+                    isCurrent
+                      ? 'border-indigo-500 text-indigo-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {isComplete && <span className="text-green-600 mr-1" aria-label="完了">✓</span>}
+                  {step.name}
+                </button>
+              );
+            })}
+          </nav>
         </div>
       </div>
 

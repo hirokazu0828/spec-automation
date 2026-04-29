@@ -95,7 +95,7 @@ export const initialSpecData: SpecData = {
   dimensionPiping: '',
   dimensionEmbroidery: '',
   sewingNotes: '',
-  revisionHistory: [],
+  revisionHistory: [{ date: new Date().toISOString().split('T')[0], content: '' }],
   fabricParts: [
     { id: '1', label: 'A', usage: '', material: '', partNumber: '', quantity: '', colorName: '', threadNumber: '', colorSwatch: '#000000' },
     { id: '2', label: 'B', usage: '', material: '', partNumber: '', quantity: '', colorName: '', threadNumber: '', colorSwatch: '#000000' },

@@ -59,7 +59,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
             }}
           />
           {error && (
-            <div style={{ fontSize: 12, color: 'var(--color-text-danger)' }}>
+            <div role="alert" aria-live="assertive" style={{ fontSize: 12, color: 'var(--color-text-danger)' }}>
               パスワードが正しくありません
             </div>
           )}
