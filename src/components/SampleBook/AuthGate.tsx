@@ -1,6 +1,9 @@
 import { useState } from 'react'
 
-const PASSWORD = import.meta.env.VITE_APP_PASSWORD ?? 'golfstreetlab'
+const PASSWORD = import.meta.env.VITE_APP_PASSWORD
+if (!PASSWORD) {
+  throw new Error('VITE_APP_PASSWORD is not set. Define it in .env (see .env.example).')
+}
 
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const [input, setInput] = useState('')
