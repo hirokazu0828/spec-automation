@@ -60,7 +60,31 @@ export type SpecData = {
     size: string;
     placement: string;
   }>;
+
+  baseProposal?: ProposalBase | null;
 };
+
+export type ProposalBase = {
+  bodyFabric: string;
+  texture: string;
+  lining: string;
+  piping: string;
+  closure: string;
+  embroidery: string;
+  bodyColor: string;
+  hardwareFinish: string;
+};
+
+export const PROPOSAL_KEYS: ReadonlyArray<keyof ProposalBase> = [
+  'bodyFabric',
+  'texture',
+  'lining',
+  'piping',
+  'closure',
+  'embroidery',
+  'bodyColor',
+  'hardwareFinish',
+];
 
 export const initialSpecData: SpecData = {
   productCode: '',
@@ -112,4 +136,5 @@ export const initialSpecData: SpecData = {
     { id: '2', technique: '', threadType: '', threadNumber: '', size: '', placement: '' },
     { id: '3', technique: '', threadType: '', threadNumber: '', size: '', placement: '' },
   ],
+  baseProposal: null,
 };

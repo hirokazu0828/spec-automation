@@ -777,13 +777,5 @@
       "body_color": "black",
       "price": "¥800〜¥1,200"
     }
-  ],
-  "midjourney": {
-    "suffix": "product photography, pure white background, soft diffused lighting, sharp focus, 8k resolution, commercial product shot --ar 4:3 --style raw --v 6",
-    "shape_en": {
-      "pin": "pin type blade putter cover",
-      "mallet": "mallet type putter cover",
-      "neo_mallet": "neo mallet large oversized putter cover"
-    }
-  }
+  ]
 }

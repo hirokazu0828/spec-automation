@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <rect width="1024" height="1024" fill="#ffffff"/>
+  <!-- Pin / blade-style putter cover outline -->
+  <path
+    d="M 180 460
+       Q 180 380 260 360
+       L 760 360
+       Q 860 360 880 440
+       L 880 600
+       Q 880 660 820 670
+       L 250 670
+       Q 180 660 180 600
+       Z"
+    fill="none"
+    stroke="#222222"
+    stroke-width="6"
+    stroke-linejoin="round"
+  />
+  <!-- Stitch line indication (top fold) -->
+  <path
+    d="M 220 410 L 820 410"
+    fill="none"
+    stroke="#666666"
+    stroke-width="2"
+    stroke-dasharray="6 6"
+  />
+</svg>

@@ -1,16 +1,17 @@
-import { useMemo, useEffect } from 'react';
-import { SparklesIcon, ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
-import type { SpecData } from '../types';
-import { specJson } from '../data/spec';
+import { useEffect, useMemo } from 'react';
+import { SparklesIcon, ExclamationTriangleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import type { SpecData } from '../../types';
+import { specJson } from '../../data/spec';
 import {
-  getLabel,
-  getColorHex,
   COLOR_HEX_MAP,
   SHAPE_LABELS_SHORT_JA,
   POSITION_LABELS_JA,
-} from '../utils/specHelpers';
-import { useToast } from './Toast';
-import { useStep2Proposals } from '../hooks/useStep2Proposals';
+} from '../../utils/specHelpers';
+import { useToast } from '../Toast';
+import { useStep2Proposals } from '../../hooks/useStep2Proposals';
+import ProposalDeck from './ProposalDeck';
+import BaselineBadge from './FieldWithBaseline';
+import { applyProposal, diffFromProposal } from './applyProposal';
 
 interface Props {
   data: SpecData;
@@ -21,6 +22,8 @@ interface Props {
 
 export default function Step2({ data, updateData, onNext, onBack }: Props) {
   const { showToast, ToastView } = useToast();
+  const baseline = data.baseProposal ?? null;
+
   const {
     proposals,
     currentProposalIndex,
@@ -34,28 +37,28 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
     onRegenerateFailed: () => showToast('新しいパターンを生成できませんでした', 'error'),
   });
 
-  const applyProposal = () => {
+  const handleApplyProposal = () => {
     if (!proposals) return;
     const proposal = proposals[currentProposalIndex];
-
-    const colorNameJp = getLabel(specJson.parameters.body_color, proposal.bodyColor || '');
-    const cCode = getColorHex(proposal.bodyColor);
-
-    const newFabricParts = [
-      { id: 'A', label: 'A', usage: '本体生地・縁巻き', material: getLabel(specJson.parameters.body_fabric, proposal.bodyFabric || ''), partNumber: '', quantity: '', colorName: colorNameJp, colorSwatch: cCode, threadNumber: '' },
-      { id: 'B', label: 'B', usage: '本体生地・切替', material: '', partNumber: '', quantity: '', colorName: colorNameJp, colorSwatch: cCode, threadNumber: '' },
-      { id: 'C', label: 'C', usage: '裏地', material: getLabel(specJson.parameters.lining, proposal.lining || ''), partNumber: '', quantity: '', colorName: 'ホワイト', colorSwatch: '#ffffff', threadNumber: '' },
-      { id: 'D', label: 'D', usage: '留め具', material: getLabel(specJson.parameters.closure, proposal.closure || ''), partNumber: '', quantity: '1組', colorName: getLabel(specJson.parameters.hardware_finish, proposal.hardwareFinish || ''), colorSwatch: '#cccccc', threadNumber: '' },
-    ];
-
-    if (proposal.piping && proposal.piping !== 'なし' && proposal.piping !== 'none') {
-      newFabricParts.push({ id: 'E', label: 'E', usage: 'パイピング', material: getLabel(specJson.parameters.piping, proposal.piping || ''), partNumber: '', quantity: '', colorName: colorNameJp, colorSwatch: cCode, threadNumber: '' });
+    const diffs = diffFromProposal(data, baseline);
+    if (diffs.length > 0) {
+      const ok = window.confirm(
+        `${diffs.length} 件の変更がありますが、新しい提案で上書きしますか？`,
+      );
+      if (!ok) return;
     }
+    updateData(applyProposal(proposal));
+    showToast('提案を適用しました');
+  };
 
-    const fLabel = newFabricParts.length === 4 ? 'E' : 'F';
-    newFabricParts.push({ id: 'F', label: fLabel, usage: '刺繍・装飾', material: getLabel(specJson.parameters.embroidery, proposal.embroidery || ''), partNumber: '', quantity: '', colorName: '', colorSwatch: '#cccccc', threadNumber: '' });
+  const handleDiscardProposal = () => {
+    updateData({ baseProposal: null });
+    showToast('提案ベースを破棄しました');
+  };
 
-    updateData({ ...proposal, colorCode: cCode, fabricParts: newFabricParts });
+  const handleRevertField = (field: keyof NonNullable<SpecData['baseProposal']>) => {
+    if (!baseline) return;
+    updateData({ [field]: baseline[field] } as Partial<SpecData>);
   };
 
   const fabricType = useMemo(() => {
@@ -87,12 +90,24 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
   const canProceed =
     !!data.bodyFabric && !!data.lining && !!data.closure && !!data.embroidery && !!data.bodyColor && !!data.hardwareFinish;
 
+  const fieldLabel = (text: string, fieldKey: keyof NonNullable<SpecData['baseProposal']>) => (
+    <div className="flex items-center justify-between mb-1">
+      <label className="block text-sm font-medium text-gray-700">{text}</label>
+      <BaselineBadge
+        baseline={baseline}
+        fieldKey={fieldKey}
+        currentValue={data[fieldKey] ?? ''}
+        onRevert={() => handleRevertField(fieldKey)}
+      />
+    </div>
+  );
+
   return (
     <div className="space-y-8 animate-fade-in fade-in pb-12">
       <ToastView />
       {/* AI Proposal Section */}
       <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-xl border border-indigo-100 flex flex-col">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h3 className="text-lg font-bold text-indigo-900 flex items-center gap-2">
               <SparklesIcon className="w-5 h-5 text-indigo-600" />
@@ -102,90 +117,36 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
               {SHAPE_LABELS_SHORT_JA[data.headShape]} × {POSITION_LABELS_JA[data.position]} の推奨パターンを提案します
             </p>
           </div>
-          <button
-            onClick={generateProposals}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded shadow transition-colors shrink-0"
-          >
-            提案を見る
-          </button>
+          <div className="flex gap-2">
+            {baseline && (
+              <button
+                onClick={handleDiscardProposal}
+                className="inline-flex items-center gap-1 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded shadow-sm"
+              >
+                <XCircleIcon className="w-4 h-4" /> 提案ベースを破棄
+              </button>
+            )}
+            <button
+              onClick={generateProposals}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded shadow transition-colors shrink-0"
+            >
+              提案を見る
+            </button>
+          </div>
         </div>
 
         {proposals && proposals.length > 0 && (
-          <div className="mt-6">
-            <div className="flex gap-4 overflow-x-auto pb-4 snap-x" role="radiogroup" aria-label="AI 提案リスト">
-              {proposals.map((p, idx) => {
-                const isSelected = currentProposalIndex === idx;
-                const hasWarning = getProposalWarnings(p).length > 0;
-                return (
-                  <button
-                    type="button"
-                    key={idx}
-                    onClick={() => setCurrentProposalIndex(idx)}
-                    role="radio"
-                    aria-checked={isSelected}
-                    className={`text-left min-w-[260px] max-w-[280px] snap-center cursor-pointer border-2 rounded-lg p-4 relative transition-all ${isSelected ? 'border-indigo-500 bg-indigo-50 shadow-md transform scale-100' : 'border-gray-200 bg-white hover:border-indigo-300 transform scale-95 opacity-80 hover:opacity-100'}`}
-                  >
-                    <h4 className={`font-bold mb-3 ${isSelected ? 'text-indigo-800' : 'text-gray-600'}`}>
-                      提案 {idx + 1} {isSelected && <span className="ml-2 text-xs bg-indigo-200 text-indigo-800 px-2 py-1 rounded-full">選択中</span>}
-                    </h4>
-                    {hasWarning && (
-                      <span className="absolute top-4 right-4 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">⚠ NG</span>
-                    )}
-                    <div className="space-y-1 text-sm">
-                      <div><span className="text-gray-500 inline-block w-12">本体:</span> <span className="font-medium text-gray-800">{getLabel(specJson.parameters.body_fabric, p.bodyFabric || '')}</span></div>
-                      <div><span className="text-gray-500 inline-block w-12">裏地:</span> <span className="font-medium text-gray-800">{getLabel(specJson.parameters.lining, p.lining || '')}</span></div>
-                      <div><span className="text-gray-500 inline-block w-12">開閉:</span> <span className="font-medium text-gray-800">{getLabel(specJson.parameters.closure, p.closure || '')}</span></div>
-                      <div><span className="text-gray-500 inline-block w-12">刺繍:</span> <span className="font-medium text-gray-800">{getLabel(specJson.parameters.embroidery, p.embroidery || '')}</span></div>
-                      <div><span className="text-gray-500 inline-block w-12">金具:</span> <span className="font-medium text-gray-800">{getLabel(specJson.parameters.hardware_finish, p.hardwareFinish || '')}</span></div>
-                      <div><span className="text-gray-500 inline-block w-12">カラー:</span> <span className="font-medium text-gray-800">{getLabel(specJson.parameters.body_color, p.bodyColor || '')}</span></div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-            <div className="flex flex-col gap-4 mt-2 border-t border-indigo-200 pt-4 relative">
-              <div className="flex justify-between items-center w-full">
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => setCurrentProposalIndex(Math.max(0, currentProposalIndex - 1))}
-                    disabled={currentProposalIndex === 0}
-                    className="text-indigo-600 font-bold disabled:text-gray-400 hover:text-indigo-800 transition-colors"
-                  >
-                    ← 前の提案
-                  </button>
-                  <span className="text-xs text-indigo-800 font-bold bg-indigo-100 px-3 py-1 rounded-full">
-                    {currentProposalIndex + 1} / {proposals.length}
-                  </span>
-                  <button
-                    onClick={() => setCurrentProposalIndex(Math.min(proposals.length - 1, currentProposalIndex + 1))}
-                    disabled={currentProposalIndex === proposals.length - 1}
-                    className="text-indigo-600 font-bold disabled:text-gray-400 hover:text-indigo-800 transition-colors"
-                  >
-                    次の提案 →
-                  </button>
-                </div>
-                <button
-                  onClick={applyProposal}
-                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full shadow transition-transform transform hover:scale-105"
-                >
-                  この提案を適用する
-                </button>
-              </div>
-
-              <div className="flex justify-start">
-                <button
-                  onClick={regenerateProposals}
-                  className="flex items-center justify-center font-bold outline-none uppercase tracking-wide cursor-pointer transition-colors border border-[#2E75B6] text-[#2E75B6] bg-white rounded-[6px] px-[16px] py-[8px] hover:bg-[#EDF4FB]"
-                >
-                  <ArrowPathIcon className="w-4 h-4 mr-2" /> 別のパターンを再生成する
-                </button>
-              </div>
-            </div>
-          </div>
+          <ProposalDeck
+            proposals={proposals}
+            currentIndex={currentProposalIndex}
+            setCurrentIndex={setCurrentProposalIndex}
+            onApply={handleApplyProposal}
+            onRegenerate={regenerateProposals}
+            getProposalWarnings={getProposalWarnings}
+          />
         )}
       </div>
 
-      {/* NG Warnings for current form state */}
       {ngWarnings.length > 0 && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm" role="alert">
           <div className="flex">
@@ -206,13 +167,11 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
         </div>
       )}
 
-      {/* Individual Selectors */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-
         <div className="space-y-4">
           <h4 className="font-bold text-gray-800 border-b pb-2">■ 生地・素材</h4>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">本体生地</label>
+            {fieldLabel('本体生地', 'bodyFabric')}
             <select
               className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 p-2 border"
               value={data.bodyFabric}
@@ -225,7 +184,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">テクスチャー</label>
+            {fieldLabel('テクスチャー', 'texture')}
             <select
               className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 p-2 border"
               value={data.texture}
@@ -238,7 +197,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">裏地</label>
+            {fieldLabel('裏地', 'lining')}
             <select
               className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 p-2 border"
               value={data.lining}
@@ -251,7 +210,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">パイピング</label>
+            {fieldLabel('パイピング', 'piping')}
             <select
               className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 p-2 border"
               value={data.piping}
@@ -268,7 +227,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
         <div className="space-y-4">
           <h4 className="font-bold text-gray-800 border-b pb-2">■ 開閉・留め具</h4>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">開閉・留め具方式</label>
+            {fieldLabel('開閉・留め具方式', 'closure')}
             <select
               className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 p-2 border"
               value={data.closure}
@@ -285,7 +244,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
         <div className="space-y-4">
           <h4 className="font-bold text-gray-800 border-b pb-2">■ 刺繍・装飾</h4>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">主刺繍技法</label>
+            {fieldLabel('主刺繍技法', 'embroidery')}
             <select
               className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 p-2 border"
               value={data.embroidery}
@@ -302,7 +261,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
         <div className="space-y-4">
           <h4 className="font-bold text-gray-800 border-b pb-2">■ カラー指示</h4>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">本体カラー</label>
+            {fieldLabel('本体カラー', 'bodyColor')}
             <div className="relative">
               <select
                 className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 p-2 border pl-10"
@@ -344,7 +303,18 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
                     const parts = [...(data.fabricParts || [])];
                     const idx = parts.findIndex((p) => p.id === label || p.label === label);
                     if (idx >= 0) parts[idx] = { ...parts[idx], colorName: e.target.value };
-                    else parts.push({ id: label, label, usage: '', material: '', partNumber: '', quantity: '', colorName: e.target.value, colorSwatch: '#ccc', threadNumber: '' });
+                    else
+                      parts.push({
+                        id: label,
+                        label,
+                        usage: '',
+                        material: '',
+                        partNumber: '',
+                        quantity: '',
+                        colorName: e.target.value,
+                        colorSwatch: '#ccc',
+                        threadNumber: '',
+                      });
                     updateData({ fabricParts: parts });
                   }}
                 />
@@ -353,7 +323,7 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 mt-2">金具仕上げ</label>
+            {fieldLabel('金具仕上げ', 'hardwareFinish')}
             <select
               className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 p-2 border"
               value={data.hardwareFinish}

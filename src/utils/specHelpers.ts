@@ -58,9 +58,3 @@ export const POSITION_LABELS_LONG_JA: Record<string, string> = {
   standard: 'スタンダードライン',
   casual: 'カジュアルライン',
 };
-
-export const POSITION_PROMPT_EN: Record<string, string> = {
-  luxury: 'luxury, premium quality, sophisticated craftsmanship',
-  standard: 'premium, clean design, quality craftsmanship',
-  casual: 'casual, sporty, colorful, fun',
-};

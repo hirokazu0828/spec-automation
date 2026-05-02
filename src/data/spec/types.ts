@@ -37,8 +37,4 @@ export interface SpecJson {
   };
   parameters: Record<string, SpecParameter>;
   auto_fill: Record<string, AutoFillEntry>;
-  midjourney: {
-    suffix: string;
-    shape_en: Record<string, string>;
-  };
 }

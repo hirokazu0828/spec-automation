@@ -1,17 +1,20 @@
+import { useEffect } from 'react';
 import { PrinterIcon, ArrowPathIcon, ArrowLeftIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { SpecData } from '../types';
 import { specJson } from '../data/spec';
 import {
   getLabel,
-  getColorHex,
   SHAPE_LABELS_JA,
   POSITION_LABELS_JA,
 } from '../utils/specHelpers';
 import { useToast } from './Toast';
+import { buildFabricParts } from './Step2/applyProposal';
+import { loadImage } from '../lib/imageStore';
 
 interface Props {
   data: SpecData;
   updateData: (updates: Partial<SpecData>) => void;
+  draftId: string;
   onReset: () => void;
   onBack: () => void;
 }
@@ -47,32 +50,31 @@ function PrintHeader({ data, pageNum, totalPages }: { data: SpecData; pageNum: n
   );
 }
 
-export default function Step4({ data, updateData, onReset, onBack }: Props) {
+export default function Step4({ data, updateData, draftId, onReset, onBack }: Props) {
   const { showToast, ToastView } = useToast();
 
   const handlePrint = () => window.print();
 
   const recalculateFabricParts = () => {
-    const cCode = data.colorCode || getColorHex(data.bodyColor);
-    const colorNameJp = getLabel(specJson.parameters.body_color, data.bodyColor || '');
-
-    const newFabricParts = [
-      { id: 'A', label: 'A', usage: '本体生地・縁巻き', material: getLabel(specJson.parameters.body_fabric, data.bodyFabric || ''), partNumber: '', quantity: '', colorName: colorNameJp, colorSwatch: cCode, threadNumber: '' },
-      { id: 'B', label: 'B', usage: '本体生地・切替', material: '', partNumber: '', quantity: '', colorName: colorNameJp, colorSwatch: cCode, threadNumber: '' },
-      { id: 'C', label: 'C', usage: '裏地', material: getLabel(specJson.parameters.lining, data.lining || ''), partNumber: '', quantity: '', colorName: 'ホワイト', colorSwatch: '#ffffff', threadNumber: '' },
-      { id: 'D', label: 'D', usage: '留め具', material: getLabel(specJson.parameters.closure, data.closure || ''), partNumber: '', quantity: '1組', colorName: getLabel(specJson.parameters.hardware_finish, data.hardwareFinish || ''), colorSwatch: '#cccccc', threadNumber: '' },
-    ];
-
-    if (data.piping && data.piping !== 'なし' && data.piping !== 'none') {
-      newFabricParts.push({ id: 'E', label: 'E', usage: 'パイピング', material: getLabel(specJson.parameters.piping, data.piping || ''), partNumber: '', quantity: '', colorName: colorNameJp, colorSwatch: cCode, threadNumber: '' });
-    }
-
-    const fLabel = newFabricParts.length === 4 ? 'E' : 'F';
-    newFabricParts.push({ id: 'F', label: fLabel, usage: '刺繍・装飾', material: getLabel(specJson.parameters.embroidery, data.embroidery || ''), partNumber: '', quantity: '', colorName: '', colorSwatch: '#cccccc', threadNumber: '' });
-
+    const newFabricParts = buildFabricParts(data);
     updateData({ fabricParts: newFabricParts });
     showToast('再反映しました');
   };
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!data.productPhotos[0]?.dataUrl) {
+      loadImage(draftId).then((url) => {
+        if (cancelled || !url) return;
+        const photos = data.productPhotos.map((p, i) => (i === 0 ? { ...p, dataUrl: url } : p));
+        updateData({ productPhotos: photos });
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftId]);
 
   const setRevisions = (next: SpecData['revisionHistory']) => updateData({ revisionHistory: next });
   const setParts = (next: SpecData['fabricParts']) => updateData({ fabricParts: next });
