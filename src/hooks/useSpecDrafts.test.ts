@@ -89,4 +89,39 @@ describe('useSpecDrafts', () => {
     const { result } = renderHook(() => useSpecDrafts());
     expect(result.current.drafts).toEqual([]);
   });
+
+  it('strips removed legacy fields (colorA-D) when loading older drafts', () => {
+    const legacyEnvelope = {
+      id: 'legacy-1',
+      productCode: 'OLD-001',
+      brandName: 'Legacy',
+      savedAt: 1700000000000,
+      lastStep: 2,
+      data: {
+        productCode: 'OLD-001',
+        brandName: 'Legacy',
+        bodyFabric: 'pu_smooth',
+        bodyColor: 'black',
+        colorA: 'red-legacy',
+        colorB: 'blue-legacy',
+        colorC: 'green-legacy',
+        colorD: 'yellow-legacy',
+      },
+    };
+    localStorage.setItem(
+      __testing.STORAGE_KEY,
+      JSON.stringify({ version: 1, drafts: [legacyEnvelope] }),
+    );
+
+    const { result } = renderHook(() => useSpecDrafts());
+    const loaded = result.current.loadDraft('legacy-1');
+    expect(loaded).not.toBeNull();
+    expect(loaded?.data.bodyFabric).toBe('pu_smooth');
+    expect(loaded?.data.bodyColor).toBe('black');
+    // Removed fields must not appear on the migrated SpecData
+    expect((loaded?.data as Record<string, unknown>).colorA).toBeUndefined();
+    expect((loaded?.data as Record<string, unknown>).colorB).toBeUndefined();
+    expect((loaded?.data as Record<string, unknown>).colorC).toBeUndefined();
+    expect((loaded?.data as Record<string, unknown>).colorD).toBeUndefined();
+  });
 });

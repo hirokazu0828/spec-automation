@@ -21,10 +21,6 @@ export type SpecData = {
   embroidery: string;
   bodyColor: string;
   colorCode: string;
-  colorA: string;
-  colorB: string;
-  colorC: string;
-  colorD: string;
   hardwareFinish: string;
 
   // p.2生地仕様ページ用
@@ -107,10 +103,6 @@ export const initialSpecData: SpecData = {
   embroidery: '',
   bodyColor: '',
   colorCode: '',
-  colorA: '',
-  colorB: '',
-  colorC: '',
-  colorD: '',
   hardwareFinish: '',
 
   dimensionLength: '',

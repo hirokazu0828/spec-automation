@@ -19,16 +19,49 @@ type DraftStore = { version: 1; drafts: DraftEnvelope[] };
 const STORAGE_KEY = 'spec-automation:drafts:v1';
 const STORAGE_EVENT = 'spec-automation:drafts:changed';
 
+// Drop fields that no longer exist on SpecData but may still live in older
+// drafts persisted to localStorage. Keeps unknown future-shape fields intact.
+const REMOVED_FIELDS = ['colorA', 'colorB', 'colorC', 'colorD'] as const;
+
+export function migrateSpecData(raw: unknown): SpecData {
+  if (raw == null || typeof raw !== 'object') return { ...initialSpecData };
+  const cleaned: Record<string, unknown> = { ...(raw as Record<string, unknown>) };
+  for (const key of REMOVED_FIELDS) {
+    delete cleaned[key];
+  }
+  return { ...initialSpecData, ...(cleaned as Partial<SpecData>) } as SpecData;
+}
+
+function migrateEnvelope(raw: unknown): DraftEnvelope | null {
+  if (raw == null || typeof raw !== 'object') return null;
+  const env = raw as Partial<DraftEnvelope> & { data?: unknown };
+  if (typeof env.id !== 'string') return null;
+  return {
+    id: env.id,
+    productCode: typeof env.productCode === 'string' ? env.productCode : '',
+    brandName: typeof env.brandName === 'string' ? env.brandName : '',
+    savedAt: typeof env.savedAt === 'number' ? env.savedAt : Date.now(),
+    lastStep: ((): WizardStep => {
+      const s = env.lastStep;
+      return s === 1 || s === 2 || s === 3 || s === 4 ? s : 1;
+    })(),
+    data: migrateSpecData(env.data),
+  };
+}
+
 function readStore(): DraftStore {
   if (typeof localStorage === 'undefined') return { version: 1, drafts: [] };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { version: 1, drafts: [] };
-    const parsed = JSON.parse(raw) as DraftStore;
+    const parsed = JSON.parse(raw) as { version?: number; drafts?: unknown };
     if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.drafts)) {
       return { version: 1, drafts: [] };
     }
-    return parsed;
+    const drafts = parsed.drafts
+      .map(migrateEnvelope)
+      .filter((d): d is DraftEnvelope => d !== null);
+    return { version: 1, drafts };
   } catch (e) {
     console.warn('[useSpecDrafts] failed to read store', e);
     return { version: 1, drafts: [] };

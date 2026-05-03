@@ -298,8 +298,8 @@ PutterSample
 - **プロンプト全文**: 該当なし。完全にローカル処理:
   - p1 = `auto_fill[${position}_${shapeKey}]` テンプレートそのまま
   - p2 = p1 + `bodyColor` を `ALTERNATIVE_COLORS = ['black','navy','white','black_navy','red','green']` から 1 つ
-  - p3 = p1 + `bodyFabric` を `pu_smooth ↔ pu_shibo` でトグル ※`pu_shibo` は putter-cover.json に存在しない値 (バグの可能性、`pu_lizard` と思われる)
-  - p4 = p1 + `embroidery='tatami_3d'` + `hardwareFinish` を `silver_matte ↔ gold` でトグル ※`silver_matte` は putter-cover.json では `matte_silver`、これも値ずれ
+  - p3 = p1 + `bodyFabric` を `pu_smooth ↔ pu_lizard` でトグル ✅ Layer 0 で `pu_shibo` から修正
+  - p4 = p1 + `embroidery='tatami_3d'` + `hardwareFinish` を `matte_silver ↔ gold` でトグル ✅ Layer 0 で `silver_matte` から修正
   - p5 = `auto_fill[${SHIFT_POSITION[position]}_${shapeKey}]` (luxury↔standard, casual→standard) + フォールバック
   - 再生成: `body_fabric` × `body_color` × `embroidery` をランダムに組み合わせ、NG ルールに引っかからない 5 件
 - **戻り値の構造**: 上記 [3.Step2] 参照
@@ -374,10 +374,10 @@ PutterSample
 
 ### マスタとコードのハードコード重複 (不一致リスト)
 
-1. **NG ルール**: `putter-cover.json` の `parameters.{piping|closure|hardware_finish}.ng_rules` 配列が定義されているが、コードは `Step2/index.tsx:80-86` と `useStep2Proposals.ts:28-40` の独自関数に書き写されている。**JSON 側 ng_rules は未消費**。
-2. **刺繍技法**: マスタは英語 ID (`flat`, `tatami_3d` 等) で管理するが、Step4 PAGE 3 の `<select>` は日本語ラベル直書きで連動しない。
-3. **形状**: SpecJson は `pin` だが Step1 の表示ラベルは「ピン型（ブレード型）」、サンプル帳の filter は「ブレード」。
-4. **`useStep2Proposals` の値ずれ**: `pu_shibo` (実際は `pu_lizard`)、`silver_matte` (実際は `matte_silver`) — マスタにない値を参照している箇所があり、p3/p4 の挙動が崩れている可能性。
+1. ✅ **NG ルール** *(Layer 0 で解消)*: `putter-cover.json` の `parameters.*.ng_rules` に構造化 `match` を追加し、`src/utils/ngRules.ts` の `evaluateNgRules` が JSON を読んで判定するように一元化。Step2/index.tsx の独自 NG 関数と useStep2Proposals.ts の `getProposalWarnings` は同関数を呼ぶだけになり、コード側ハードコードは消滅。
+2. **刺繍技法**: マスタは英語 ID (`flat`, `tatami_3d` 等) で管理するが、Step4 PAGE 3 の `<select>` は日本語ラベル直書きで連動しない。【Layer 2 持ち越し】
+3. **形状**: SpecJson は `pin` だが Step1 の表示ラベルは「ピン型（ブレード型）」、サンプル帳の filter は「ブレード」。【Layer 2 持ち越し: 語彙統一 / 翻訳辞書】
+4. ✅ **`useStep2Proposals` の値ずれ** *(Layer 0 で解消)*: `pu_shibo` → `pu_lizard`、`silver_matte` → `matte_silver` に修正。`src/hooks/useStep2Proposals.test.ts` で全提案がマスタに存在する value のみを参照することを保証。
 
 ---
 
@@ -391,8 +391,10 @@ PutterSample
 | `src/components/SampleBook/AuthGate.test.tsx` | 3 | 未認証フォーム表示、誤パスワード alert、正パスワード通過 |
 | `src/components/Step2/applyProposal.test.ts` | 6 | piping=none で 5 件、piping あり で 6 件、baseProposal 保存、buildFabricParts、diffFromProposal |
 | `src/components/Step3/buildImagePrompt.test.ts` | 4 | shape 反映、bodyFabric 空時のスキップ、英語ラベル使用、unknown shape の fallback |
-| `src/hooks/useSpecDrafts.test.ts` | 6 | 空からの create / save / load / duplicate / delete / 不正 JSON フォールバック |
-| 合計 | **26** | 全 pass |
+| `src/hooks/useSpecDrafts.test.ts` | 7 | create / save / load / duplicate / delete / 不正 JSON / 旧 colorA-D を含むドラフトのマイグレーション |
+| `src/hooks/useStep2Proposals.test.ts` *(Layer 0 で追加)* | 3 | p3/p4 が putter-cover.json に存在する value のみを参照することを保証 |
+| `src/utils/ngRules.test.ts` *(Layer 0 で追加)* | 8 | knit+pu_10/pu_15、PU+pu_10、white+gold、white+black_nickel、black+gold、match なしルールの skip、`hasViolation` |
+| 合計 | **38** | 全 pass |
 
 ### 手厚い箇所
 - 純関数 (`applyProposal`, `getLabel`, `buildImagePrompt`)

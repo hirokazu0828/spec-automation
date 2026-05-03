@@ -205,7 +205,14 @@
       ],
       "ng_rules": [
         {
-          "condition": "knit素材 AND (pu_10 OR pu_15)",
+          "condition": "knit素材 AND pu_10",
+          "match": { "body_fabric_type": "knit", "piping": "pu_10" },
+          "message": "縫製ストレスが発生します。ポリエステルテープ8mmを推奨",
+          "severity": "高"
+        },
+        {
+          "condition": "knit素材 AND pu_15",
+          "match": { "body_fabric_type": "knit", "piping": "pu_15" },
           "message": "縫製ストレスが発生します。ポリエステルテープ8mmを推奨",
           "severity": "高"
         }
@@ -241,7 +248,8 @@
         {
           "condition": "magnet_only",
           "message": "パターカバーにマグネット単独は落下リスクあり。ワイヤーまたはゴム式を使用",
-          "severity": "高"
+          "severity": "高",
+          "note": "現状 closure.options に magnet 値がないため match は未設定 (将来追加時に付与)"
         }
       ]
     },
@@ -321,13 +329,15 @@
       ],
       "ng_rules": [
         {
-          "condition": "gold_embroidery AND black_nickel",
-          "message": "ポジションが混在しています。ゴールド系金具を推奨",
-          "severity": "高"
+          "condition": "white_body AND gold",
+          "match": { "body_color": "white", "hardware_finish": "gold" },
+          "message": "ホワイト系本体×ゴールドはコントラスト過剰になる場合があります",
+          "severity": "中"
         },
         {
           "condition": "white_body AND black_nickel",
-          "message": "コントラスト過剰です。ソフトニッケルまたは艶なしシルバーを推奨",
+          "match": { "body_color": "white", "hardware_finish": "black_nickel" },
+          "message": "ホワイト系本体×黒ニッケルはコントラスト過剰になる場合があります",
           "severity": "中"
         }
       ]

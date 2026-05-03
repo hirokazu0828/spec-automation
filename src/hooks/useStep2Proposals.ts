@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import type { SpecData } from '../types';
 import { specJson } from '../data/spec';
 import type { SpecOption } from '../data/spec';
+import { evaluateNgRules } from '../utils/ngRules';
 
 interface Callbacks {
   onNoBaseAutoFill: () => void;
@@ -26,17 +27,7 @@ function pickRandom<T>(arr: T[]): T {
 }
 
 export function getProposalWarnings(proposal: Partial<SpecData>): string[] {
-  const warnings: string[] = [];
-  const fabric = specJson.parameters.body_fabric.options?.find((o) => o.value === proposal.bodyFabric);
-  const fabricType = fabric?.type ?? 'pu';
-
-  if (fabricType === 'knit' && (proposal.piping === 'pu_10' || proposal.piping === 'pu_15')) {
-    warnings.push('NG');
-  }
-  if (proposal.bodyColor === 'white' && (proposal.hardwareFinish === 'gold' || proposal.hardwareFinish === 'black_nickel')) {
-    warnings.push('NG');
-  }
-  return warnings;
+  return evaluateNgRules(proposal, specJson).map((v) => v.message);
 }
 
 export function useStep2Proposals(data: SpecData, callbacks: Callbacks) {
@@ -68,14 +59,14 @@ export function useStep2Proposals(data: SpecData, callbacks: Callbacks) {
 
     const p3 = {
       ...p1,
-      bodyFabric: p1.bodyFabric === 'pu_smooth' ? 'pu_shibo' : 'pu_smooth',
+      bodyFabric: p1.bodyFabric === 'pu_smooth' ? 'pu_lizard' : 'pu_smooth',
       texture: '',
     };
 
     const p4 = {
       ...p1,
       embroidery: 'tatami_3d',
-      hardwareFinish: p1.hardwareFinish === 'silver_matte' ? 'gold' : 'silver_matte',
+      hardwareFinish: p1.hardwareFinish === 'matte_silver' ? 'gold' : 'matte_silver',
     };
 
     const shiftedPos = SHIFT_POSITION[data.position] || 'standard';
