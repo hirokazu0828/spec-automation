@@ -7,6 +7,12 @@ export interface SpecOption {
   aql?: string;
   note?: string;
   feature?: string;
+  /**
+   * Alternative names that should resolve to this option's `value`.
+   * Used to bridge external vocabularies (e.g. samples.json's `shape.head_type`
+   * "ブレード" → master `pin`). Matching is case-insensitive after trimming.
+   */
+  aliases?: string[];
 }
 
 export interface NgRuleMatch {

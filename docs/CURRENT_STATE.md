@@ -375,9 +375,11 @@ PutterSample
 ### マスタとコードのハードコード重複 (不一致リスト)
 
 1. ✅ **NG ルール** *(Layer 0 で解消)*: `putter-cover.json` の `parameters.*.ng_rules` に構造化 `match` を追加し、`src/utils/ngRules.ts` の `evaluateNgRules` が JSON を読んで判定するように一元化。Step2/index.tsx の独自 NG 関数と useStep2Proposals.ts の `getProposalWarnings` は同関数を呼ぶだけになり、コード側ハードコードは消滅。
-2. **刺繍技法**: マスタは英語 ID (`flat`, `tatami_3d` 等) で管理するが、Step4 PAGE 3 の `<select>` は日本語ラベル直書きで連動しない。【Layer 2 持ち越し】
-3. **形状**: SpecJson は `pin` だが Step1 の表示ラベルは「ピン型（ブレード型）」、サンプル帳の filter は「ブレード」。【Layer 2 持ち越し: 語彙統一 / 翻訳辞書】
+2. ✅ **刺繍技法 / 糸種** *(Layer 2 で解消)*: master `parameters.embroidery.options` に `print` を追加 (8 値に拡張)、`parameters.thread_type` を新規追加 (3 値: standard / metallic / ginnan)。Step4 PAGE 3 の `<select>` は `getOptions('embroidery')` / `getOptions('thread_type')` で master 駆動。判断記録: `docs/embroidery-options-decision.md`。
+3. ✅ **形状** *(Layer 2 で解消)*: master `head_shape.options[].aliases` を追加 (`pin: ['ブレード','ピン','blade',...]` 等)、`getShapeByAlias()` で外部語彙 (samples の「ブレード」「セミマレット」「フルマレット」) を master value に正規化。SampleBook の shape filter は master の `label` で表示し、絞込は alias 経由。
 4. ✅ **`useStep2Proposals` の値ずれ** *(Layer 0 で解消)*: `pu_shibo` → `pu_lizard`、`silver_matte` → `matte_silver` に修正。`src/hooks/useStep2Proposals.test.ts` で全提案がマスタに存在する value のみを参照することを保証。
+5. ✅ **SampleBook フィルタ語彙** *(Layer 2 で解消)*: `closure` / `decoration` フィルタは samples.json と master が完全別語彙のため独立カテゴリと判断 (判断記録: `docs/sample-book-vocabulary-mapping.md`)。`getSampleClosureTypes` / `getSampleDecorationTypes` で samples.json から動的算出。「スクエアマレット」「複合」のような phantom 値は自動的に消滅。
+6. ✅ **寸法 default** *(Layer 2 で解消)*: master `dimensions.{shape}.{name}.standard` / `range` を `getDimensionDefault` / `isDimensionOutOfRange` から参照。Step4 寸法フィールドは placeholder で master 標準値を表示、「標準値で埋める」ボタン、範囲外 warning バッジを実装。
 
 ---
 
@@ -387,14 +389,15 @@ PutterSample
 
 | ファイル | 件数 | 内容 |
 |---|---|---|
-| `src/utils/specHelpers.test.ts` | 7 | `getLabel` (ja/en/未設定/フォールバック)、`getColorHex` |
+| `src/utils/specHelpers.test.ts` | 22 | `getLabel`, `getColorHex`, `getOptions`, `getDimensionDefault`/`Range`/`isDimensionOutOfRange`, `getShapeByAlias` |
 | `src/components/SampleBook/AuthGate.test.tsx` | 3 | 未認証フォーム表示、誤パスワード alert、正パスワード通過 |
+| `src/components/SampleBook/sampleHelpers.test.ts` *(Layer 2 で追加)* | 3 | `getSampleClosureTypes` / `getSampleDecorationTypes` の動的算出 + 重複除去 + 空入力 |
 | `src/components/Step2/applyProposal.test.ts` | 6 | piping=none で 5 件、piping あり で 6 件、baseProposal 保存、buildFabricParts、diffFromProposal |
 | `src/components/Step3/buildImagePrompt.test.ts` | 4 | shape 反映、bodyFabric 空時のスキップ、英語ラベル使用、unknown shape の fallback |
 | `src/hooks/useSpecDrafts.test.ts` | 7 | create / save / load / duplicate / delete / 不正 JSON / 旧 colorA-D を含むドラフトのマイグレーション |
 | `src/hooks/useStep2Proposals.test.ts` *(Layer 0 で追加)* | 3 | p3/p4 が putter-cover.json に存在する value のみを参照することを保証 |
 | `src/utils/ngRules.test.ts` *(Layer 0 で追加)* | 8 | knit+pu_10/pu_15、PU+pu_10、white+gold、white+black_nickel、black+gold、match なしルールの skip、`hasViolation` |
-| 合計 | **38** | 全 pass |
+| 合計 | **56** | 全 pass |
 
 ### 手厚い箇所
 - 純関数 (`applyProposal`, `getLabel`, `buildImagePrompt`)
