@@ -110,20 +110,28 @@ function newId(): string {
 export function useSpecDrafts() {
   const store = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
-  const createDraft = useCallback((): string => {
-    const id = newId();
-    const next: DraftEnvelope = {
-      id,
-      productCode: '',
-      brandName: '',
-      savedAt: Date.now(),
-      lastStep: 1,
-      data: { ...initialSpecData },
-    };
-    const current = readStore();
-    writeStore({ version: 1, drafts: [next, ...current.drafts] });
-    return id;
-  }, []);
+  const createDraft = useCallback(
+    (route?: 'A' | 'B' | 'C', seedData?: Partial<SpecData>): string => {
+      const id = newId();
+      const data: SpecData = {
+        ...initialSpecData,
+        ...(seedData ?? {}),
+        ...(route ? { originRoute: route } : {}),
+      };
+      const next: DraftEnvelope = {
+        id,
+        productCode: data.productCode,
+        brandName: data.brandName,
+        savedAt: Date.now(),
+        lastStep: 1,
+        data,
+      };
+      const current = readStore();
+      writeStore({ version: 1, drafts: [next, ...current.drafts] });
+      return id;
+    },
+    [],
+  );
 
   const loadDraft = useCallback((id: string): DraftEnvelope | null => {
     const current = readStore();

@@ -138,7 +138,15 @@ function SampleCard({ sample, onClick }: { sample: PutterSample; onClick: () => 
   )
 }
 
-function Modal({ sample, onClose }: { sample: PutterSample; onClose: () => void }) {
+function Modal({
+  sample,
+  onClose,
+  onPickSample,
+}: {
+  sample: PutterSample
+  onClose: () => void
+  onPickSample?: (s: PutterSample) => void
+}) {
   const [imgError, setImgError] = useState(false)
   const icon = SHAPE_ICONS[sample.shape.head_type] ?? '◻'
 
@@ -247,13 +255,42 @@ function Modal({ sample, onClose }: { sample: PutterSample; onClose: () => void 
               要確認: {sample.meta.review_reason}
             </div>
           )}
+
+          {onPickSample && (
+            <div style={{ marginTop: 16, paddingTop: 16, borderTop: '0.5px solid var(--color-border-tertiary)' }}>
+              <button
+                type="button"
+                onClick={() => onPickSample(sample)}
+                style={{
+                  width: '100%', fontSize: 14, fontWeight: 600, padding: '10px 0',
+                  borderRadius: 8, border: 'none', cursor: 'pointer',
+                  background: '#4f46e5', color: '#ffffff',
+                }}
+              >
+                このサンプルを起点に新規作成 →
+              </button>
+              <p style={{ fontSize: 11, color: 'var(--color-text-tertiary)', marginTop: 8, textAlign: 'center' }}>
+                形状とブランド名を引き継いで Step1 を起動します
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
   )
 }
 
-export default function SampleBook() {
+interface SampleBookProps {
+  /**
+   * When provided, each sample's modal shows a primary "起点に新規作成" button.
+   * When `mode === 'pick'`, a top banner clarifies that the user is picking a
+   * sample as a starting point for Route A.
+   */
+  onPickSample?: (sample: PutterSample) => void
+  mode?: 'browse' | 'pick'
+}
+
+export default function SampleBook({ onPickSample, mode = 'browse' }: SampleBookProps = {}) {
   const [query, setQuery] = useState('')
   const [filterShape, setFilterShape] = useState('') // master head_shape value, e.g. 'pin'
   const [filterClosure, setFilterClosure] = useState('')
@@ -288,6 +325,21 @@ export default function SampleBook() {
 
   return (
     <div style={{ padding: '24px 0' }}>
+      {mode === 'pick' && (
+        <div
+          style={{
+            marginBottom: 16,
+            padding: '12px 16px',
+            background: '#EEF2FF',
+            border: '1px solid #C7D2FE',
+            borderRadius: 8,
+            fontSize: 13,
+            color: '#3730A3',
+          }}
+        >
+          <strong>[A] サンプル帳から作成</strong>: 起点となるサンプルを選んでください。詳細を開いて「起点に新規作成」を押すと Step1 に進みます。
+        </div>
+      )}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
         <input
           type="text"
@@ -331,7 +383,13 @@ export default function SampleBook() {
         </div>
       )}
 
-      {selected && <Modal sample={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <Modal
+          sample={selected}
+          onClose={() => setSelected(null)}
+          onPickSample={onPickSample}
+        />
+      )}
     </div>
   )
 }

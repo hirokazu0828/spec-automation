@@ -15,17 +15,22 @@
 type View =
   | { kind: 'home' }
   | { kind: 'wizard'; draftId: string; step: 1|2|3|4 }
-  | { kind: 'samples' }
+  | { kind: 'samples'; mode?: 'browse' | 'pick' }   // ← Layer 6 で mode 追加
 ```
 
 | 遷移 | きっかけ |
 |---|---|
-| `home` → `wizard` (新規) | ホームの「+ 新しい仕様書を作成」ボタン → `createDraft()` で id 発行 → `setView({kind:'wizard', draftId, step:1})` |
+| `home` → `wizard` (Route C / 白紙) | ホームの「[C] コンセプトから作成」 → `createDraft('C')` |
+| `home` → `samples (mode=pick)` | ホームの「[A] サンプル帳から作成」 (バナー付き選択モード) |
+| `samples (mode=pick)` → `wizard` (Route A) | サンプル詳細モーダルの「このサンプルを起点に新規作成」 → `createDraft('A', seed)` |
+| `home` → `wizard` (Route B) | ホームの「[B] 既存ドラフトを複製」 → `DraftPickerModal` で選択 → `createDraft('B', seed)` |
 | `home` → `wizard` (再開) | DraftList の「開く」 → `loadDraft(id)` → `setView({kind:'wizard', draftId, step: env.lastStep})` |
-| `home` → `samples` | ホーム右上「サンプル帳を開く」 |
+| `home` → `samples (mode=browse)` | ホーム右上「サンプル帳を開く」 (閲覧モード、起点にすることも可能) |
 | `wizard` → `home` | ヘッダー「← ドラフト一覧へ」 (`goHome()`) または Step4 の「最初からやり直す」 |
-| `wizard` → `samples` | wizard ヘッダー右上「サンプル帳」 |
-| `samples` → `home` | samples ヘッダー「← ドラフト一覧へ」 |
+| `wizard` → `samples (mode=browse)` | wizard ヘッダー右上「サンプル帳」 |
+| `samples (任意 mode)` → `home` | samples ヘッダー「← ドラフト一覧へ」 |
+
+**3 ルート起点判定 (Layer 6)**: 新規ドラフトの起点が SpecData に `originRoute: 'A'|'B'|'C'` として記録される。Step1 上部に起点バッジを表示。詳細は `docs/route-design-decisions.md`。
 
 **全 view は `<AuthGate>` でラップ** (`src/components/SampleBook/AuthGate.tsx`)。`VITE_APP_PASSWORD` で sessionStorage 認証。
 
@@ -391,13 +396,16 @@ PutterSample
 |---|---|---|
 | `src/utils/specHelpers.test.ts` | 22 | `getLabel`, `getColorHex`, `getOptions`, `getDimensionDefault`/`Range`/`isDimensionOutOfRange`, `getShapeByAlias` |
 | `src/components/SampleBook/AuthGate.test.tsx` | 3 | 未認証フォーム表示、誤パスワード alert、正パスワード通過 |
-| `src/components/SampleBook/sampleHelpers.test.ts` *(Layer 2 で追加)* | 3 | `getSampleClosureTypes` / `getSampleDecorationTypes` の動的算出 + 重複除去 + 空入力 |
+| `src/components/SampleBook/sampleHelpers.test.ts` *(Layer 2)* | 3 | `getSampleClosureTypes` / `getSampleDecorationTypes` の動的算出 + 重複除去 + 空入力 |
 | `src/components/Step2/applyProposal.test.ts` | 6 | piping=none で 5 件、piping あり で 6 件、baseProposal 保存、buildFabricParts、diffFromProposal |
 | `src/components/Step3/buildImagePrompt.test.ts` | 4 | shape 反映、bodyFabric 空時のスキップ、英語ラベル使用、unknown shape の fallback |
-| `src/hooks/useSpecDrafts.test.ts` | 7 | create / save / load / duplicate / delete / 不正 JSON / 旧 colorA-D を含むドラフトのマイグレーション |
-| `src/hooks/useStep2Proposals.test.ts` *(Layer 0 で追加)* | 3 | p3/p4 が putter-cover.json に存在する value のみを参照することを保証 |
-| `src/utils/ngRules.test.ts` *(Layer 0 で追加)* | 8 | knit+pu_10/pu_15、PU+pu_10、white+gold、white+black_nickel、black+gold、match なしルールの skip、`hasViolation` |
-| 合計 | **56** | 全 pass |
+| `src/hooks/useSpecDrafts.test.ts` | 11 | create / save / load / duplicate / delete / 不正 JSON / 旧 colorA-D マイグレーション + Route A/B/C の `createDraft(route, seed)` 4 ケース *(Layer 6)* |
+| `src/hooks/useStep2Proposals.test.ts` *(Layer 0)* | 3 | p3/p4 が putter-cover.json に存在する value のみを参照することを保証 |
+| `src/utils/ngRules.test.ts` *(Layer 0)* | 8 | knit+pu_10/pu_15、PU+pu_10、white+gold、white+black_nickel、black+gold、match なしルールの skip、`hasViolation` |
+| `src/components/Home/RouteSelector.test.tsx` *(Layer 6)* | 3 | A/B/C 各カードのレンダリングとクリックハンドラ、Route B 無効化時の挙動 |
+| `src/components/Home/DraftPickerModal.test.tsx` *(Layer 6)* | 3 | 空状態 / 選択コールバック / 閉じるボタン |
+| `src/components/Step1.test.tsx` *(Layer 6)* | 5 | OriginBadge: 旧ドラフト (バッジなし) / Route A / Route B with lookup / Route B fallback / Route C |
+| 合計 | **71** | 全 pass |
 
 ### 手厚い箇所
 - 純関数 (`applyProposal`, `getLabel`, `buildImagePrompt`)
@@ -427,7 +435,7 @@ PutterSample
 |---|---|---|
 | 横向き A4 PDF 出力 | ❌ 未実装 | `Step4.tsx:592` `@page { size: A4 }` で**縦向き固定**。`size: A4 landscape` 指定なし。PDF ライブラリも未導入 (`window.print()` のみ) |
 | サンプル指示書 vs 最終仕様書 (テンプレ切替) | ❌ 未実装 | `Step4.tsx:30` ヘッダー赤バナーは「最終仕様書」固定文字列。テンプレ種別を表す state も Spec フィールドもなし |
-| 3 ルート起点判定 (A/B/C) | ❌ 未実装 | "ルート"/"起点"を示すフィールドや分岐コードは src 全体に存在せず |
+| 3 ルート起点判定 (A/B/C) | ✅ 実装済 *(Layer 6)* | `SpecData.originRoute` + `createDraft(route, seed)` + Home の `RouteSelector` + `DraftPickerModal` + Step1 の `OriginBadge`。詳細 `docs/route-design-decisions.md` |
 | マスタ DB 分離 | △ 部分的 | `src/data/spec/index.ts` で `domains` Record + `DomainKey = 'putter-cover'` の枠は用意済。実体は putter-cover.json 1 件のみ。コード側ではどこも `specJson` 直 import (= 単一ドメイン固定) で、ドメイン切替 UI / state 不在 |
 | 過去サンプル参照 (SampleBook → Wizard) | ❌ 未実装 | SampleBook のカード/モーダルから wizard を起動する経路なし。逆方向の参照もなし |
 | リビジョン管理 | △ 限定的 | `data.revisionHistory: Array<{date, content}>` は存在し、Step4 PAGE 2 で編集可能テーブルになっている。**ただし「過去仕様書スナップショットの差分」ではなく自由入力の改訂メモ**。version の自動採番なし、過去版へのロールバック / 比較機能なし |

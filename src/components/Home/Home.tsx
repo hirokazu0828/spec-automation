@@ -1,20 +1,37 @@
 import { useMemo, useState } from 'react';
-import { DocumentPlusIcon, BookOpenIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { BookOpenIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import type { DraftEnvelope } from '../../hooks/useSpecDrafts';
 import DraftList from './DraftList';
 import EmptyState from './EmptyState';
+import RouteSelector from './RouteSelector';
+import DraftPickerModal from './DraftPickerModal';
 
 interface Props {
   drafts: DraftEnvelope[];
-  onCreate: () => void;
+  /** Route C (white-paper). */
+  onCreateConcept: () => void;
+  /** Route A (SampleBook 起点) — Home からは samples view への遷移。 */
+  onOpenSampleBookForRouteA: () => void;
+  /** Route B (Draft 起点) — modal で選んだ draft を起点にする。 */
+  onCreateFromDraft: (sourceDraft: DraftEnvelope) => void;
   onOpen: (id: string) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
   onOpenSamples: () => void;
 }
 
-export default function Home({ drafts, onCreate, onOpen, onDuplicate, onDelete, onOpenSamples }: Props) {
+export default function Home({
+  drafts,
+  onCreateConcept,
+  onOpenSampleBookForRouteA,
+  onCreateFromDraft,
+  onOpen,
+  onDuplicate,
+  onDelete,
+  onOpenSamples,
+}: Props) {
   const [query, setQuery] = useState('');
+  const [showDraftPicker, setShowDraftPicker] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -32,54 +49,72 @@ export default function Home({ drafts, onCreate, onOpen, onDuplicate, onDelete, 
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">仕様書ドラフト</h1>
-          <p className="text-sm text-gray-500 mt-1">編集中の仕様書を選んで再開、または新規作成できます。</p>
+          <p className="text-sm text-gray-500 mt-1">
+            起点を選んで新規作成するか、既存ドラフトを開いて再開できます。
+          </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={onOpenSamples}
-            className="inline-flex items-center gap-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg shadow-sm"
-          >
-            <BookOpenIcon className="w-5 h-5" /> サンプル帳を開く
-          </button>
-          <button
-            onClick={onCreate}
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow"
-          >
-            <DocumentPlusIcon className="w-5 h-5" /> 新しい仕様書を作成
-          </button>
-        </div>
+        <button
+          onClick={onOpenSamples}
+          className="inline-flex items-center gap-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg shadow-sm self-start sm:self-end"
+        >
+          <BookOpenIcon className="w-5 h-5" /> サンプル帳を開く
+        </button>
       </header>
 
-      {drafts.length === 0 ? (
-        <EmptyState onCreate={onCreate} />
-      ) : (
-        <>
-          <div className="relative">
-            <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="search"
-              placeholder="品番またはブランド名で検索"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full sm:max-w-md pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-              aria-label="ドラフトを検索"
-            />
+      <section aria-label="新規作成の起点を選択">
+        <h2 className="text-sm font-bold text-gray-700 mb-2">新規作成</h2>
+        <RouteSelector
+          onPickRouteA={onOpenSampleBookForRouteA}
+          onPickRouteB={() => setShowDraftPicker(true)}
+          onPickRouteC={onCreateConcept}
+          disableRouteB={drafts.length === 0}
+        />
+      </section>
+
+      <section aria-label="既存ドラフト">
+        <h2 className="text-sm font-bold text-gray-700 mb-2">既存ドラフト ({drafts.length})</h2>
+        {drafts.length === 0 ? (
+          <EmptyState onCreate={onCreateConcept} />
+        ) : (
+          <div className="space-y-3">
+            <div className="relative">
+              <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="search"
+                placeholder="品番またはブランド名で検索"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full sm:max-w-md pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                aria-label="ドラフトを検索"
+              />
+            </div>
+            {sorted.length === 0 ? (
+              <p className="text-sm text-gray-500 px-2">該当するドラフトがありません。</p>
+            ) : (
+              <DraftList
+                drafts={sorted}
+                onOpen={onOpen}
+                onDuplicate={onDuplicate}
+                onDelete={onDelete}
+              />
+            )}
           </div>
-          {sorted.length === 0 ? (
-            <p className="text-sm text-gray-500 px-2">該当するドラフトがありません。</p>
-          ) : (
-            <DraftList
-              drafts={sorted}
-              onOpen={onOpen}
-              onDuplicate={onDuplicate}
-              onDelete={onDelete}
-            />
-          )}
-        </>
+        )}
+      </section>
+
+      {showDraftPicker && (
+        <DraftPickerModal
+          drafts={drafts}
+          onClose={() => setShowDraftPicker(false)}
+          onPick={(d) => {
+            setShowDraftPicker(false);
+            onCreateFromDraft(d);
+          }}
+        />
       )}
     </div>
   );
