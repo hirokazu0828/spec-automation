@@ -7,6 +7,7 @@ import {
   SHAPE_LABELS_SHORT_JA,
   POSITION_LABELS_JA,
 } from '../../utils/specHelpers';
+import { evaluateNgRules } from '../../utils/ngRules';
 import { useToast } from '../Toast';
 import { useStep2Proposals } from '../../hooks/useStep2Proposals';
 import ProposalDeck from './ProposalDeck';
@@ -76,16 +77,10 @@ export default function Step2({ data, updateData, onNext, onBack }: Props) {
     }
   }, [fabricType, textureOptions, data.texture, updateData]);
 
-  const ngWarnings = useMemo(() => {
-    const warnings: string[] = [];
-    if (fabricType === 'knit' && (data.piping === 'pu_10' || data.piping === 'pu_15')) {
-      warnings.push('縫製ストレスが発生します。ポリエステルテープ8mmを推奨');
-    }
-    if (data.bodyColor === 'white' && (data.hardwareFinish === 'gold' || data.hardwareFinish === 'black_nickel')) {
-      warnings.push('ホワイト系本体×ゴールドまたは黒ニッケルはコントラスト過剰になる場合があります');
-    }
-    return warnings;
-  }, [fabricType, data]);
+  const ngWarnings = useMemo(
+    () => evaluateNgRules(data, specJson).map((v) => v.message),
+    [data],
+  );
 
   const canProceed =
     !!data.bodyFabric && !!data.lining && !!data.closure && !!data.embroidery && !!data.bodyColor && !!data.hardwareFinish;
