@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import type { PutterSample } from './types'
 import samplesData from '../../data/samples.json'
+import { getOptions, getShapeByAlias } from '../../utils/specHelpers'
+import { getSampleClosureTypes, getSampleDecorationTypes } from './sampleHelpers'
 
 const SAMPLES = samplesData as PutterSample[]
 const IMAGE_BASE = '/images/'
@@ -253,14 +255,21 @@ function Modal({ sample, onClose }: { sample: PutterSample; onClose: () => void 
 
 export default function SampleBook() {
   const [query, setQuery] = useState('')
-  const [filterShape, setFilterShape] = useState('')
+  const [filterShape, setFilterShape] = useState('') // master head_shape value, e.g. 'pin'
   const [filterClosure, setFilterClosure] = useState('')
   const [filterDecor, setFilterDecor] = useState('')
   const [selected, setSelected] = useState<PutterSample | null>(null)
 
+  const shapeOptions = useMemo(() => getOptions('head_shape'), [])
+  const closureOptions = useMemo(() => getSampleClosureTypes(SAMPLES), [])
+  const decorationOptions = useMemo(() => getSampleDecorationTypes(SAMPLES), [])
+
   const filtered = useMemo(() => {
     return SAMPLES.filter(s => {
-      if (filterShape && s.shape.head_type !== filterShape) return false
+      if (filterShape) {
+        const masterValue = getShapeByAlias(s.shape.head_type)
+        if (masterValue !== filterShape) return false
+      }
       if (filterClosure && s.closure.type !== filterClosure) return false
       if (filterDecor && s.decoration.type !== filterDecor) return false
       if (query) {
@@ -289,19 +298,19 @@ export default function SampleBook() {
         />
         <select value={filterShape} onChange={e => setFilterShape(e.target.value)} style={selectStyle}>
           <option value="">形状：すべて</option>
-          {['ブレード','フルマレット','セミマレット','スクエアマレット','ネオマレット'].map(v => (
-            <option key={v}>{v}</option>
+          {shapeOptions.map(o => (
+            <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
         <select value={filterClosure} onChange={e => setFilterClosure(e.target.value)} style={selectStyle}>
           <option value="">開閉：すべて</option>
-          {['マグネット','ベルクロ','FIDLOCK','ベルト'].map(v => (
+          {closureOptions.map(v => (
             <option key={v}>{v}</option>
           ))}
         </select>
         <select value={filterDecor} onChange={e => setFilterDecor(e.target.value)} style={selectStyle}>
           <option value="">装飾：すべて</option>
-          {['刺繍','プリント','複合','なし'].map(v => (
+          {decorationOptions.map(v => (
             <option key={v}>{v}</option>
           ))}
         </select>

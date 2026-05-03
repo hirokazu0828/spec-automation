@@ -4,6 +4,10 @@ import type { SpecData } from '../types';
 import { specJson } from '../data/spec';
 import {
   getLabel,
+  getOptions,
+  getDimensionDefault,
+  isDimensionOutOfRange,
+  DIMENSION_FIELD_TO_MASTER_KEY,
   SHAPE_LABELS_JA,
   POSITION_LABELS_JA,
 } from '../utils/specHelpers';
@@ -20,6 +24,43 @@ interface Props {
 }
 
 const colLabel = (index: number) => String.fromCharCode(65 + index);
+
+function DimensionInput({
+  label,
+  fieldName,
+  shape,
+  value,
+  onChange,
+}: {
+  label: string;
+  fieldName: string;
+  shape: string;
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  const def = getDimensionDefault(shape, fieldName);
+  const outOfRange = isDimensionOutOfRange(shape, fieldName, value);
+  const placeholder = def != null ? String(def) : '';
+  return (
+    <label className="flex items-center gap-2 text-sm">
+      <span className="font-bold">{label}</span>
+      <input
+        type="number"
+        className={`border p-1 w-20 print:border-gray-400 ${outOfRange ? 'border-amber-500 bg-amber-50' : 'border-gray-400'}`}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        aria-invalid={outOfRange || undefined}
+      />
+      <span>mm</span>
+      {outOfRange && (
+        <span className="text-xs text-amber-700 print:hidden" role="alert">
+          推奨範囲外
+        </span>
+      )}
+    </label>
+  );
+}
 
 function PrintHeader({ data, pageNum, totalPages }: { data: SpecData; pageNum: number; totalPages: number }) {
   return (
@@ -59,6 +100,28 @@ export default function Step4({ data, updateData, draftId, onReset, onBack }: Pr
     const newFabricParts = buildFabricParts(data);
     updateData({ fabricParts: newFabricParts });
     showToast('再反映しました');
+  };
+
+  const fillDimensionsFromMaster = () => {
+    if (!data.headShape) {
+      showToast('STEP1 でヘッド形状を選択してください', 'error');
+      return;
+    }
+    const updates: Partial<SpecData> = {};
+    let filled = 0;
+    for (const fieldName of Object.keys(DIMENSION_FIELD_TO_MASTER_KEY)) {
+      const def = getDimensionDefault(data.headShape, fieldName);
+      if (def != null) {
+        (updates as Record<string, unknown>)[fieldName] = String(def);
+        filled++;
+      }
+    }
+    if (filled > 0) {
+      updateData(updates);
+      showToast(`${filled} 項目を標準値で埋めました`);
+    } else {
+      showToast('対応する標準値がありません', 'error');
+    }
   };
 
   useEffect(() => {
@@ -253,13 +316,52 @@ export default function Step4({ data, updateData, draftId, onReset, onBack }: Pr
 
         {/* 寸法 */}
         <div className="mb-[20px] border-t border-[#ddd] pt-[16px]">
-          <h4 className="font-bold mb-2">寸法</h4>
+          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+            <h4 className="font-bold">寸法</h4>
+            <button
+              onClick={fillDimensionsFromMaster}
+              disabled={!data.headShape}
+              className="text-xs bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded shadow-sm hover:bg-indigo-100 print:hidden disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              標準値で埋める ({SHAPE_LABELS_JA[data.headShape] || '形状未設定'})
+            </button>
+          </div>
           <div className="flex flex-wrap gap-4">
-            <label className="flex items-center gap-2 text-sm"><span className="font-bold">全長</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionLength} onChange={(e) => updateData({ dimensionLength: e.target.value })} /> mm</label>
-            <label className="flex items-center gap-2 text-sm"><span className="font-bold">幅</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionWidth} onChange={(e) => updateData({ dimensionWidth: e.target.value })} /> mm</label>
-            <label className="flex items-center gap-2 text-sm"><span className="font-bold">高さ</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionHeight} onChange={(e) => updateData({ dimensionHeight: e.target.value })} /> mm</label>
-            <label className="flex items-center gap-2 text-sm"><span className="font-bold">縁巻き幅</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionPiping} onChange={(e) => updateData({ dimensionPiping: e.target.value })} /> mm</label>
-            <label className="flex items-center gap-2 text-sm"><span className="font-bold">刺繍位置</span> <input type="number" className="border border-gray-400 p-1 w-20 print:border-gray-400" value={data.dimensionEmbroidery} onChange={(e) => updateData({ dimensionEmbroidery: e.target.value })} /> mm</label>
+            <DimensionInput
+              label="全長"
+              fieldName="dimensionLength"
+              shape={data.headShape}
+              value={data.dimensionLength}
+              onChange={(v) => updateData({ dimensionLength: v })}
+            />
+            <DimensionInput
+              label="幅"
+              fieldName="dimensionWidth"
+              shape={data.headShape}
+              value={data.dimensionWidth}
+              onChange={(v) => updateData({ dimensionWidth: v })}
+            />
+            <DimensionInput
+              label="高さ"
+              fieldName="dimensionHeight"
+              shape={data.headShape}
+              value={data.dimensionHeight}
+              onChange={(v) => updateData({ dimensionHeight: v })}
+            />
+            <DimensionInput
+              label="縁巻き幅"
+              fieldName="dimensionPiping"
+              shape={data.headShape}
+              value={data.dimensionPiping}
+              onChange={(v) => updateData({ dimensionPiping: v })}
+            />
+            <DimensionInput
+              label="刺繍位置"
+              fieldName="dimensionEmbroidery"
+              shape={data.headShape}
+              value={data.dimensionEmbroidery}
+              onChange={(v) => updateData({ dimensionEmbroidery: v })}
+            />
           </div>
         </div>
 
@@ -480,13 +582,9 @@ export default function Step4({ data, updateData, draftId, onReset, onBack }: Pr
                       onChange={(e) => setEmbroideries(embroideries.map((r, i) => (i === idx ? { ...r, technique: e.target.value } : r)))}
                     >
                       <option value=""></option>
-                      <option value="普通刺繍">普通刺繍</option>
-                      <option value="普通刺繍・振り刺繍">普通刺繍・振り刺繍</option>
-                      <option value="畳刺繍">畳刺繍</option>
-                      <option value="畳立体刺繍">畳立体刺繍</option>
-                      <option value="文字型土台畳刺繍">文字型土台畳刺繍</option>
-                      <option value="シリコンパッチ">シリコンパッチ</option>
-                      <option value="プリント">プリント</option>
+                      {getOptions('embroidery').map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
                     </select>
                   </td>
                   <td className="border border-[#333] p-1">
@@ -497,9 +595,9 @@ export default function Step4({ data, updateData, draftId, onReset, onBack }: Pr
                       onChange={(e) => setEmbroideries(embroideries.map((r, i) => (i === idx ? { ...r, threadType: e.target.value } : r)))}
                     >
                       <option value=""></option>
-                      <option value="銀杏">銀杏</option>
-                      <option value="メタリック糸">メタリック糸</option>
-                      <option value="標準刺繍糸">標準刺繍糸</option>
+                      {getOptions('thread_type').map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
                     </select>
                   </td>
                   <td className="border border-[#333] p-1">

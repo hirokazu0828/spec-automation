@@ -14,17 +14,20 @@
         {
           "value": "pin",
           "label": "ピン型（ブレード型）",
-          "en": "pin type blade putter cover"
+          "en": "pin type blade putter cover",
+          "aliases": ["ブレード", "ピン", "ピン型", "ブレード型", "blade", "pin"]
         },
         {
           "value": "mallet",
           "label": "マレット型",
-          "en": "mallet type putter cover"
+          "en": "mallet type putter cover",
+          "aliases": ["マレット", "マレット型", "セミマレット", "mallet", "semi-mallet"]
         },
         {
           "value": "neo_mallet",
           "label": "ネオマレット（大型マレット）",
-          "en": "neo mallet large oversized putter cover"
+          "en": "neo mallet large oversized putter cover",
+          "aliases": ["ネオマレット", "ネオ", "フルマレット", "大型マレット", "neo", "full-mallet"]
         }
       ]
     },
@@ -293,6 +296,34 @@
           "value": "silicon",
           "label": "シリコンパッチ",
           "en": "with silicone patch logo"
+        },
+        {
+          "value": "print",
+          "label": "プリント",
+          "en": "with printed graphic logo"
+        }
+      ]
+    },
+    "thread_type": {
+      "label": "糸種",
+      "type": "select",
+      "required": false,
+      "note": "刺繍テーブルの 1 行ごとに選択。embroidery と独立",
+      "options": [
+        {
+          "value": "standard",
+          "label": "標準刺繍糸",
+          "en": "standard polyester embroidery thread"
+        },
+        {
+          "value": "metallic",
+          "label": "メタリック糸",
+          "en": "metallic embroidery thread"
+        },
+        {
+          "value": "ginnan",
+          "label": "銀杏",
+          "en": "ginnan specialty silk-like embroidery thread"
         }
       ]
     },

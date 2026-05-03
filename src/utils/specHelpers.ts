@@ -1,6 +1,101 @@
-import type { SpecParameter } from '../data/spec';
+import type { SpecOption, SpecParameter } from '../data/spec';
+import { specJson } from '../data/spec';
 
 export type Lang = 'ja' | 'en';
+
+/**
+ * Returns the options list for a top-level parameter from the master JSON.
+ * Returns `[]` (not undefined) so callers can map without null checks.
+ */
+export function getOptions(parameterKey: string): SpecOption[] {
+  return specJson.parameters[parameterKey]?.options ?? [];
+}
+
+function normalizeAlias(s: string): string {
+  return s.trim().toLowerCase();
+}
+
+/**
+ * Resolves an arbitrary input (label / external vocabulary / value itself)
+ * to the master `head_shape` option's `value`, using the `aliases` field on
+ * each option. Returns null when no option matches.
+ *
+ * Used for bridging samples.json's `shape.head_type` (Japanese label vocabulary
+ * like "ブレード" / "セミマレット" / "フルマレット") to the master IDs
+ * (`pin` / `mallet` / `neo_mallet`).
+ */
+export function getShapeByAlias(input: string | null | undefined): string | null {
+  if (!input) return null;
+  const needle = normalizeAlias(input);
+  if (!needle) return null;
+  for (const opt of getOptions('head_shape')) {
+    if (normalizeAlias(opt.value) === needle) return opt.value;
+    if (normalizeAlias(opt.label) === needle) return opt.value;
+    if (opt.aliases?.some((a) => normalizeAlias(a) === needle)) return opt.value;
+  }
+  return null;
+}
+
+/**
+ * Mapping from `SpecData` dimension field name to the master JSON's dimension key.
+ * Step4 also has `dimensionPiping` and `dimensionEmbroidery`, but those have no
+ * standard default in master so they are intentionally absent here.
+ */
+export const DIMENSION_FIELD_TO_MASTER_KEY: Record<string, string> = {
+  dimensionLength: '全長_mm',
+  dimensionWidth: '幅_mm',
+  dimensionHeight: '高さ_mm',
+};
+
+export type DimensionFieldKey = keyof typeof DIMENSION_FIELD_TO_MASTER_KEY;
+
+/**
+ * Returns the master-defined "standard" value (in mm) for the given shape and
+ * SpecData dimension field, or null if no master entry exists.
+ */
+export function getDimensionDefault(
+  shape: string | undefined,
+  fieldName: string,
+): number | null {
+  if (!shape) return null;
+  const masterKey = DIMENSION_FIELD_TO_MASTER_KEY[fieldName];
+  if (!masterKey) return null;
+  const dim = specJson.dimensions?.[shape]?.[masterKey];
+  return typeof dim?.standard === 'number' ? dim.standard : null;
+}
+
+/**
+ * Returns the master-defined `[min, max]` range for the given shape and
+ * dimension field, or null if no range is registered.
+ */
+export function getDimensionRange(
+  shape: string | undefined,
+  fieldName: string,
+): [number, number] | null {
+  if (!shape) return null;
+  const masterKey = DIMENSION_FIELD_TO_MASTER_KEY[fieldName];
+  if (!masterKey) return null;
+  const range = specJson.dimensions?.[shape]?.[masterKey]?.range;
+  if (!range || range.length < 2) return null;
+  return [range[0], range[1]];
+}
+
+/**
+ * Returns true when the user-entered numeric value (string) is outside the
+ * master range. An empty / non-numeric value never warns.
+ */
+export function isDimensionOutOfRange(
+  shape: string | undefined,
+  fieldName: string,
+  rawValue: string,
+): boolean {
+  if (!rawValue) return false;
+  const n = Number(rawValue);
+  if (!Number.isFinite(n)) return false;
+  const range = getDimensionRange(shape, fieldName);
+  if (!range) return false;
+  return n < range[0] || n > range[1];
+}
 
 export function getLabel(paramMap: SpecParameter | undefined, value: string, lang: Lang = 'ja'): string {
   if (!value) return '-';
