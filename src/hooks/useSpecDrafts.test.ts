@@ -90,6 +90,75 @@ describe('useSpecDrafts', () => {
     expect(result.current.drafts).toEqual([]);
   });
 
+  describe('createDraft route variants (Layer 6)', () => {
+    it('Route C records originRoute=C and leaves seedable fields blank', () => {
+      const { result } = renderHook(() => useSpecDrafts());
+      let id = '';
+      act(() => {
+        id = result.current.createDraft('C');
+      });
+      const draft = result.current.loadDraft(id);
+      expect(draft?.data.originRoute).toBe('C');
+      expect(draft?.data.headShape).toBe('');
+      expect(draft?.data.brandName).toBe('');
+      expect(draft?.data.originSampleId).toBeUndefined();
+      expect(draft?.data.originDraftId).toBeUndefined();
+    });
+
+    it('Route A merges the partial seed and records originSampleId', () => {
+      const { result } = renderHook(() => useSpecDrafts());
+      let id = '';
+      act(() => {
+        id = result.current.createDraft('A', {
+          originSampleId: 'BRG-2109-P897',
+          headShape: 'neo_mallet',
+          brandName: 'ユニオンゲート',
+        });
+      });
+      const draft = result.current.loadDraft(id);
+      expect(draft?.data.originRoute).toBe('A');
+      expect(draft?.data.originSampleId).toBe('BRG-2109-P897');
+      expect(draft?.data.headShape).toBe('neo_mallet');
+      expect(draft?.data.brandName).toBe('ユニオンゲート');
+      // unsupplied fields fall back to initialSpecData
+      expect(draft?.data.bodyFabric).toBe('');
+    });
+
+    it('Route B merges the full seed and records originDraftId', () => {
+      const { result } = renderHook(() => useSpecDrafts());
+      let id = '';
+      act(() => {
+        id = result.current.createDraft('B', {
+          originDraftId: 'src-1',
+          productCode: '',
+          brandName: 'Acme',
+          headShape: 'mallet',
+          bodyFabric: 'pu_smooth',
+          issueDate: '2026-05-03',
+          revisionHistory: [{ date: '2026-05-03', content: '' }],
+        });
+      });
+      const draft = result.current.loadDraft(id);
+      expect(draft?.data.originRoute).toBe('B');
+      expect(draft?.data.originDraftId).toBe('src-1');
+      expect(draft?.data.productCode).toBe('');
+      expect(draft?.data.bodyFabric).toBe('pu_smooth');
+      // envelope reflects the productCode reset (= empty string)
+      expect(draft?.productCode).toBe('');
+    });
+
+    it('createDraft() with no arguments still works (backward compat)', () => {
+      const { result } = renderHook(() => useSpecDrafts());
+      let id = '';
+      act(() => {
+        id = result.current.createDraft();
+      });
+      const draft = result.current.loadDraft(id);
+      expect(draft).not.toBeNull();
+      expect(draft?.data.originRoute).toBeUndefined();
+    });
+  });
+
   it('strips removed legacy fields (colorA-D) when loading older drafts', () => {
     const legacyEnvelope = {
       id: 'legacy-1',

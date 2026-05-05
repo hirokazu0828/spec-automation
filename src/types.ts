@@ -58,6 +58,20 @@ export type SpecData = {
   }>;
 
   baseProposal?: ProposalBase | null;
+
+  /**
+   * Where this draft originated. Set once at creation and never reassigned
+   * afterwards (used for the Step1 origin badge and analytics).
+   *   A = SampleBook を起点に新規作成
+   *   B = 既存ドラフトを複製して新規作成
+   *   C = コンセプトから白紙で新規作成
+   * Optional because drafts created before Layer 6 do not carry it.
+   */
+  originRoute?: 'A' | 'B' | 'C';
+  /** Route A: the sample_number of the source sample. */
+  originSampleId?: string;
+  /** Route B: the id of the source draft. */
+  originDraftId?: string;
 };
 
 export type ProposalBase = {

@@ -1,12 +1,45 @@
 import type { SpecData } from '../types';
+import type { DraftEnvelope } from '../hooks/useSpecDrafts';
 
 interface Props {
   data: SpecData;
   updateData: (data: Partial<SpecData>) => void;
   onNext: () => void;
+  /** Used to look up the source draft's productCode for Route B's badge. */
+  draftLookup?: (id: string) => DraftEnvelope | null;
 }
 
-export default function Step1({ data, updateData, onNext }: Props) {
+function OriginBadge({ data, draftLookup }: { data: SpecData; draftLookup?: Props['draftLookup'] }) {
+  if (!data.originRoute) return null;
+
+  const baseClass = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold';
+  if (data.originRoute === 'A') {
+    return (
+      <div className={`${baseClass} bg-indigo-50 text-indigo-700 border border-indigo-200`}>
+        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600 text-white">A</span>
+        起点: サンプル {data.originSampleId ?? '(不明)'}
+      </div>
+    );
+  }
+  if (data.originRoute === 'B') {
+    const source = data.originDraftId && draftLookup ? draftLookup(data.originDraftId) : null;
+    const label = source?.productCode || data.originDraftId || '(不明)';
+    return (
+      <div className={`${baseClass} bg-emerald-50 text-emerald-700 border border-emerald-200`}>
+        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-600 text-white">B</span>
+        複製元: {label}
+      </div>
+    );
+  }
+  return (
+    <div className={`${baseClass} bg-gray-100 text-gray-700 border border-gray-200`}>
+      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-600 text-white">C</span>
+      新規作成 (白紙)
+    </div>
+  );
+}
+
+export default function Step1({ data, updateData, onNext, draftLookup }: Props) {
   const brands = [
     'PEARLY GATES', 'フォーティーン', 'ツアーステージ', 'TaylorMade',
     'Callaway', 'Titleist', 'Scotty Cameron', 'Odyssey', 'ミズノ', 'ブリヂストン'
@@ -14,6 +47,7 @@ export default function Step1({ data, updateData, onNext }: Props) {
 
   return (
     <div className="space-y-10 animate-fade-in fade-in">
+      <OriginBadge data={data} draftLookup={draftLookup} />
       {/* 書類管理セクション */}
       <section>
         <h2 className="text-xl font-bold border-b pb-2 mb-6 text-gray-800">■ 書類管理セクション</h2>

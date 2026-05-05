@@ -4,18 +4,20 @@ import Step2 from './components/Step2';
 import Step3 from './components/Step3';
 import Step4 from './components/Step4';
 import SampleBook from './components/SampleBook/SampleBook';
+import type { PutterSample } from './components/SampleBook/types';
 import AuthGate from './components/SampleBook/AuthGate';
 import Home from './components/Home/Home';
 import { initialSpecData } from './types';
 import type { SpecData } from './types';
-import { useSpecDrafts, type WizardStep } from './hooks/useSpecDrafts';
+import { useSpecDrafts, type WizardStep, type DraftEnvelope } from './hooks/useSpecDrafts';
+import { getShapeByAlias } from './utils/specHelpers';
 import { ArrowLeftIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import './index.css';
 
 type View =
   | { kind: 'home' }
   | { kind: 'wizard'; draftId: string; step: WizardStep }
-  | { kind: 'samples' };
+  | { kind: 'samples'; mode?: 'browse' | 'pick' };
 
 function App() {
   const { drafts, createDraft, loadDraft, saveDraft, duplicateDraft, deleteDraft } = useSpecDrafts();
@@ -41,11 +43,50 @@ function App() {
     [loadDraft],
   );
 
-  const handleCreate = useCallback(() => {
-    const id = createDraft();
-    setSpecData(initialSpecData);
-    setView({ kind: 'wizard', draftId: id, step: 1 });
-  }, [createDraft]);
+  const startWizardFromSeed = useCallback(
+    (route: 'A' | 'B' | 'C', seed?: Partial<SpecData>) => {
+      const id = createDraft(route, seed);
+      setSpecData({ ...initialSpecData, ...(seed ?? {}), originRoute: route });
+      setView({ kind: 'wizard', draftId: id, step: 1 });
+    },
+    [createDraft],
+  );
+
+  // Route C: blank
+  const handleCreateConcept = useCallback(() => {
+    startWizardFromSeed('C');
+  }, [startWizardFromSeed]);
+
+  // Route A: came from SampleBook → seed via getShapeByAlias
+  const handleCreateFromSample = useCallback(
+    (sample: PutterSample) => {
+      const headShape = getShapeByAlias(sample.shape.head_type) ?? '';
+      const seed: Partial<SpecData> = {
+        originSampleId: sample.sample_number,
+        headShape,
+        brandName: sample.client ?? '',
+      };
+      startWizardFromSeed('A', seed);
+    },
+    [startWizardFromSeed],
+  );
+
+  // Route B: copy an existing draft, but reset productCode / issueDate / revisionHistory
+  const handleCreateFromDraft = useCallback(
+    (sourceDraft: DraftEnvelope) => {
+      const today = new Date().toISOString().slice(0, 10);
+      const seed: Partial<SpecData> = {
+        ...sourceDraft.data,
+        productCode: '',
+        issueDate: today,
+        revisionHistory: [{ date: today, content: '' }],
+        originSampleId: undefined,
+        originDraftId: sourceDraft.id,
+      };
+      startWizardFromSeed('B', seed);
+    },
+    [startWizardFromSeed],
+  );
 
   const handleDelete = useCallback(
     (id: string) => {
@@ -104,6 +145,7 @@ function App() {
   }, [view, specData, saveDraft]);
 
   if (view.kind === 'samples') {
+    const mode = view.mode ?? 'browse';
     return (
       <AuthGate>
         <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -116,11 +158,13 @@ function App() {
                 <ArrowLeftIcon className="w-4 h-4" /> ドラフト一覧へ
               </button>
               <span className="text-gray-300">/</span>
-              <span className="text-sm font-bold text-gray-800">サンプル帳</span>
+              <span className="text-sm font-bold text-gray-800">
+                サンプル帳{mode === 'pick' ? ' (起点を選択)' : ''}
+              </span>
             </div>
           </div>
           <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-            <SampleBook />
+            <SampleBook mode={mode} onPickSample={handleCreateFromSample} />
           </main>
         </div>
       </AuthGate>
@@ -134,11 +178,13 @@ function App() {
           <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8">
             <Home
               drafts={drafts}
-              onCreate={handleCreate}
+              onCreateConcept={handleCreateConcept}
+              onOpenSampleBookForRouteA={() => setView({ kind: 'samples', mode: 'pick' })}
+              onCreateFromDraft={handleCreateFromDraft}
               onOpen={openDraft}
               onDuplicate={handleDuplicate}
               onDelete={handleDelete}
-              onOpenSamples={() => setView({ kind: 'samples' })}
+              onOpenSamples={() => setView({ kind: 'samples', mode: 'browse' })}
             />
           </main>
         </div>
@@ -166,7 +212,7 @@ function App() {
                 <ArrowLeftIcon className="w-4 h-4" /> ドラフト一覧へ
               </button>
               <button
-                onClick={() => setView({ kind: 'samples' })}
+                onClick={() => setView({ kind: 'samples', mode: 'browse' })}
                 className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
               >
                 <BookOpenIcon className="w-4 h-4" /> サンプル帳
@@ -199,7 +245,12 @@ function App() {
         <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8">
           <div className="bg-white rounded-lg shadow p-6 print:shadow-none print:p-0">
             {view.step === 1 && (
-              <Step1 data={specData} updateData={updateData} onNext={handleNext} />
+              <Step1
+                data={specData}
+                updateData={updateData}
+                onNext={handleNext}
+                draftLookup={loadDraft}
+              />
             )}
             {view.step === 2 && (
               <Step2
