@@ -10,7 +10,7 @@ import Home from './components/Home/Home';
 import { initialSpecData } from './types';
 import type { SpecData } from './types';
 import { useSpecDrafts, type WizardStep, type DraftEnvelope } from './hooks/useSpecDrafts';
-import { getShapeByAlias } from './utils/specHelpers';
+import { getShapeByAlias, getOptionValueByAlias } from './utils/specHelpers';
 import { ArrowLeftIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import './index.css';
 
@@ -57,14 +57,22 @@ function App() {
     startWizardFromSeed('C');
   }, [startWizardFromSeed]);
 
-  // Route A: came from SampleBook → seed via getShapeByAlias
+  // Route A: came from SampleBook → seed master-mappable fields via aliases.
+  // bodyFabric / closure / embroidery / hardware_finish stay empty because the
+  // sample vocabulary (CORDURA / マグネット / 刺繍) doesn't 1:1-map to master
+  // categories — those get filled via Step2's AI proposal flow.
   const handleCreateFromSample = useCallback(
     (sample: PutterSample) => {
       const headShape = getShapeByAlias(sample.shape.head_type) ?? '';
+      const colorSource = sample.outer_material?.color || sample.color_scheme?.main_color || '';
+      const bodyColor = getOptionValueByAlias('body_color', colorSource) ?? '';
+      const lining = getOptionValueByAlias('lining', sample.lining_material?.fabric ?? '') ?? '';
       const seed: Partial<SpecData> = {
         originSampleId: sample.sample_number,
         headShape,
         brandName: sample.client ?? '',
+        ...(bodyColor ? { bodyColor } : {}),
+        ...(lining ? { lining } : {}),
       };
       startWizardFromSeed('A', seed);
     },

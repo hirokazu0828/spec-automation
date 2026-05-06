@@ -163,7 +163,8 @@
         {
           "value": "ten_uron",
           "label": "天ウーロン",
-          "feature": "傷防止・静電気防止"
+          "feature": "傷防止・静電気防止",
+          "aliases": ["天ウーロン", "テンウーロン", "テンダーロン", "デンザーロン", "天竹ーロン", "テンウーロン、メッシュ", "天ウーロン、メッシュ", "テンダーロン、メッシュ", "デンザーロン・メッシュ", "天竹ーロン、メッシュ"]
         },
         {
           "value": "poly_smooth",
@@ -381,57 +382,68 @@
         {
           "value": "black",
           "label": "ブラック",
-          "en": "matte black colorway"
+          "en": "matte black colorway",
+          "aliases": ["黒", "BLACK", "Black", "ブラック"]
         },
         {
           "value": "white",
           "label": "ホワイト",
-          "en": "clean white colorway"
+          "en": "clean white colorway",
+          "aliases": ["白", "WHITE", "White", "ホワイト"]
         },
         {
           "value": "gray",
           "label": "グレー",
-          "en": "gray colorway"
+          "en": "gray colorway",
+          "aliases": ["灰", "グレー", "GRAY", "Gray", "GREY", "Grey", "ねず", "鼠"]
         },
         {
           "value": "light_gray",
           "label": "ライトグレー",
-          "en": "light gray colorway"
+          "en": "light gray colorway",
+          "aliases": ["ライトグレー", "L.GRAY", "L.Gray", "Light Gray", "LIGHT GRAY", "薄灰", "浅灰"]
         },
         {
           "value": "navy",
           "label": "ネイビー",
-          "en": "deep navy colorway"
+          "en": "deep navy colorway",
+          "aliases": ["紺", "ネイビー", "NAVY", "Navy", "NAVY(紺)", "デジカモ NAVY(紺) ナイロン"]
         },
         {
           "value": "black_navy",
           "label": "ブラックネイビー",
-          "en": "black navy colorway"
+          "en": "black navy colorway",
+          "aliases": ["黒紺", "ブラックネイビー", "BLACK NAVY"]
         },
         {
           "value": "sax_blue",
           "label": "サックスブルー",
-          "en": "sax blue colorway"
+          "en": "sax blue colorway",
+          "aliases": ["サックス", "サックスブルー", "Sax", "SAX", "Sax Blue", "水色", "ライトブルー", "浅青"]
         },
         {
           "value": "burgundy",
           "label": "エンジ（バーガンディ）",
-          "en": "burgundy colorway"
+          "en": "burgundy colorway",
+          "aliases": ["エンジ", "バーガンディ", "Burgundy", "BURGUNDY", "ワインレッド", "ワイン"]
         },
         {
           "value": "pink",
           "label": "ピンク",
-          "en": "soft pink colorway"
+          "en": "soft pink colorway",
+          "aliases": ["桃", "ピンク", "PINK", "Pink"]
         },
         {
           "value": "green",
           "label": "グリーン",
-          "en": "bright green colorway"
+          "en": "bright green colorway",
+          "aliases": ["緑", "グリーン", "GREEN", "Green", "PC.GREEN", "PC GREEN", "PC.Green", "GREEN（緑）"]
         },
         {
           "value": "red",
           "label": "レッド",
-          "en": "red colorway"
+          "en": "red colorway",
+          "aliases": ["赤", "レッド", "RED", "Red"]
         }
       ]
     }
