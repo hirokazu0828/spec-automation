@@ -66,7 +66,15 @@ function DetailRow({ label, value }: { label: string; value: string | null | und
   )
 }
 
-function SampleCard({ sample, onClick }: { sample: PutterSample; onClick: () => void }) {
+function SampleCard({
+  sample,
+  onClick,
+  onQuickPick,
+}: {
+  sample: PutterSample
+  onClick: () => void
+  onQuickPick?: (s: PutterSample) => void
+}) {
   const [imgError, setImgError] = useState(false)
   const shapeStyle = SHAPE_STYLES[sample.shape.head_type] ?? SHAPE_STYLES['ブレード']
   const icon = SHAPE_ICONS[sample.shape.head_type] ?? '◻'
@@ -133,6 +141,34 @@ function SampleCard({ sample, onClick }: { sample: PutterSample; onClick: () => 
           <SpecRow label="開閉方式" value={sample.closure.type} />
           <SpecRow label="装飾" value={sample.decoration.type} />
         </div>
+
+        {onQuickPick && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onQuickPick(sample)
+            }}
+            aria-label={`${sample.sample_number} を起点に新規作成`}
+            style={{
+              display: 'block',
+              width: '100%',
+              minHeight: 44,
+              marginTop: 12,
+              padding: '10px 12px',
+              borderRadius: 8,
+              border: 'none',
+              background: '#4f46e5',
+              color: '#ffffff',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              textAlign: 'center',
+            }}
+          >
+            [A] このサンプルを起点に作成 →
+          </button>
+        )}
       </div>
     </div>
   )
@@ -166,18 +202,22 @@ function Modal({
       aria-label={sample.item_name}
       style={{
         position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
-        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-        padding: '24px 16px', zIndex: 1000, overflowY: 'auto',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '16px', zIndex: 1000,
       }}
     >
       <div style={{
         background: 'var(--color-background-primary)',
         border: '0.5px solid var(--color-border-tertiary)',
-        borderRadius: 12, width: '100%', maxWidth: 540, overflow: 'hidden',
+        borderRadius: 12, width: '100%', maxWidth: 540,
+        maxHeight: 'calc(100vh - 32px)',
+        display: 'flex', flexDirection: 'column',
+        overflow: 'hidden',
       }}>
         <div style={{
           padding: '16px 20px', borderBottom: '0.5px solid var(--color-border-tertiary)',
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12,
+          flex: '0 0 auto',
         }}>
           <div>
             <div style={{ fontSize: 15, fontWeight: 500, lineHeight: 1.4 }}>{sample.item_name}</div>
@@ -194,7 +234,7 @@ function Modal({
           </button>
         </div>
 
-        <div style={{ padding: '16px 20px' }}>
+        <div style={{ padding: '16px 20px', overflowY: 'auto', flex: '1 1 auto', WebkitOverflowScrolling: 'touch' }}>
           <div style={{
             width: '100%', height: 220, background: 'var(--color-background-secondary)',
             borderRadius: 8, overflow: 'hidden', marginBottom: 16,
@@ -255,26 +295,33 @@ function Modal({
               要確認: {sample.meta.review_reason}
             </div>
           )}
-
-          {onPickSample && (
-            <div style={{ marginTop: 16, paddingTop: 16, borderTop: '0.5px solid var(--color-border-tertiary)' }}>
-              <button
-                type="button"
-                onClick={() => onPickSample(sample)}
-                style={{
-                  width: '100%', fontSize: 14, fontWeight: 600, padding: '10px 0',
-                  borderRadius: 8, border: 'none', cursor: 'pointer',
-                  background: '#4f46e5', color: '#ffffff',
-                }}
-              >
-                このサンプルを起点に新規作成 →
-              </button>
-              <p style={{ fontSize: 11, color: 'var(--color-text-tertiary)', marginTop: 8, textAlign: 'center' }}>
-                形状とブランド名を引き継いで Step1 を起動します
-              </p>
-            </div>
-          )}
         </div>
+
+        {onPickSample && (
+          <div
+            style={{
+              padding: '12px 20px',
+              borderTop: '0.5px solid var(--color-border-tertiary)',
+              background: 'var(--color-background-primary)',
+              flex: '0 0 auto',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => onPickSample(sample)}
+              style={{
+                width: '100%', minHeight: 44, fontSize: 14, fontWeight: 600,
+                padding: '10px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                background: '#4f46e5', color: '#ffffff',
+              }}
+            >
+              このサンプルを起点に新規作成 →
+            </button>
+            <p style={{ fontSize: 11, color: 'var(--color-text-tertiary)', marginTop: 6, textAlign: 'center' }}>
+              形状とブランド名を引き継いで Step1 を起動します
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -378,7 +425,12 @@ export default function SampleBook({ onPickSample, mode = 'browse' }: SampleBook
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
           {filtered.map((s, i) => (
-            <SampleCard key={`${s.sample_number}-${i}`} sample={s} onClick={() => setSelected(s)} />
+            <SampleCard
+              key={`${s.sample_number}-${i}`}
+              sample={s}
+              onClick={() => setSelected(s)}
+              onQuickPick={mode === 'pick' && onPickSample ? onPickSample : undefined}
+            />
           ))}
         </div>
       )}
