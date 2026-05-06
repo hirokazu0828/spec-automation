@@ -1,22 +1,25 @@
 import { useMemo, useState } from 'react';
 import { BookOpenIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import type { DraftEnvelope } from '../../hooks/useSpecDrafts';
+import type { DocumentType } from '../../types';
 import DraftList from './DraftList';
 import EmptyState from './EmptyState';
 import RouteSelector from './RouteSelector';
-import DraftPickerModal from './DraftPickerModal';
+import DraftPickerModal, { type DocTypeOverride } from './DraftPickerModal';
 
 interface Props {
   drafts: DraftEnvelope[];
-  /** Route C (white-paper). */
-  onCreateConcept: () => void;
+  /** Route C (white-paper). docType comes from the radio in the route card. */
+  onCreateConcept: (documentType: DocumentType) => void;
   /** Route A (SampleBook 起点) — Home からは samples view への遷移。 */
   onOpenSampleBookForRouteA: () => void;
-  /** Route B (Draft 起点) — modal で選んだ draft を起点にする。 */
-  onCreateFromDraft: (sourceDraft: DraftEnvelope) => void;
+  /** Route B (Draft 起点) — modal で選んだ draft + docType override を起点にする。 */
+  onCreateFromDraft: (sourceDraft: DraftEnvelope, override: DocTypeOverride) => void;
   onOpen: (id: string) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
+  onPromoteRevision: (id: string) => void;
+  onPromoteToFinal: (id: string) => void;
   onOpenSamples: () => void;
 }
 
@@ -28,6 +31,8 @@ export default function Home({
   onOpen,
   onDuplicate,
   onDelete,
+  onPromoteRevision,
+  onPromoteToFinal,
   onOpenSamples,
 }: Props) {
   const [query, setQuery] = useState('');
@@ -78,7 +83,7 @@ export default function Home({
       <section aria-label="既存ドラフト">
         <h2 className="text-sm font-bold text-gray-700 mb-2">既存ドラフト ({drafts.length})</h2>
         {drafts.length === 0 ? (
-          <EmptyState onCreate={onCreateConcept} />
+          <EmptyState onCreate={() => onCreateConcept('sample')} />
         ) : (
           <div className="space-y-3">
             <div className="relative">
@@ -100,6 +105,8 @@ export default function Home({
                 onOpen={onOpen}
                 onDuplicate={onDuplicate}
                 onDelete={onDelete}
+                onPromoteRevision={onPromoteRevision}
+                onPromoteToFinal={onPromoteToFinal}
               />
             )}
           </div>
@@ -110,9 +117,9 @@ export default function Home({
         <DraftPickerModal
           drafts={drafts}
           onClose={() => setShowDraftPicker(false)}
-          onPick={(d) => {
+          onPick={(d, override) => {
             setShowDraftPicker(false);
-            onCreateFromDraft(d);
+            onCreateFromDraft(d, override);
           }}
         />
       )}

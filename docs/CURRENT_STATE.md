@@ -94,10 +94,15 @@ SpecData
 │                          colorName, threadNumber, colorSwatch}>
 ├── productPhotos:  Array<{name, dataUrl}>      初期値: 正面/側面/背面 の 3 枠
 ├── embroideryDetails: Array<{id, technique, threadType, threadNumber, size, placement}>
-└── baseProposal?:  ProposalBase | null         (Step2 の「提案ベース」)
+├── baseProposal?:  ProposalBase | null         (Step2 の「提案ベース」)
+├── originRoute? / originSampleId? / originDraftId?  (Layer 6: 3 ルート起点)
+├── documentType:   'sample' | 'final'           (Layer 4: 既定 'sample')
+├── sampleRevision?: number                      (Layer 4: documentType==='sample' のみ)
+├── sampleArrangement?: { quantities, unit, ... } (Layer 4: 表紙 SAMPLE 手配欄)
+└── imageSource?:   'generated' | 'manual' | 'photo' (Layer 4: 画像出所)
 ```
 
-**※ colorA〜D は SpecData に存在するが、Step2 の「部位 A〜D」入力フィールドは `data.colorA` ではなく `data.fabricParts[A〜D].colorName` に書き込んでいる**(Step2/index.tsx:268-296)。`data.colorA` は初期化以降ほぼ書き換えられない**デッドフィールド**。これは旧実装の名残と推測される。
+**Layer 0 メモ**: 旧 `colorA〜D` は Layer 0 で削除済み。`useSpecDrafts.migrateSpecData` で旧ドラフトロード時に除去。
 
 ### ドラフト構造 (`src/hooks/useSpecDrafts.ts`)
 
@@ -110,15 +115,20 @@ type DraftEnvelope = {
   brandName: string;       // 一覧表示用
   savedAt: number;         // Date.now()
   lastStep: 1 | 2 | 3 | 4;
-  data: SpecData;          // baseProposal 含む全 SpecData
+  data: SpecData;          // baseProposal / originRoute / documentType 等を含む
+  documentType: 'sample' | 'final';  // Layer 4: data.documentType のミラー (一覧バッジ用)
+  sampleRevision?: number;            // Layer 4: data.sampleRevision のミラー
 }
 type DraftStore = { version: 1; drafts: DraftEnvelope[] }
 ```
 
-- `saveDraft(id, data, lastStep)` で保存。productCode/brandName は `data` から自動転記
-- `duplicateDraft(id)` は productCode に `-copy` サフィックス付与、画像も IndexedDB でコピー
+- `saveDraft(id, data, lastStep)` で保存。productCode/brandName/documentType/sampleRevision は `data` から自動転記
+- `duplicateDraft(id)` は productCode に `-copy` サフィックス付与、画像も IndexedDB でコピー (= リピート用)
+- **`promoteRevision(id)`** *(Layer 4)*: documentType==='sample' の draft を複製 → `sampleRevision +1`、productCode 末尾に `_2nd` 等のサフィックス、改訂履歴に派生元行を prepend、画像コピー
+- **`promoteToFinal(id)`** *(Layer 4)*: 既存 draft を変異させて documentType='final' に昇格、sampleRevision を undefined、imageSource は generated→manual に置換 (photo はそのまま温存)
 - `deleteDraft(id)` は localStorage からエンベロープ削除 + IndexedDB から画像削除
-- リビジョン履歴は `data.revisionHistory` (配列) として保存されるが、**仕様書スナップショットの差分管理ではない** (Step4 の編集可能テーブルとして表現される、自由入力)
+- 旧ドラフト (Layer 4 以前) は `migrateSpecData` で `documentType='final'` に補完
+- `data.revisionHistory` は仕様書スナップショットの差分管理ではない (Step4 の編集可能テーブルとして表現される、自由入力)
 
 ### 生成画像 (`src/lib/imageStore.ts`)
 
@@ -226,29 +236,35 @@ IndexedDB:
 
 Step3 マウント時に `loadImage(draftId)` で復元、生成成功時に `saveImage(draftId, dataUrl)`。「破棄」ボタンで `deleteImage(draftId)`。
 
-### Step4: 印刷用最終仕様書 (`src/components/Step4.tsx`)
+### Step4: 印刷用最終仕様書 / サンプル指示書 (`src/components/Step4.tsx`)
 
 **HTML プレビュー + ブラウザ印刷ダイアログ** (`window.print()`)。**PDF ライブラリは使用していない** (jsPDF / react-pdf 等の依存はゼロ)。
 
-**用紙設定** (Step4.tsx:592):
+**用紙設定**:
 ```css
 @media print {
   @page { size: A4; margin: 15mm; }
 }
 ```
-= **A4 縦** 固定。**横向き指定は無し**。
+= **A4 縦** 固定。**横向き指定は無し** (Layer 2-PDF 持ち越し)。
+
+**ヘッダー切替** *(Layer 4)*:
+- `documentType === 'final'` → 赤バナー「最終仕様書」
+- `documentType === 'sample'` → 橙バナー「SAMPLE指示書 {ordinal(sampleRevision)}」(例: `SAMPLE指示書 1st`)
 
 **ページ構成 (3 ページ)**:
-1. **PAGE 1: パラメーター一覧** — 形状/ポジション/コンセプト/本体生地/テクスチャー/裏地/パイピング/開閉方式/主刺繍技法/本体カラー/部位別/金具仕上げ
-2. **PAGE 2: 生地仕様 (布料)** — 改訂履歴 (編集可) / 縫製注意事項 (textarea) / 寸法 5 項目 (mm) / 製品写真 (最大 6 枚 / 初期 3 枠) / 部位別仕様表 (8 部位まで追加可、A-Z ラベル自動)
-3. **PAGE 3: 刺繍・プリント・高周波 (刺绣・印刷等)** — 刺繍テーブル (技法/糸種/糸番号・カラー名/サイズ mm/配置)、追加可、行頭は番号自動、縫製注意事項 (PAGE 2 と**同じ `data.sewingNotes` を共有**)
+1. **PAGE 1: パラメーター一覧** — (`documentType==='sample'` のときのみ先頭に **SAMPLE 手配欄** [出荷納期 / 客人用・東京用・工場用 数量 / 単位 / 備考 / 参考サンプル番号]) → 形状/ポジション/コンセプト/本体生地/テクスチャー/裏地/パイピング/開閉方式/主刺繍技法/本体カラー/部位別/金具仕上げ
+2. **PAGE 2: 生地仕様 (布料)** — 改訂履歴 (編集可) / 縫製注意事項 (textarea) / 寸法 5 項目 (mm、master 標準値プレースホルダー + 「標準値で埋める」ボタン + 範囲外バッジ) / 製品写真 (最大 6 枚 / 初期 3 枠) / 部位別仕様表 (8 部位まで追加可、A-Z ラベル自動)
+3. **PAGE 3: 刺繍・プリント・高周波 (刺绣・印刷等)** — 刺繍テーブル (技法/糸種/糸番号・カラー名/サイズ mm/配置)、技法と糸種は master `embroidery` / `thread_type` 駆動、追加可、行頭は番号自動、縫製注意事項 (PAGE 2 と**同じ `data.sewingNotes` を共有**)
+
+**並列出力モード** *(Layer 4 Task 8)*: ヘッダー直下のチェックボックス + ドラフトピッカー。ON にして 2 つ目のドラフトを選ぶと、印刷時にプライマリの 3 ページ後ろに secondary draft の概要 (read-only パラメーター抜粋) が page-break で連結される。詳細レイアウト最適化と横向き対応は Layer 2-PDF 持ち越し。
 
 **印刷用 CSS**: `print:` Tailwind プレフィックス + 末尾の `<style>{`@media print {...}`}</style>`。背景色保持 (`-webkit-print-color-adjust: exact`)、`page-break-before/after`、テーブル罫線維持。
 
 **注意点**:
 - ヘッダーは「客人名 / 品番・製品名 / 発行日 / 氏名」(ブランド名は「客人名」セルに入っている。クライアント名はどこにも出ない)
 - Step3 で生成した画像は `useEffect([draftId])` で「写真[0] が空のときのみ」p1 (productPhotos[0] = "正面") に自動セット
-- ヘッダーの「最終仕様書」ラベルは hardcoded — 別フォーマット (サンプル指示書 等) との切替機構は現状なし
+- ヘッダーラベル (`headerLabel(data)`) は documentType 駆動 (Layer 4 で対応済)。判断記録 `docs/document-type-decisions.md`
 
 ---
 
@@ -291,7 +307,7 @@ PutterSample
 
 ### ウィザードからの参照パス
 
-**サンプル帳 → ウィザード への遷移はない**。ホームと wizard ヘッダーから sample 画面へ行けるが、サンプル帳のカード/モーダルから「このサンプルを下敷きに新規仕様書を作る」ような操作は未実装。逆方向 (wizard → sample) の参照もない。
+**サンプル帳 → ウィザード遷移**: Layer 6 で実装済。サンプル詳細モーダルに「このサンプルを起点に新規作成」ボタン (Layer 4 で docType ラジオも追加)、`getShapeByAlias` で `headShape`、`sample.client` で `brandName` を seed して Route A の wizard を起動。逆方向 (wizard → sample) の参照は未実装。
 
 ---
 
@@ -399,13 +415,14 @@ PutterSample
 | `src/components/SampleBook/sampleHelpers.test.ts` *(Layer 2)* | 3 | `getSampleClosureTypes` / `getSampleDecorationTypes` の動的算出 + 重複除去 + 空入力 |
 | `src/components/Step2/applyProposal.test.ts` | 6 | piping=none で 5 件、piping あり で 6 件、baseProposal 保存、buildFabricParts、diffFromProposal |
 | `src/components/Step3/buildImagePrompt.test.ts` | 4 | shape 反映、bodyFabric 空時のスキップ、英語ラベル使用、unknown shape の fallback |
-| `src/hooks/useSpecDrafts.test.ts` | 11 | create / save / load / duplicate / delete / 不正 JSON / 旧 colorA-D マイグレーション + Route A/B/C の `createDraft(route, seed)` 4 ケース *(Layer 6)* |
+| `src/components/Step3/imageSource.test.ts` *(Layer 4)* | 6 | `deriveUploadSource` (sample→manual / final→photo) / `imageSourceLabel` / `readFileAsDataUrl` (上限拒否 + 小ファイル可) |
+| `src/hooks/useSpecDrafts.test.ts` | 19 | create / save / load / duplicate / delete / 不正 JSON / 旧 colorA-D マイグレーション + Route A/B/C `createDraft(route, seed)` *(Layer 6)* + Layer 4 documentType ミラー + 旧ドラフト→final マイグレーション + `promoteRevision` 3 ケース + `promoteToFinal` 4 ケース |
 | `src/hooks/useStep2Proposals.test.ts` *(Layer 0)* | 3 | p3/p4 が putter-cover.json に存在する value のみを参照することを保証 |
 | `src/utils/ngRules.test.ts` *(Layer 0)* | 8 | knit+pu_10/pu_15、PU+pu_10、white+gold、white+black_nickel、black+gold、match なしルールの skip、`hasViolation` |
-| `src/components/Home/RouteSelector.test.tsx` *(Layer 6)* | 3 | A/B/C 各カードのレンダリングとクリックハンドラ、Route B 無効化時の挙動 |
-| `src/components/Home/DraftPickerModal.test.tsx` *(Layer 6)* | 3 | 空状態 / 選択コールバック / 閉じるボタン |
+| `src/components/Home/RouteSelector.test.tsx` *(Layer 6 + 4)* | 5 | A/B/C 各カードのレンダリングとクリックハンドラ、Route B 無効化、Route C ラジオ既定値 + Route C ラジオ切替 *(Layer 4)* |
+| `src/components/Home/DraftPickerModal.test.tsx` *(Layer 6 + 4)* | 5 | 空状態 / 行選択+確認 (inherit) / 確認ボタン disabled / 「最終仕様書として作成」ラジオ (sample 起点限定) / 閉じるボタン |
 | `src/components/Step1.test.tsx` *(Layer 6)* | 5 | OriginBadge: 旧ドラフト (バッジなし) / Route A / Route B with lookup / Route B fallback / Route C |
-| 合計 | **71** | 全 pass |
+| 合計 | **90** | 全 pass |
 
 ### 手厚い箇所
 - 純関数 (`applyProposal`, `getLabel`, `buildImagePrompt`)
@@ -434,12 +451,12 @@ PutterSample
 | 議題 | 実装状況 | 場所 / 補足 |
 |---|---|---|
 | 横向き A4 PDF 出力 | ❌ 未実装 | `Step4.tsx:592` `@page { size: A4 }` で**縦向き固定**。`size: A4 landscape` 指定なし。PDF ライブラリも未導入 (`window.print()` のみ) |
-| サンプル指示書 vs 最終仕様書 (テンプレ切替) | ❌ 未実装 | `Step4.tsx:30` ヘッダー赤バナーは「最終仕様書」固定文字列。テンプレ種別を表す state も Spec フィールドもなし |
+| サンプル指示書 vs 最終仕様書 (テンプレ切替) | ✅ 実装済 *(Layer 4)* | `SpecData.documentType` ('sample'\|'final') + `sampleRevision` + `promoteRevision` / `promoteToFinal` + Step4 ヘッダー駆動 + SAMPLE 手配欄 + DraftList バッジ。詳細 `docs/document-type-decisions.md` |
 | 3 ルート起点判定 (A/B/C) | ✅ 実装済 *(Layer 6)* | `SpecData.originRoute` + `createDraft(route, seed)` + Home の `RouteSelector` + `DraftPickerModal` + Step1 の `OriginBadge`。詳細 `docs/route-design-decisions.md` |
 | マスタ DB 分離 | △ 部分的 | `src/data/spec/index.ts` で `domains` Record + `DomainKey = 'putter-cover'` の枠は用意済。実体は putter-cover.json 1 件のみ。コード側ではどこも `specJson` 直 import (= 単一ドメイン固定) で、ドメイン切替 UI / state 不在 |
 | 過去サンプル参照 (SampleBook → Wizard) | ❌ 未実装 | SampleBook のカード/モーダルから wizard を起動する経路なし。逆方向の参照もなし |
 | リビジョン管理 | △ 限定的 | `data.revisionHistory: Array<{date, content}>` は存在し、Step4 PAGE 2 で編集可能テーブルになっている。**ただし「過去仕様書スナップショットの差分」ではなく自由入力の改訂メモ**。version の自動採番なし、過去版へのロールバック / 比較機能なし |
-| A/B 案併記 | ❌ 未実装 | proposals は内部に最大 5 件持っているが、**1 ドラフト = 1 仕様** で、A 案/B 案として仕様書同士を比較する機構なし。両案を 1 枚の出力に並べる UI もなし |
+| A/B 案併記 | △ 最小実装 *(Layer 4 Task 8)* | Step4 ヘッダーに「並列出力モード」チェック + secondary draft picker。印刷時は primary 3 ページ + secondary の概要ページが page-break で連結される。3 件以上 / 横並びレイアウトは Layer 5 / Layer 2-PDF 持ち越し |
 | (補足) 自動保存 | ✓ 実装済 | App.tsx で 300ms debounce |
 | (補足) ドラフト一覧 | ✓ 実装済 | `Home/`, `useSpecDrafts` |
 | (補足) 画像生成 | ✓ 実装済 | Step3 + IndexedDB |

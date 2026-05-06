@@ -1,83 +1,75 @@
-# Layer 0 + Layer 2 + Layer 6 完了 → Layer 4 への申し送り
+# Layer 0 + Layer 2 + Layer 6 + Layer 4 完了 → Layer 2-PDF / Layer 3 / Layer A への申し送り
 
 > 直近完了レイヤ:
-> - Layer 0: `claude/layer0-tech-debt` (PR #1) → `claude/organize-system-architecture-KXG4i` にマージ済
-> - Layer 2 (B: コード参照の一元化): `claude/layer2-master-json-unified` (PR #2) → 同上にマージ済
-> - Layer 6 (3 ルート起点判定 A/B/C): `claude/layer6-three-routes` (本 PR)
+> - Layer 0: PR #1 → `claude/organize-system-architecture-KXG4i` にマージ済
+> - Layer 2 (B: コード参照の一元化): PR #2 → 同上にマージ済
+> - Layer 6 (3 ルート起点判定 A/B/C): PR #3 → 同上にマージ済
+> - Layer 4 (サンプル指示書テンプレート): `claude/layer4-document-type` (本 PR)
 
 ---
 
-## Layer 0 で解消したこと
+## Layer 0 → Layer 6 で解消したこと (要約)
 
-- ✅ `useStep2Proposals` の `pu_shibo` / `silver_matte` 値ずれ
-- ✅ `SpecJson` 型の拡張 (`dimensions`, `combinations_count`, `NgRule`, `DimensionSpec` 等)
-- ✅ `SpecData.colorA-D` デッドフィールド削除 + `migrateSpecData`
-- ✅ NG ルールを `src/utils/ngRules.ts` に一元化
+- ✅ 値ずれバグ修正 / `SpecJson` 型拡充 / `colorA-D` デッドフィールド除去 / NG ルール一元化 *(Layer 0)*
+- ✅ Step4 select / 寸法 / 形状語彙 / SampleBook フィルタが master 駆動 *(Layer 2)*
+- ✅ Home に 3 ルート起点 (A/B/C)、`originRoute` メタ情報、Step1 OriginBadge *(Layer 6)*
 
-## Layer 2 で解消したこと
+## Layer 4 で実装したこと
 
-- ✅ Step4 PAGE 3 の刺繍技法 / 糸種 `<select>` を master 駆動化 (master に `print` + 新規 `parameters.thread_type`)
-- ✅ 寸法フィールドの master デフォルト適用 (`getDimensionDefault` + 標準値で埋めるボタン + 範囲外 warning)
-- ✅ `head_shape.options[].aliases` + `getShapeByAlias` で外部語彙正規化
-- ✅ SampleBook の closure / decoration フィルタを samples.json から動的算出
-- ✅ master JSON が **Single Source of Truth** に到達
+### スキーマ追加
+- ✅ `SpecData.documentType: 'sample' | 'final'` (新規 default 'sample'、旧ドラフトは 'final' に migrate)
+- ✅ `SpecData.sampleRevision?: number` (sample 限定、`migrateSpecData` で `documentType !== 'sample'` のとき強制 undefined)
+- ✅ `SpecData.sampleArrangement?: { quantities, unit, shippingDate?, arrangementNotes?, referenceSampleId? }`
+- ✅ `SpecData.imageSource?: 'generated' | 'manual' | 'photo'`
+- ✅ `DraftEnvelope` に `documentType` / `sampleRevision` をミラー (一覧表示の高速化)
 
-## Layer 6 で実装したこと
+### UI / フロー
+- ✅ Home Route C カードに「サンプル指示書 / 最終仕様書」ラジオ + 「作成」ボタン
+- ✅ Route A: SampleBook 詳細モーダルに docType ラジオ追加
+- ✅ Route B: `DraftPickerModal` を行選択+確認方式に書き直し、「複製元と同じ」/「最終仕様書として作成」のラジオ (sample 起点限定)
+- ✅ Step4 ヘッダーが docType 駆動 (「最終仕様書」/「SAMPLE指示書 1st」)、`ordinal()` ヘルパー追加
+- ✅ Step4 PAGE 1 先頭に SAMPLE 手配欄 (sample のみ)
+- ✅ DraftList に docType バッジ + 「次の rev」「最終確定」ボタン (sample 行のみ)
+- ✅ `useSpecDrafts.promoteRevision(id)`: sample → 次 rev 複製、productCode サフィックス置換、改訂履歴に派生元行 prepend、画像コピー
+- ✅ `useSpecDrafts.promoteToFinal(id)`: in-place で sample → final、imageSource は generated→manual に置換 (photo は温存)
+- ✅ Step3 に「アップロード」ボタン + imageSource バッジ ('AI生成' / '手動アップロード' / '実物写真')、5MB 上限
+- ✅ Step4 「並列出力モード」(secondary draft 概要を印刷で連結、最小実装)
 
-- ✅ `SpecData.originRoute / originSampleId / originDraftId` を追加 (optional、旧ドラフトはマイグレーションで未定義のまま温存)
-- ✅ `useSpecDrafts.createDraft(route?, seedData?)` に拡張 (旧 `createDraft()` 呼び出しは引数なしで後方互換)
-- ✅ Home に 3 ルート選択 UI (`RouteSelector` + `DraftPickerModal`)
-- ✅ ルート A: SampleBook を `mode='pick'` で開く → 詳細モーダル「このサンプルを起点に新規作成」 → `getShapeByAlias` で `headShape`、`client` で `brandName` を seed
-- ✅ ルート B: 既存ドラフト一覧モーダルから選択 → 完全コピー + productCode/issueDate/revisionHistory リセット
-- ✅ ルート C: 白紙、`originRoute='C'` のみ記録
-- ✅ Step1 上部に起点バッジ表示 (A=サンプル番号 / B=複製元品番 (lookup) / C=新規作成)
-- ✅ `mode='browse'` (ホーム右上「サンプル帳を開く」) でも詳細モーダルから起点作成可能 (オーポチュニスティック起点)
-
-判断記録: `docs/route-design-decisions.md` (seed 範囲、後方互換、UI 分岐の根拠)
-
-これで「ホームから 3 種の入口で Wizard を起動できる」状態に到達。Step 構造は不変、初期値だけがルート別に変わる。
+判断記録: `docs/document-type-decisions.md` (docType 配置 / Route B 継承 / promoteToFinal の imageSource 規則 / 画像アップロード時の自動判定 等)
 
 ---
 
-## Layer 4 (サンプル指示書テンプレート) への申し送り
+## Layer 2-PDF (横向き A4 PDF 出力) への申し送り
 
-### 期待される実装範囲
+### 着手前に確定したいこと
 
-`docs/QUESTIONS.md §B` 参照。最低限以下を確定してから着手:
+1. PDF ライブラリの選定 (jsPDF / react-pdf / Puppeteer 経由 / `window.print()` 強化)
+2. 横向き A4 が必要なテンプレート (サンプル指示書 / 最終仕様書 / 並列出力時のみ?)
+3. ファイル命名規則 (`{productCode}_{documentType}_{ordinal?}_{date}.pdf` 等)
+4. 並列出力 (Layer 4 Task 8) の本格レイアウト最適化 (左右並列 / 1 ページにまとめる / 2 ページに分けて連結)
 
-1. 「サンプル指示書」と「最終仕様書」のページ構成・載せる情報の差分
-2. 共通 SpecData vs テンプレ固有フィールドの境界
-3. テンプレ切替の UI 場所 (ホーム新規作成時 / Step1 / Step4)
-4. 出力先 (PDF ダウンロード / ブラウザ印刷 / メール / Box アップロード)
-5. A4 横向きが必要なテンプレはどれか
+### Layer 2-PDF 着手時に活用できる Layer 4 の成果
 
-### Layer 4 着手時に活用できる Layer 6 の成果
+- `documentType` / `sampleRevision` で出力ファイル名・ヘッダーを分岐できる
+- `sampleArrangement` のフィールドが既に揃っているので PDF 用の専用テンプレを別途作る必要なし
+- 並列出力モードのトグル + secondary picker は既にあるので、PDF 側は「2 案を 1 ページにまとめるか 2 ページに分けるか」のレイアウト判断だけ
 
-- `SpecData.originRoute` で起点が分かるので、**ルート A (サンプル踏襲) のときだけサンプル指示書テンプレを既定にする**等の自動切替ロジックが組める
-- `originSampleId` で起点サンプル番号にトレースバック可能
-- 起点バッジを拡張すれば、テンプレ種別バッジも同じ場所に並べられる
+---
 
-### Layer 4 着手前の整理事項
+## Layer 3 (image-2 連携 / 画像複数アングル / プロンプト改善) への申し送り
 
-- master `closure.ng_rules` の `magnet_only` (Layer 0 で `match` 未設定で残置) は仕様変更があれば付与
-- 7 件の既存仕様書 PDF 実データ確認 — Desktop で過去 PDF を見ながら master の刺繍技法を再点検 (`docs/embroidery-options-decision.md §5` 参照)
-- 「振り刺繍 (= satin)」「`metal_plate`」が実務で使われているか検証
+### 残課題
+
+- imageSource の手動切替 UI (manual ↔ photo の override) — Layer 4 では documentType ベースの自動判定のみ
+- 画像複数アングル対応 (現状は 1 ドラフト = 1 画像)
+- image-2 のプロンプト改善 (Layer 4 では `buildImagePrompt` を変更せず触っていない)
+- 線図抽出スクリプト `scripts/extract-lineart.ts` の実用化 — 現状 `/public/images/` がサンプルシートのため出力が荒れる
 
 ---
 
 ## Layer A (ストレージ分離 + マスタ編集 UI) への申し送り
 
-### 着手前に必要な意思決定 (`docs/QUESTIONS.md §A`)
-
-1. マスタの最終保存先 (localStorage / Supabase / Vercel KV / GitHub PR / 管理画面付き)
-2. マスタ編集の権限境界 (誰が編集できるか)
-3. バージョニング / 過去ドラフトの追従ポリシー (スナップショット固定 vs. 追従)
-4. 複数ドメイン化のときに parameters の形が違うか (動的フォーム生成が必要か)
-
-### Layer 2 + 6 で整った前提
-
-- すべての master 参照点が `src/utils/specHelpers.ts` (`getLabel` / `getOptions` / `getDimensionDefault` / `getShapeByAlias` 等) と `src/utils/ngRules.ts` に集約済み
-- `useSpecDrafts.createDraft` がルート + seed を受け取る設計なので、将来「マスタ更新時に過去ドラフトをマイグレーション」する関数を `createDraft` 経由で挟むのも容易
+`docs/QUESTIONS.md §A` 4 つの意思決定が前提。Layer 0 〜 4 で master 参照点が `src/utils/specHelpers.ts` (`getLabel` / `getOptions` / `getDimensionDefault` / `getShapeByAlias` 等) と `src/utils/ngRules.ts` に集約済 → 関数の入口を JSON import から fetch / DB 経由に差し替える形での移行が容易な状態。
 
 ---
 
@@ -87,23 +79,32 @@
 - `src/components/Step3/generateImage.ts` の OpenAI 呼出周り
 - `src/lib/imageStore.ts` (IndexedDB 保存形式)
 - 既存 Step UI の根本的な書き換え
-- マスタ編集 UI / ストレージ分離
 
 ---
 
-## Layer 6 PR 時点の動作確認
+## Layer 4 PR 時点の動作確認
 
 - `npm run lint`: 0 エラー
-- `npm test`: **71 件全 pass** (Layer 0 + Layer 2 + Layer 6 で +45 件)
+- `npm test`: **90 件全 pass** (Layer 6 の 71 件 + Layer 4 で +19 件)
 - `npm run build`: 型エラー 0
 - `npm run dev`: HTTP 200 (smoke)
 
 ### Desktop 側で要再確認のポイント
 
-1. Home に 3 つの起点カード (A/B/C) が並ぶ。Route B はドラフト 0 件のとき disable
-2. **Route A**: ホーム「[A]」 → SampleBook が pick モードバナー付きで開く → サンプル詳細モーダルの「このサンプルを起点に新規作成」 → Step1 で headShape (master 値) と brandName (sample.client) が埋まり、上部に「🅰 起点: サンプル {sample_number}」バッジ
-3. **Route B**: ホーム「[B]」 → DraftPickerModal で既存ドラフトを選択 → Step1 で全項目 seed、品番/発行日/改訂履歴のみリセット、上部に「🅱 複製元: {productCode}」バッジ
-4. **Route C**: ホーム「[C]」 → 即 Step1、白紙、上部に「🆑 新規作成 (白紙)」バッジ
-5. ホーム右上「サンプル帳を開く」 → browse モード (バナーなし)、ただし詳細モーダルからの「このサンプルを起点に新規作成」は依然有効
-6. 既存の DraftList 上の「複製」(`duplicateDraft`) は従来通り「productCode に -copy 付与」で動作 (Route B とは別)
-7. 旧ドラフト (originRoute なし) を開いても Step1 のバッジ表示はなし
+1. **Route C で「サンプル指示書」を選んで作成** → Step4 ヘッダーが「SAMPLE指示書 1st」(橙バナー) で表示
+2. **Route C で「最終仕様書」を選んで作成** → Step4 ヘッダーが「最終仕様書」(赤バナー) で表示
+3. サンプル指示書の Step4 PAGE 1 先頭に **SAMPLE 手配欄** が表示される (出荷納期 / 客人用・東京用・工場用 数量 / 単位 / 備考 / 参考サンプル)
+4. 最終仕様書の Step4 PAGE 1 先頭に SAMPLE 手配欄が**表示されない**
+5. ドラフト一覧で documentType バッジ ("最終仕様書" / "SAMPLE 1st" 等) が正しく表示
+6. sample 行で「次の rev」ボタン → sampleRevision +1、productCode が `_2nd` 付きで複製、改訂履歴の先頭に派生元行が入る
+7. sample 行で「最終確定」ボタン → 確認ダイアログ後、その行が緑「最終仕様書」バッジに変わる
+8. Step3 で「アップロード」ボタン → ファイル選択 → imageSource バッジが「手動アップロード」(sample 時) または「実物写真」(final 時) に
+9. Step4 ヘッダーの「並列出力モード」チェック → 別ドラフトを選ぶと、画面下部 + 印刷出力に secondary draft の概要 (read-only) が現れる
+10. 旧ドラフト (Layer 4 以前に作成) を開いてもバッジが「最終仕様書」表示で開けて、SAMPLE 手配欄は出ない
+
+### 既知の制約 / Layer 4 スコープ外 (持ち越し)
+
+- 画像アップロード時の imageSource 切替 UI (manual ↔ photo) は documentType 自動判定のみ → Layer 3
+- 並列出力は概要連結のみ (フル 3 ページ並列 / 横向きレイアウト最適化なし) → Layer 2-PDF / Layer 5
+- 状態管理 (draft / issued / approved) は未実装 (Q1-B 未決)
+- 7 件の既存仕様書 PDF 実データ確認 — Web sandbox からアクセス不可、Desktop 側で実施
