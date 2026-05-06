@@ -16,24 +16,37 @@ function normalizeAlias(s: string): string {
 }
 
 /**
- * Resolves an arbitrary input (label / external vocabulary / value itself)
- * to the master `head_shape` option's `value`, using the `aliases` field on
- * each option. Returns null when no option matches.
+ * Resolves an arbitrary input string (label / alias / external vocabulary /
+ * the value itself) to a master `parameterKey.options[].value`. Matching is
+ * case-insensitive after trim, and falls back through `value → label → aliases`.
+ * Returns null when nothing matches.
  *
- * Used for bridging samples.json's `shape.head_type` (Japanese label vocabulary
- * like "ブレード" / "セミマレット" / "フルマレット") to the master IDs
- * (`pin` / `mallet` / `neo_mallet`).
+ * Used to bridge external sample-book vocabularies (e.g. samples.json's
+ * "BLACK" / "黒" / "L.GRAY") to the master IDs (`black` / `light_gray`).
  */
-export function getShapeByAlias(input: string | null | undefined): string | null {
+export function getOptionValueByAlias(
+  parameterKey: string,
+  input: string | null | undefined,
+): string | null {
   if (!input) return null;
   const needle = normalizeAlias(input);
   if (!needle) return null;
-  for (const opt of getOptions('head_shape')) {
+  for (const opt of getOptions(parameterKey)) {
     if (normalizeAlias(opt.value) === needle) return opt.value;
     if (normalizeAlias(opt.label) === needle) return opt.value;
     if (opt.aliases?.some((a) => normalizeAlias(a) === needle)) return opt.value;
   }
   return null;
+}
+
+/**
+ * Resolves an arbitrary input (label / external vocabulary / value itself)
+ * to the master `head_shape` option's `value`. Thin wrapper around
+ * `getOptionValueByAlias('head_shape', input)`, kept for backward compatibility
+ * with Layer 2's call sites.
+ */
+export function getShapeByAlias(input: string | null | undefined): string | null {
+  return getOptionValueByAlias('head_shape', input);
 }
 
 /**

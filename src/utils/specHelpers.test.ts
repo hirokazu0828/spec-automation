@@ -7,6 +7,7 @@ import {
   getDimensionRange,
   isDimensionOutOfRange,
   getShapeByAlias,
+  getOptionValueByAlias,
   COLOR_HEX_MAP,
 } from './specHelpers';
 import { specJson } from '../data/spec';
@@ -129,5 +130,49 @@ describe('getShapeByAlias', () => {
     expect(getShapeByAlias(null)).toBeNull();
     expect(getShapeByAlias(undefined)).toBeNull();
     expect(getShapeByAlias('スクエアマレット')).toBeNull();
+  });
+});
+
+describe('getOptionValueByAlias', () => {
+  it('resolves common samples.json color names to master body_color values', () => {
+    // Mappings exercised by the SampleBook → Wizard seed path.
+    expect(getOptionValueByAlias('body_color', 'BLACK')).toBe('black');
+    expect(getOptionValueByAlias('body_color', '黒')).toBe('black');
+    expect(getOptionValueByAlias('body_color', 'NAVY')).toBe('navy');
+    expect(getOptionValueByAlias('body_color', '紺')).toBe('navy');
+    expect(getOptionValueByAlias('body_color', '赤')).toBe('red');
+    expect(getOptionValueByAlias('body_color', '緑')).toBe('green');
+    expect(getOptionValueByAlias('body_color', 'PC.GREEN')).toBe('green');
+    expect(getOptionValueByAlias('body_color', 'L.GRAY')).toBe('light_gray');
+    expect(getOptionValueByAlias('body_color', '浅青')).toBe('sax_blue');
+    expect(getOptionValueByAlias('body_color', 'エンジ')).toBe('burgundy');
+  });
+
+  it('returns null for sample colors that have no master equivalent', () => {
+    // 橙 / オレンジ are absent from master — must return null so the seed
+    // falls back to "leave blank" instead of guessing.
+    expect(getOptionValueByAlias('body_color', '橙')).toBeNull();
+    expect(getOptionValueByAlias('body_color', 'オレンジ')).toBeNull();
+    expect(getOptionValueByAlias('body_color', 'GREEN CAMO')).toBeNull();
+  });
+
+  it('resolves the spelling variants of 天ウーロン to ten_uron', () => {
+    expect(getOptionValueByAlias('lining', '天ウーロン')).toBe('ten_uron');
+    expect(getOptionValueByAlias('lining', 'テンウーロン')).toBe('ten_uron');
+    expect(getOptionValueByAlias('lining', 'テンダーロン')).toBe('ten_uron');
+    expect(getOptionValueByAlias('lining', 'デンザーロン・メッシュ')).toBe('ten_uron');
+    expect(getOptionValueByAlias('lining', '天竹ーロン、メッシュ')).toBe('ten_uron');
+  });
+
+  it('returns null for lining vocab that does not map (ボア / メッシュ alone)', () => {
+    expect(getOptionValueByAlias('lining', 'ボア')).toBeNull();
+    expect(getOptionValueByAlias('lining', 'メッシュ')).toBeNull();
+    expect(getOptionValueByAlias('lining', '羊毛絨')).toBeNull();
+  });
+
+  it('returns null for unknown parameter keys / empty inputs', () => {
+    expect(getOptionValueByAlias('nonexistent', 'anything')).toBeNull();
+    expect(getOptionValueByAlias('body_color', '')).toBeNull();
+    expect(getOptionValueByAlias('body_color', null)).toBeNull();
   });
 });
