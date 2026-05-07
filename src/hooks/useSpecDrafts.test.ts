@@ -159,6 +159,155 @@ describe('useSpecDrafts', () => {
     });
   });
 
+  describe('Layer 4 documentType (mirroring + migration)', () => {
+    it('new drafts mirror documentType="sample" + sampleRevision=1 onto the envelope', () => {
+      const { result } = renderHook(() => useSpecDrafts());
+      let id = '';
+      act(() => {
+        id = result.current.createDraft('C');
+      });
+      const draft = result.current.loadDraft(id);
+      expect(draft?.documentType).toBe('sample');
+      expect(draft?.sampleRevision).toBe(1);
+      expect(draft?.data.documentType).toBe('sample');
+    });
+
+    it('legacy drafts (no documentType in data) get migrated to "final"', () => {
+      const legacyEnvelope = {
+        id: 'legacy-pre-layer4',
+        productCode: 'OLD-001',
+        brandName: 'Acme',
+        savedAt: 1700000000000,
+        lastStep: 1,
+        data: { productCode: 'OLD-001', brandName: 'Acme', headShape: 'pin' },
+      };
+      localStorage.setItem(
+        __testing.STORAGE_KEY,
+        JSON.stringify({ version: 1, drafts: [legacyEnvelope] }),
+      );
+      const { result } = renderHook(() => useSpecDrafts());
+      const loaded = result.current.loadDraft('legacy-pre-layer4');
+      expect(loaded?.documentType).toBe('final');
+      expect(loaded?.sampleRevision).toBeUndefined();
+      expect(loaded?.data.documentType).toBe('final');
+      expect(loaded?.data.sampleRevision).toBeUndefined();
+    });
+  });
+
+  describe('promoteRevision (Layer 4 Task 6)', () => {
+    it('bumps sampleRevision and prepends a revision history row', () => {
+      const { result } = renderHook(() => useSpecDrafts());
+      let srcId = '';
+      act(() => {
+        srcId = result.current.createDraft('C');
+      });
+      const original = result.current.loadDraft(srcId);
+      if (!original) throw new Error('source missing');
+      act(() => {
+        result.current.saveDraft(srcId, { ...original.data, productCode: 'PRD-001' }, 1);
+      });
+      let nextId = '';
+      act(() => {
+        nextId = result.current.promoteRevision(srcId);
+      });
+      expect(nextId).not.toBe(srcId);
+      const next = result.current.loadDraft(nextId);
+      expect(next?.documentType).toBe('sample');
+      expect(next?.sampleRevision).toBe(2);
+      expect(next?.productCode).toBe('PRD-001_2nd');
+      expect(next?.data.revisionHistory[0].content).toContain('PRD-001');
+      expect(next?.data.revisionHistory[0].content).toContain('1st');
+    });
+
+    it('replaces an existing _<ord> suffix instead of appending a new one', () => {
+      const { result } = renderHook(() => useSpecDrafts());
+      let srcId = '';
+      act(() => {
+        srcId = result.current.createDraft('C');
+      });
+      const o = result.current.loadDraft(srcId);
+      if (!o) throw new Error('missing');
+      act(() => {
+        result.current.saveDraft(srcId, { ...o.data, productCode: 'PRD-001_2nd', sampleRevision: 2 }, 1);
+      });
+      let nextId = '';
+      act(() => {
+        nextId = result.current.promoteRevision(srcId);
+      });
+      const next = result.current.loadDraft(nextId);
+      expect(next?.productCode).toBe('PRD-001_3rd');
+      expect(next?.sampleRevision).toBe(3);
+    });
+
+    it('refuses to promote a final draft', () => {
+      const { result } = renderHook(() => useSpecDrafts());
+      let srcId = '';
+      act(() => {
+        srcId = result.current.createDraft('C', { documentType: 'final', sampleRevision: undefined });
+      });
+      let attempted = '';
+      act(() => {
+        attempted = result.current.promoteRevision(srcId);
+      });
+      expect(attempted).toBe(srcId); // returns input id when refused
+    });
+  });
+
+  describe('promoteToFinal (Layer 4 Task 6)', () => {
+    it('flips a sample draft to final and clears sampleRevision', () => {
+      const { result } = renderHook(() => useSpecDrafts());
+      let id = '';
+      act(() => {
+        id = result.current.createDraft('C');
+      });
+      let ok = false;
+      act(() => {
+        ok = result.current.promoteToFinal(id);
+      });
+      expect(ok).toBe(true);
+      const updated = result.current.loadDraft(id);
+      expect(updated?.documentType).toBe('final');
+      expect(updated?.sampleRevision).toBeUndefined();
+    });
+
+    it('preserves "photo" imageSource when promoting (does not stomp on existing photo)', () => {
+      const { result } = renderHook(() => useSpecDrafts());
+      let id = '';
+      act(() => {
+        id = result.current.createDraft('C', { imageSource: 'photo' });
+      });
+      act(() => {
+        result.current.promoteToFinal(id);
+      });
+      expect(result.current.loadDraft(id)?.data.imageSource).toBe('photo');
+    });
+
+    it('moves a "generated" image to "manual" when promoting', () => {
+      const { result } = renderHook(() => useSpecDrafts());
+      let id = '';
+      act(() => {
+        id = result.current.createDraft('C', { imageSource: 'generated' });
+      });
+      act(() => {
+        result.current.promoteToFinal(id);
+      });
+      expect(result.current.loadDraft(id)?.data.imageSource).toBe('manual');
+    });
+
+    it('refuses to promote a final draft (returns false)', () => {
+      const { result } = renderHook(() => useSpecDrafts());
+      let id = '';
+      act(() => {
+        id = result.current.createDraft('C', { documentType: 'final', sampleRevision: undefined });
+      });
+      let ok = false;
+      act(() => {
+        ok = result.current.promoteToFinal(id);
+      });
+      expect(ok).toBe(false);
+    });
+  });
+
   it('strips removed legacy fields (colorA-D) when loading older drafts', () => {
     const legacyEnvelope = {
       id: 'legacy-1',

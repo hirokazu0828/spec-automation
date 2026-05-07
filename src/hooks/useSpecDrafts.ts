@@ -1,7 +1,8 @@
 import { useCallback, useSyncExternalStore } from 'react';
-import type { SpecData } from '../types';
+import type { SpecData, DocumentType } from '../types';
 import { initialSpecData } from '../types';
 import { copyImage, deleteImage } from '../lib/imageStore';
+import { ordinal } from '../utils/specHelpers';
 
 export type WizardStep = 1 | 2 | 3 | 4;
 
@@ -12,6 +13,10 @@ export type DraftEnvelope = {
   savedAt: number;
   lastStep: WizardStep;
   data: SpecData;
+  /** Mirrored from data.documentType for cheap list rendering. */
+  documentType: DocumentType;
+  /** Mirrored from data.sampleRevision for cheap list rendering. */
+  sampleRevision?: number;
 };
 
 type DraftStore = { version: 1; drafts: DraftEnvelope[] };
@@ -29,13 +34,28 @@ export function migrateSpecData(raw: unknown): SpecData {
   for (const key of REMOVED_FIELDS) {
     delete cleaned[key];
   }
-  return { ...initialSpecData, ...(cleaned as Partial<SpecData>) } as SpecData;
+  const merged = { ...initialSpecData, ...(cleaned as Partial<SpecData>) } as SpecData;
+  // Drafts persisted before Layer 4 have no documentType. Treat them as final
+  // (= the only sheet kind that existed back then) to preserve their current
+  // appearance.
+  if (!('documentType' in cleaned)) {
+    merged.documentType = 'final';
+    merged.sampleRevision = undefined;
+  }
+  // sampleRevision only makes sense when documentType==='sample'. JSON.stringify
+  // drops `undefined` so a sample-→-final promotion would re-inflate the
+  // initialSpecData default of 1; enforce the invariant on every load.
+  if (merged.documentType !== 'sample') {
+    merged.sampleRevision = undefined;
+  }
+  return merged;
 }
 
 function migrateEnvelope(raw: unknown): DraftEnvelope | null {
   if (raw == null || typeof raw !== 'object') return null;
   const env = raw as Partial<DraftEnvelope> & { data?: unknown };
   if (typeof env.id !== 'string') return null;
+  const data = migrateSpecData(env.data);
   return {
     id: env.id,
     productCode: typeof env.productCode === 'string' ? env.productCode : '',
@@ -45,7 +65,9 @@ function migrateEnvelope(raw: unknown): DraftEnvelope | null {
       const s = env.lastStep;
       return s === 1 || s === 2 || s === 3 || s === 4 ? s : 1;
     })(),
-    data: migrateSpecData(env.data),
+    data,
+    documentType: data.documentType,
+    sampleRevision: data.sampleRevision,
   };
 }
 
@@ -125,6 +147,8 @@ export function useSpecDrafts() {
         savedAt: Date.now(),
         lastStep: 1,
         data,
+        documentType: data.documentType,
+        sampleRevision: data.sampleRevision,
       };
       const current = readStore();
       writeStore({ version: 1, drafts: [next, ...current.drafts] });
@@ -148,6 +172,8 @@ export function useSpecDrafts() {
       savedAt: Date.now(),
       lastStep,
       data,
+      documentType: data.documentType,
+      sampleRevision: data.sampleRevision,
     };
     const drafts = idx >= 0
       ? current.drafts.map((d, i) => (i === idx ? updated : d))
@@ -171,6 +197,92 @@ export function useSpecDrafts() {
     return newDraftId;
   }, []);
 
+  /**
+   * Layer 4: spawn the next sample revision from an existing sample draft.
+   * Copies all data, bumps sampleRevision, rewrites the productCode suffix,
+   * resets the issueDate to today, and prepends a revisionHistory row that
+   * references the source draft.
+   * Returns the new draft id (or the original id if the source isn't a sample).
+   */
+  const promoteRevision = useCallback((id: string): string => {
+    const current = readStore();
+    const source = current.drafts.find((d) => d.id === id);
+    if (!source) return id;
+    if (source.data.documentType !== 'sample') return id;
+    const newDraftId = newId();
+    const today = new Date().toISOString().slice(0, 10);
+    const fromRev = source.data.sampleRevision ?? 1;
+    const toRev = fromRev + 1;
+    const fromOrd = ordinal(fromRev);
+    const toOrd = ordinal(toRev);
+    // Replace any existing _<ord> suffix; otherwise append.
+    const SUFFIX_RE = /_(\d+(?:st|nd|rd|th))$/;
+    const newProductCode = source.productCode
+      ? source.productCode.replace(SUFFIX_RE, '') + `_${toOrd}`
+      : '';
+    const sourceLabel = source.productCode || `(品番未入力)`;
+    const newData: SpecData = {
+      ...source.data,
+      productCode: newProductCode,
+      sampleRevision: toRev,
+      issueDate: today,
+      revisionHistory: [
+        { date: today, content: `${sourceLabel} (${fromOrd}) から派生` },
+        ...source.data.revisionHistory,
+      ],
+    };
+    const copy: DraftEnvelope = {
+      id: newDraftId,
+      productCode: newProductCode,
+      brandName: source.brandName,
+      savedAt: Date.now(),
+      lastStep: source.lastStep,
+      data: newData,
+      documentType: 'sample',
+      sampleRevision: toRev,
+    };
+    writeStore({ version: 1, drafts: [copy, ...current.drafts] });
+    void copyImage(id, newDraftId);
+    return newDraftId;
+  }, []);
+
+  /**
+   * Layer 4: flip an existing sample draft into the final spec sheet.
+   * Mutates the existing draft (no new id) so revision history is preserved.
+   * Returns true on success, false if the draft was missing or already final.
+   */
+  const promoteToFinal = useCallback((id: string): boolean => {
+    const current = readStore();
+    const idx = current.drafts.findIndex((d) => d.id === id);
+    if (idx < 0) return false;
+    const target = current.drafts[idx];
+    if (target.data.documentType === 'final') return false;
+    // Per docs/document-type-decisions.md §7: only nudge 'generated' images
+    // toward 'manual'; preserve 'photo' / 'manual' / undefined → manual default.
+    const nextImageSource: SpecData['imageSource'] =
+      target.data.imageSource === 'photo'
+        ? 'photo'
+        : target.data.imageSource === 'manual'
+          ? 'manual'
+          : 'manual';
+    const newData: SpecData = {
+      ...target.data,
+      documentType: 'final',
+      sampleRevision: undefined,
+      imageSource: nextImageSource,
+    };
+    const updated: DraftEnvelope = {
+      ...target,
+      savedAt: Date.now(),
+      data: newData,
+      documentType: 'final',
+      sampleRevision: undefined,
+    };
+    const drafts = current.drafts.map((d, i) => (i === idx ? updated : d));
+    writeStore({ version: 1, drafts });
+    return true;
+  }, []);
+
   const removeDraft = useCallback((id: string): void => {
     const current = readStore();
     writeStore({ version: 1, drafts: current.drafts.filter((d) => d.id !== id) });
@@ -183,6 +295,8 @@ export function useSpecDrafts() {
     loadDraft,
     saveDraft,
     duplicateDraft,
+    promoteRevision,
+    promoteToFinal,
     deleteDraft: removeDraft,
   };
 }

@@ -11,6 +11,18 @@ export function getOptions(parameterKey: string): SpecOption[] {
   return specJson.parameters[parameterKey]?.options ?? [];
 }
 
+/**
+ * English-style ordinal suffix as specified by Layer 4: 1→1st, 2→2nd, 3→3rd,
+ * everything else uses "th" (so 21→21th, not 21st). Day-to-day English would
+ * say 21st/22nd/23rd, but the spec deliberately keeps it simple.
+ */
+export function ordinal(n: number): string {
+  if (n === 1) return '1st';
+  if (n === 2) return '2nd';
+  if (n === 3) return '3rd';
+  return `${n}th`;
+}
+
 function normalizeAlias(s: string): string {
   return s.trim().toLowerCase();
 }

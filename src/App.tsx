@@ -8,8 +8,9 @@ import type { PutterSample } from './components/SampleBook/types';
 import AuthGate from './components/SampleBook/AuthGate';
 import Home from './components/Home/Home';
 import { initialSpecData } from './types';
-import type { SpecData } from './types';
+import type { SpecData, DocumentType } from './types';
 import { useSpecDrafts, type WizardStep, type DraftEnvelope } from './hooks/useSpecDrafts';
+import type { DocTypeOverride } from './components/Home/DraftPickerModal';
 import { getShapeByAlias, getOptionValueByAlias } from './utils/specHelpers';
 import { ArrowLeftIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import './index.css';
@@ -19,8 +20,23 @@ type View =
   | { kind: 'wizard'; draftId: string; step: WizardStep }
   | { kind: 'samples'; mode?: 'browse' | 'pick' };
 
+function applyDocType(documentType: DocumentType): Partial<SpecData> {
+  return documentType === 'sample'
+    ? { documentType, sampleRevision: 1 }
+    : { documentType, sampleRevision: undefined };
+}
+
 function App() {
-  const { drafts, createDraft, loadDraft, saveDraft, duplicateDraft, deleteDraft } = useSpecDrafts();
+  const {
+    drafts,
+    createDraft,
+    loadDraft,
+    saveDraft,
+    duplicateDraft,
+    promoteRevision,
+    promoteToFinal,
+    deleteDraft,
+  } = useSpecDrafts();
   const [view, setView] = useState<View>({ kind: 'home' });
   const [specData, setSpecData] = useState<SpecData>(initialSpecData);
   const saveTimer = useRef<number | null>(null);
@@ -52,17 +68,21 @@ function App() {
     [createDraft],
   );
 
-  // Route C: blank
-  const handleCreateConcept = useCallback(() => {
-    startWizardFromSeed('C');
-  }, [startWizardFromSeed]);
+  // Route C: blank, docType chosen on the home card
+  const handleCreateConcept = useCallback(
+    (documentType: DocumentType) => {
+      startWizardFromSeed('C', applyDocType(documentType));
+    },
+    [startWizardFromSeed],
+  );
 
-  // Route A: came from SampleBook → seed master-mappable fields via aliases.
-  // bodyFabric / closure / embroidery / hardware_finish stay empty because the
-  // sample vocabulary (CORDURA / マグネット / 刺繍) doesn't 1:1-map to master
-  // categories — those get filled via Step2's AI proposal flow.
+  // Route A: came from SampleBook → seed master-mappable fields via aliases +
+  // docType from the sample detail modal radio. bodyFabric / closure /
+  // embroidery / hardware_finish stay empty because the sample vocabulary
+  // (CORDURA / マグネット / 刺繍) doesn't 1:1-map to master categories — those
+  // get filled via Step2's AI proposal flow.
   const handleCreateFromSample = useCallback(
-    (sample: PutterSample) => {
+    (sample: PutterSample, documentType: DocumentType) => {
       const headShape = getShapeByAlias(sample.shape.head_type) ?? '';
       const colorSource = sample.outer_material?.color || sample.color_scheme?.main_color || '';
       const bodyColor = getOptionValueByAlias('body_color', colorSource) ?? '';
@@ -73,16 +93,33 @@ function App() {
         brandName: sample.client ?? '',
         ...(bodyColor ? { bodyColor } : {}),
         ...(lining ? { lining } : {}),
+        ...applyDocType(documentType),
       };
       startWizardFromSeed('A', seed);
     },
     [startWizardFromSeed],
   );
 
-  // Route B: copy an existing draft, but reset productCode / issueDate / revisionHistory
+  // Route B: copy an existing draft, but reset productCode / issueDate / revisionHistory.
+  // documentType per `override` (inherit auto-bumps sampleRevision; final clears it).
   const handleCreateFromDraft = useCallback(
-    (sourceDraft: DraftEnvelope) => {
+    (sourceDraft: DraftEnvelope, override: DocTypeOverride) => {
       const today = new Date().toISOString().slice(0, 10);
+      const sourceIsSample = sourceDraft.data.documentType === 'sample';
+
+      let documentType: DocumentType;
+      let sampleRevision: number | undefined;
+      if (override === 'final') {
+        documentType = 'final';
+        sampleRevision = undefined;
+      } else if (sourceIsSample) {
+        documentType = 'sample';
+        sampleRevision = (sourceDraft.data.sampleRevision ?? 1) + 1;
+      } else {
+        documentType = 'final';
+        sampleRevision = undefined;
+      }
+
       const seed: Partial<SpecData> = {
         ...sourceDraft.data,
         productCode: '',
@@ -90,6 +127,8 @@ function App() {
         revisionHistory: [{ date: today, content: '' }],
         originSampleId: undefined,
         originDraftId: sourceDraft.id,
+        documentType,
+        sampleRevision,
       };
       startWizardFromSeed('B', seed);
     },
@@ -110,6 +149,22 @@ function App() {
       duplicateDraft(id);
     },
     [duplicateDraft],
+  );
+
+  const handlePromoteRevision = useCallback(
+    (id: string) => {
+      promoteRevision(id);
+    },
+    [promoteRevision],
+  );
+
+  const handlePromoteToFinal = useCallback(
+    (id: string) => {
+      const ok = window.confirm('このサンプル指示書を最終仕様書として確定します。よろしいですか？');
+      if (!ok) return;
+      promoteToFinal(id);
+    },
+    [promoteToFinal],
   );
 
   const goStep = useCallback((step: WizardStep) => {
@@ -192,6 +247,8 @@ function App() {
               onOpen={openDraft}
               onDuplicate={handleDuplicate}
               onDelete={handleDelete}
+              onPromoteRevision={handlePromoteRevision}
+              onPromoteToFinal={handlePromoteToFinal}
               onOpenSamples={() => setView({ kind: 'samples', mode: 'browse' })}
             />
           </main>
@@ -282,6 +339,8 @@ function App() {
                 data={specData}
                 updateData={updateData}
                 draftId={view.draftId}
+                drafts={drafts}
+                loadDraft={loadDraft}
                 onReset={goHome}
                 onBack={handleBack}
               />

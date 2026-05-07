@@ -1,10 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import type { DraftEnvelope } from '../../hooks/useSpecDrafts';
+import { ordinal } from '../../utils/specHelpers';
+
+export type DocTypeOverride = 'inherit' | 'final';
 
 interface Props {
   drafts: DraftEnvelope[];
-  onPick: (draft: DraftEnvelope) => void;
+  /**
+   * `override` lets the caller skip inheritance and force `documentType: 'final'`.
+   * The actual inheritance + sampleRevision +1 logic is App-side.
+   */
+  onPick: (draft: DraftEnvelope, override: DocTypeOverride) => void;
   onClose: () => void;
 }
 
@@ -16,7 +23,21 @@ function formatTimestamp(ms: number): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+function describeDocType(d: DraftEnvelope): string {
+  if (d.documentType === 'final') return '最終仕様書';
+  const rev = d.sampleRevision ?? 1;
+  return `SAMPLE指示書 ${ordinal(rev)}`;
+}
+
 export default function DraftPickerModal({ drafts, onPick, onClose }: Props) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [override, setOverride] = useState<DocTypeOverride>('inherit');
+
+  const selected = useMemo(
+    () => drafts.find((d) => d.id === selectedId) ?? null,
+    [drafts, selectedId],
+  );
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -24,6 +45,9 @@ export default function DraftPickerModal({ drafts, onPick, onClose }: Props) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
+
+  const showFinalOption = selected?.documentType === 'sample';
+  const effectiveOverride: DocTypeOverride = showFinalOption ? override : 'inherit';
 
   return (
     <div
@@ -51,33 +75,97 @@ export default function DraftPickerModal({ drafts, onPick, onClose }: Props) {
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
-        <div className="max-h-[60vh] overflow-y-auto">
+        <div className="max-h-[50vh] overflow-y-auto">
           {drafts.length === 0 ? (
             <div className="p-8 text-center text-sm text-gray-500">複製元になるドラフトがありません</div>
           ) : (
             <ul className="divide-y divide-gray-100">
-              {drafts.map((d) => (
-                <li key={d.id}>
-                  <button
-                    type="button"
-                    onClick={() => onPick(d)}
-                    className="w-full text-left px-5 py-3 hover:bg-indigo-50 flex items-center justify-between gap-3"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="font-mono text-sm text-gray-900 truncate">
-                        {d.productCode || <span className="text-gray-400">(品番未入力)</span>}
+              {drafts.map((d) => {
+                const isSelected = d.id === selectedId;
+                return (
+                  <li key={d.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedId(d.id)}
+                      aria-pressed={isSelected}
+                      className={`w-full text-left px-5 py-3 flex items-center justify-between gap-3 ${
+                        isSelected ? 'bg-indigo-50' : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="font-mono text-sm text-gray-900 truncate">
+                          {d.productCode || <span className="text-gray-400">(品番未入力)</span>}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate">
+                          {d.brandName || '(ブランド未入力)'} · {formatTimestamp(d.savedAt)} · STEP{d.lastStep}
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-500 truncate">
-                        {d.brandName || '(ブランド未入力)'} · {formatTimestamp(d.savedAt)} · STEP{d.lastStep}
-                      </div>
-                    </div>
-                    <span className="text-xs text-indigo-600 font-bold shrink-0">この案件をベースに →</span>
-                  </button>
-                </li>
-              ))}
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                          d.documentType === 'final'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-orange-100 text-orange-700'
+                        }`}
+                      >
+                        {describeDocType(d)}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
+        {drafts.length > 0 && (
+          <div className="border-t border-gray-200 px-5 py-4 space-y-3">
+            <fieldset className="text-sm">
+              <legend className="text-xs font-bold text-gray-600 mb-1">複製後の出力タイプ</legend>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="draft-picker-doctype"
+                  value="inherit"
+                  checked={effectiveOverride === 'inherit'}
+                  onChange={() => setOverride('inherit')}
+                  className="text-indigo-600"
+                />
+                <span>
+                  複製元と同じ
+                  {selected?.documentType === 'sample' && ' (sampleRevision を +1 した次のリビジョン)'}
+                </span>
+              </label>
+              <label
+                className={`flex items-center gap-2 ${
+                  showFinalOption ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="draft-picker-doctype"
+                  value="final"
+                  checked={effectiveOverride === 'final'}
+                  disabled={!showFinalOption}
+                  onChange={() => setOverride('final')}
+                  className="text-indigo-600"
+                />
+                <span>最終仕様書として作成</span>
+              </label>
+            </fieldset>
+            <button
+              type="button"
+              onClick={() => {
+                if (!selected) return;
+                onPick(selected, effectiveOverride);
+              }}
+              disabled={!selected}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {selected
+                ? `この案件をベースに作成 (${selected.productCode || '(品番未入力)'}) →`
+                : 'まず複製元のドラフトを選んでください'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

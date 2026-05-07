@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PrinterIcon, ArrowPathIcon, ArrowLeftIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import type { SpecData } from '../types';
+import type { SpecData, SampleArrangement } from '../types';
 import { specJson } from '../data/spec';
 import {
   getLabel,
@@ -10,17 +10,30 @@ import {
   DIMENSION_FIELD_TO_MASTER_KEY,
   SHAPE_LABELS_JA,
   POSITION_LABELS_JA,
+  ordinal,
 } from '../utils/specHelpers';
 import { useToast } from './Toast';
 import { buildFabricParts } from './Step2/applyProposal';
 import { loadImage } from '../lib/imageStore';
+import type { DraftEnvelope } from '../hooks/useSpecDrafts';
 
 interface Props {
   data: SpecData;
   updateData: (updates: Partial<SpecData>) => void;
   draftId: string;
+  /** Layer 4 parallel-output: enumerate sibling drafts for the secondary picker. */
+  drafts: DraftEnvelope[];
+  /** Layer 4 parallel-output: read the chosen secondary draft's full data. */
+  loadDraft: (id: string) => DraftEnvelope | null;
   onReset: () => void;
   onBack: () => void;
+}
+
+function headerLabel(data: Pick<SpecData, 'documentType' | 'sampleRevision'>): string {
+  if (data.documentType === 'sample') {
+    return `SAMPLE指示書 ${ordinal(data.sampleRevision ?? 1)}`;
+  }
+  return '最終仕様書';
 }
 
 const colLabel = (index: number) => String.fromCharCode(65 + index);
@@ -62,13 +75,142 @@ function DimensionInput({
   );
 }
 
+const SAMPLE_UNIT_SUGGESTIONS = ['個', '本', '枚', 'セット', '組'];
+
+function defaultSampleArrangement(): SampleArrangement {
+  return {
+    quantities: { customer: 0, tokyo: 0, factory: 0 },
+    unit: '個',
+  };
+}
+
+function SampleArrangementSection({
+  arrangement,
+  onChange,
+}: {
+  arrangement: SampleArrangement | undefined;
+  onChange: (next: SampleArrangement) => void;
+}) {
+  const a = arrangement ?? defaultSampleArrangement();
+  const update = (patch: Partial<SampleArrangement>) => onChange({ ...a, ...patch });
+  const updateQuantity = (key: keyof SampleArrangement['quantities'], v: string) => {
+    const n = v === '' ? 0 : Number(v);
+    onChange({ ...a, quantities: { ...a.quantities, [key]: Number.isFinite(n) ? n : 0 } });
+  };
+  return (
+    <div className="mb-[20px] border-2 border-[#d97706] rounded-sm p-[12px_16px] bg-[#fffbeb] print-bg-orange-light">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="bg-[#d97706] text-white px-3 py-0.5 text-xs font-bold rounded print-bg-orange">SAMPLE手配</span>
+      </div>
+      <table className="w-full text-sm">
+        <tbody>
+          <tr>
+            <th className="text-left font-medium text-gray-700 w-24 py-1 align-middle">出荷納期</th>
+            <td className="py-1" colSpan={3}>
+              <input
+                type="date"
+                aria-label="出荷納期"
+                className="border border-gray-400 p-1 text-sm print:border-gray-400 w-44"
+                value={a.shippingDate ?? ''}
+                onChange={(e) => update({ shippingDate: e.target.value })}
+              />
+            </td>
+          </tr>
+          <tr>
+            <th className="text-left font-medium text-gray-700 py-1 align-middle">数量</th>
+            <td className="py-1" colSpan={3}>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <label className="flex items-center gap-1 text-sm">
+                  <span className="text-gray-600">客人用</span>
+                  <input
+                    type="number"
+                    aria-label="客人用 数量"
+                    className="border border-gray-400 p-1 w-16 text-sm print:border-gray-400"
+                    value={a.quantities.customer}
+                    onChange={(e) => updateQuantity('customer', e.target.value)}
+                  />
+                </label>
+                <label className="flex items-center gap-1 text-sm">
+                  <span className="text-gray-600">東京用</span>
+                  <input
+                    type="number"
+                    aria-label="東京用 数量"
+                    className="border border-gray-400 p-1 w-16 text-sm print:border-gray-400"
+                    value={a.quantities.tokyo}
+                    onChange={(e) => updateQuantity('tokyo', e.target.value)}
+                  />
+                </label>
+                <label className="flex items-center gap-1 text-sm">
+                  <span className="text-gray-600">工場用</span>
+                  <input
+                    type="number"
+                    aria-label="工場用 数量"
+                    className="border border-gray-400 p-1 w-16 text-sm print:border-gray-400"
+                    value={a.quantities.factory}
+                    onChange={(e) => updateQuantity('factory', e.target.value)}
+                  />
+                </label>
+                <label className="flex items-center gap-1 text-sm">
+                  <span className="text-gray-600">単位</span>
+                  <input
+                    type="text"
+                    aria-label="数量の単位"
+                    list="sample-unit-suggestions"
+                    className="border border-gray-400 p-1 w-20 text-sm print:border-gray-400"
+                    value={a.unit}
+                    onChange={(e) => update({ unit: e.target.value })}
+                  />
+                  <datalist id="sample-unit-suggestions">
+                    {SAMPLE_UNIT_SUGGESTIONS.map((u) => (
+                      <option key={u} value={u} />
+                    ))}
+                  </datalist>
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <th className="text-left font-medium text-gray-700 py-1 align-middle">手配備考</th>
+            <td className="py-1" colSpan={3}>
+              <input
+                type="text"
+                aria-label="手配備考"
+                className="border border-gray-400 p-1 w-full text-sm print:border-gray-400"
+                value={a.arrangementNotes ?? ''}
+                onChange={(e) => update({ arrangementNotes: e.target.value })}
+              />
+            </td>
+          </tr>
+          <tr>
+            <th className="text-left font-medium text-gray-700 py-1 align-middle">参考サンプル</th>
+            <td className="py-1" colSpan={3}>
+              <input
+                type="text"
+                aria-label="参考サンプル番号"
+                placeholder="例: HGP-2207-H002"
+                className="border border-gray-400 p-1 w-72 text-sm print:border-gray-400"
+                value={a.referenceSampleId ?? ''}
+                onChange={(e) => update({ referenceSampleId: e.target.value })}
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function PrintHeader({ data, pageNum, totalPages }: { data: SpecData; pageNum: number; totalPages: number }) {
+  const label = headerLabel(data);
+  const labelClass = data.documentType === 'sample'
+    ? 'w-[140px] bg-[#d97706] text-white text-[11px] font-bold border-2 border-[#333] p-[8px_12px] align-middle print-bg-orange'
+    : 'w-[120px] bg-[#cc0000] text-white text-[12px] font-bold border-2 border-[#333] p-[8px_12px] align-middle print-bg-red';
   return (
     <div className="mb-[20px]">
       <table className="w-full border-collapse" style={{ tableLayout: 'auto' }}>
         <tbody>
           <tr className="text-[10px] text-[#666] bg-[#f5f5f5] h-[20px] print-bg-f5">
-            <th rowSpan={2} className="w-[120px] bg-[#cc0000] text-white text-[12px] font-bold border-2 border-[#333] p-[8px_12px] align-middle print-bg-red">最終仕様書</th>
+            <th rowSpan={2} className={labelClass}>{label}</th>
             <th className="w-[160px] font-normal border-2 border-[#333] p-[8px_12px] align-middle">客人名</th>
             <th className="font-normal border-2 border-[#333] p-[8px_12px] align-middle" style={{ width: 'auto' }}>品番 / 製品名</th>
             <th className="w-[100px] font-normal border-2 border-[#333] p-[8px_12px] align-middle">発行日</th>
@@ -91,8 +233,18 @@ function PrintHeader({ data, pageNum, totalPages }: { data: SpecData; pageNum: n
   );
 }
 
-export default function Step4({ data, updateData, draftId, onReset, onBack }: Props) {
+export default function Step4({ data, updateData, draftId, drafts, loadDraft, onReset, onBack }: Props) {
   const { showToast, ToastView } = useToast();
+  const [secondaryId, setSecondaryId] = useState<string>('');
+  const secondaryEnabled = !!secondaryId;
+  const secondaryDraft = useMemo(
+    () => (secondaryId ? loadDraft(secondaryId) : null),
+    [secondaryId, loadDraft],
+  );
+  const otherDrafts = useMemo(
+    () => drafts.filter((d) => d.id !== draftId),
+    [drafts, draftId],
+  );
 
   const handlePrint = () => window.print();
 
@@ -100,6 +252,10 @@ export default function Step4({ data, updateData, draftId, onReset, onBack }: Pr
     const newFabricParts = buildFabricParts(data);
     updateData({ fabricParts: newFabricParts });
     showToast('再反映しました');
+  };
+
+  const handleArrangementChange = (next: SampleArrangement) => {
+    updateData({ sampleArrangement: next });
   };
 
   const fillDimensionsFromMaster = () => {
@@ -165,9 +321,53 @@ export default function Step4({ data, updateData, draftId, onReset, onBack }: Pr
     <div className="space-y-12 animate-fade-in fade-in" id="spec-sheet">
       <ToastView />
 
+      {otherDrafts.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded-lg p-4 print:hidden">
+          <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+            <input
+              type="checkbox"
+              checked={secondaryEnabled}
+              onChange={(e) => {
+                if (!e.target.checked) setSecondaryId('');
+              }}
+              className="w-4 h-4 text-indigo-600"
+              aria-label="並列出力モード"
+            />
+            並列出力モード (印刷時に他のドラフトを連結)
+          </label>
+          <div className="flex items-center gap-2">
+            <select
+              value={secondaryId}
+              onChange={(e) => setSecondaryId(e.target.value)}
+              aria-label="並列出力する 2 つ目のドラフト"
+              className="border border-gray-300 rounded p-2 text-sm flex-1 max-w-md"
+            >
+              <option value="">— もう 1 つのドラフトを選択 —</option>
+              {otherDrafts.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.productCode || '(品番未入力)'} ({d.documentType === 'sample' ? `SAMPLE ${ordinal(d.sampleRevision ?? 1)}` : '最終仕様書'})
+                </option>
+              ))}
+            </select>
+            {secondaryEnabled && (
+              <span className="text-xs text-gray-500">
+                プレビュー下部 + 印刷出力に Secondary が並びます (read-only)
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ======================= PAGE 1 ======================= */}
       <div className="border border-gray-800 rounded-sm p-[24px_32px] bg-white print:border-none print:p-0 page-break-after">
         <PrintHeader data={data} pageNum={1} totalPages={3} />
+
+        {data.documentType === 'sample' && (
+          <SampleArrangementSection
+            arrangement={data.sampleArrangement}
+            onChange={handleArrangementChange}
+          />
+        )}
 
         <div className="mb-[20px] flex items-center gap-4">
           <span className="bg-[#16a34a] text-white px-4 py-1 font-bold text-lg inline-block print-bg-green">1. パラメーター一覧</span>
@@ -661,6 +861,51 @@ export default function Step4({ data, updateData, draftId, onReset, onBack }: Pr
         </div>
       </div>
 
+      {/* ============== Secondary draft (parallel output, read-only) ============== */}
+      {secondaryDraft && (
+        <div className="border border-gray-800 rounded-sm p-[24px_32px] bg-white print:border-none print:p-0 page-break-before">
+          <PrintHeader data={secondaryDraft.data} pageNum={1} totalPages={1} />
+          <div className="mb-[20px] flex items-center gap-2">
+            <span className="bg-[#6366f1] text-white px-4 py-1 font-bold text-lg inline-block print-bg-indigo">
+              並列出力 (B 案)
+            </span>
+            <span className="text-sm text-gray-600">
+              {secondaryDraft.productCode || '(品番未入力)'} ·{' '}
+              {secondaryDraft.documentType === 'sample'
+                ? `SAMPLE ${ordinal(secondaryDraft.sampleRevision ?? 1)}`
+                : '最終仕様書'}
+            </span>
+          </div>
+          <table className="w-full text-sm text-left border-collapse border border-gray-800">
+            <tbody>
+              <tr className="border-b border-gray-800">
+                <th className="w-1/4 bg-gray-100 p-2 border-r border-gray-800 print-bg-gray">形状</th>
+                <td className="p-2 font-bold">{SHAPE_LABELS_JA[secondaryDraft.data.headShape] || '-'}</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <th className="bg-gray-100 p-2 border-r border-gray-800 print-bg-gray">本体生地</th>
+                <td className="p-2">{getLabel(specJson.parameters.body_fabric, secondaryDraft.data.bodyFabric)}</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <th className="bg-gray-100 p-2 border-r border-gray-800 print-bg-gray">本体カラー</th>
+                <td className="p-2">{getLabel(specJson.parameters.body_color, secondaryDraft.data.bodyColor)}</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <th className="bg-gray-100 p-2 border-r border-gray-800 print-bg-gray">主刺繍技法</th>
+                <td className="p-2">{getLabel(specJson.parameters.embroidery, secondaryDraft.data.embroidery)}</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <th className="bg-gray-100 p-2 border-r border-gray-800 print-bg-gray">金具仕上げ</th>
+                <td className="p-2">{getLabel(specJson.parameters.hardware_finish, secondaryDraft.data.hardwareFinish)}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p className="text-xs text-gray-500 mt-2 print:hidden">
+            完全な詳細は元のドラフトを開いて編集してください。Layer 4 では概要だけを並べて印刷します。
+          </p>
+        </div>
+      )}
+
       {/* Global Buttons */}
       <div className="pt-6 flex justify-between print:hidden">
         <button
@@ -699,6 +944,9 @@ export default function Step4({ data, updateData, draftId, onReset, onBack }: Pr
           .print-bg-f5 { background-color: #f5f5f5 !important; }
           .print-bg-gray { background-color: #f3f4f6 !important; }
           .print-bg-red { background-color: #cc0000 !important; color: white !important; }
+          .print-bg-orange { background-color: #d97706 !important; color: white !important; }
+          .print-bg-orange-light { background-color: #fffbeb !important; }
+          .print-bg-indigo { background-color: #6366f1 !important; color: white !important; }
 
           input[type="text"], input[type="number"], input[type="date"], select, textarea {
             border: 1px solid #ccc !important;

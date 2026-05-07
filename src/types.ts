@@ -1,3 +1,18 @@
+export type DocumentType = 'sample' | 'final';
+export type ImageSource = 'generated' | 'manual' | 'photo';
+
+export type SampleArrangement = {
+  shippingDate?: string;
+  quantities: {
+    customer: number;
+    tokyo: number;
+    factory: number;
+  };
+  unit: string;
+  arrangementNotes?: string;
+  referenceSampleId?: string;
+};
+
 export type SpecData = {
   // STEP1
   productCode: string;
@@ -72,6 +87,20 @@ export type SpecData = {
   originSampleId?: string;
   /** Route B: the id of the source draft. */
   originDraftId?: string;
+
+  /**
+   * Whether this draft is a sample instruction sheet ('sample') or the final
+   * spec sheet ('final'). New drafts default to 'sample'; legacy drafts loaded
+   * from before Layer 4 are migrated to 'final' to preserve their existing
+   * appearance.
+   */
+  documentType: DocumentType;
+  /** 1-based revision counter, only meaningful when documentType === 'sample'. */
+  sampleRevision?: number;
+  /** Sample-only arrangement section that prints on the cover page. */
+  sampleArrangement?: SampleArrangement;
+  /** Where the product image came from (Layer 3 will refine this). */
+  imageSource?: ImageSource;
 };
 
 export type ProposalBase = {
@@ -143,4 +172,10 @@ export const initialSpecData: SpecData = {
     { id: '3', technique: '', threadType: '', threadNumber: '', size: '', placement: '' },
   ],
   baseProposal: null,
+  documentType: 'sample',
+  sampleRevision: 1,
+  sampleArrangement: {
+    quantities: { customer: 0, tokyo: 0, factory: 0 },
+    unit: '個',
+  },
 };

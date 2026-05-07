@@ -31,6 +31,8 @@ describe('Step1 OriginBadge', () => {
       savedAt: 0,
       lastStep: 1 as const,
       data: initialSpecData,
+      documentType: initialSpecData.documentType,
+      sampleRevision: initialSpecData.sampleRevision,
     });
     render(<Step1 data={data} updateData={() => {}} onNext={() => {}} draftLookup={lookup} />);
     expect(screen.getByText(/複製元: OLD-PROD-001/)).toBeInTheDocument();

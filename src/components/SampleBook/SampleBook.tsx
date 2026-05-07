@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import type { PutterSample } from './types'
+import type { DocumentType } from '../../types'
 import samplesData from '../../data/samples.json'
 import { getOptions, getShapeByAlias } from '../../utils/specHelpers'
 import { getSampleClosureTypes, getSampleDecorationTypes } from './sampleHelpers'
@@ -181,9 +182,10 @@ function Modal({
 }: {
   sample: PutterSample
   onClose: () => void
-  onPickSample?: (s: PutterSample) => void
+  onPickSample?: (s: PutterSample, documentType: DocumentType) => void
 }) {
   const [imgError, setImgError] = useState(false)
+  const [pickDocType, setPickDocType] = useState<DocumentType>('sample')
   const icon = SHAPE_ICONS[sample.shape.head_type] ?? '◻'
 
   useEffect(() => {
@@ -306,9 +308,36 @@ function Modal({
               flex: '0 0 auto',
             }}
           >
+            <fieldset style={{ marginBottom: 8, fontSize: 13 }}>
+              <legend style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-secondary)', marginBottom: 4 }}>
+                出力タイプ
+              </legend>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name={`sample-doctype-${sample.sample_number}`}
+                    value="sample"
+                    checked={pickDocType === 'sample'}
+                    onChange={() => setPickDocType('sample')}
+                  />
+                  <span>サンプル指示書</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name={`sample-doctype-${sample.sample_number}`}
+                    value="final"
+                    checked={pickDocType === 'final'}
+                    onChange={() => setPickDocType('final')}
+                  />
+                  <span>最終仕様書</span>
+                </label>
+              </div>
+            </fieldset>
             <button
               type="button"
-              onClick={() => onPickSample(sample)}
+              onClick={() => onPickSample(sample, pickDocType)}
               style={{
                 width: '100%', minHeight: 44, fontSize: 14, fontWeight: 600,
                 padding: '10px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
@@ -333,7 +362,7 @@ interface SampleBookProps {
    * When `mode === 'pick'`, a top banner clarifies that the user is picking a
    * sample as a starting point for Route A.
    */
-  onPickSample?: (sample: PutterSample) => void
+  onPickSample?: (sample: PutterSample, documentType: DocumentType) => void
   mode?: 'browse' | 'pick'
 }
 
@@ -429,7 +458,11 @@ export default function SampleBook({ onPickSample, mode = 'browse' }: SampleBook
               key={`${s.sample_number}-${i}`}
               sample={s}
               onClick={() => setSelected(s)}
-              onQuickPick={mode === 'pick' && onPickSample ? onPickSample : undefined}
+              onQuickPick={
+                mode === 'pick' && onPickSample
+                  ? (s) => onPickSample(s, 'sample')
+                  : undefined
+              }
             />
           ))}
         </div>
