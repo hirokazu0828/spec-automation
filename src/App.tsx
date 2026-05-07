@@ -323,6 +323,7 @@ function App() {
                 updateData={updateData}
                 onNext={handleNext}
                 onBack={handleBack}
+                draftLookup={loadDraft}
               />
             )}
             {view.step === 3 && (
