@@ -8,6 +8,7 @@ import {
   isDimensionOutOfRange,
   getShapeByAlias,
   getOptionValueByAlias,
+  generatePdfFileName,
   COLOR_HEX_MAP,
 } from './specHelpers';
 import { specJson } from '../data/spec';
@@ -174,5 +175,55 @@ describe('getOptionValueByAlias', () => {
     expect(getOptionValueByAlias('nonexistent', 'anything')).toBeNull();
     expect(getOptionValueByAlias('body_color', '')).toBeNull();
     expect(getOptionValueByAlias('body_color', null)).toBeNull();
+  });
+});
+
+describe('generatePdfFileName (Layer 2-PDF)', () => {
+  it('formats sample with revision number', () => {
+    expect(
+      generatePdfFileName({ productCode: 'KOD-001', documentType: 'sample', sampleRevision: 1 }),
+    ).toBe('KOD-001_sample_1.pdf');
+    expect(
+      generatePdfFileName({ productCode: 'KOD-001', documentType: 'sample', sampleRevision: 2 }),
+    ).toBe('KOD-001_sample_2.pdf');
+  });
+
+  it('formats final without revision', () => {
+    expect(
+      generatePdfFileName({ productCode: 'KOD-001', documentType: 'final' }),
+    ).toBe('KOD-001_final.pdf');
+  });
+
+  it('inserts _vs_ for parallel output mode', () => {
+    expect(
+      generatePdfFileName(
+        { productCode: 'KOD-001', documentType: 'sample', sampleRevision: 1 },
+        { productCode: 'KOD-002' },
+      ),
+    ).toBe('KOD-001_vs_KOD-002_sample_1.pdf');
+  });
+
+  it('falls back to "spec" when productCode is empty / whitespace', () => {
+    expect(
+      generatePdfFileName({ productCode: '', documentType: 'sample', sampleRevision: 1 }),
+    ).toBe('spec_sample_1.pdf');
+    expect(
+      generatePdfFileName({ productCode: '   ', documentType: 'final' }),
+    ).toBe('spec_final.pdf');
+  });
+
+  it('falls back to "spec_vs_spec" when both productCodes are empty', () => {
+    expect(
+      generatePdfFileName(
+        { productCode: '', documentType: 'sample', sampleRevision: 1 },
+        { productCode: '' },
+      ),
+    ).toBe('spec_vs_spec_sample_1.pdf');
+  });
+
+  it('defaults sampleRevision to 1 when undefined', () => {
+    expect(
+      generatePdfFileName({ productCode: 'KOD-001', documentType: 'sample' }),
+    ).toBe('KOD-001_sample_1.pdf');
   });
 });

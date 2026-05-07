@@ -1,4 +1,4 @@
-# Layer 0 + Layer 2 + Layer 6 + Layer 4 + Layer 6 UX fix + Layer 6 UX fix-2 完了 → Layer 2-PDF / Layer 3 / Layer A への申し送り
+# Layer 0 + 2 + 6 + 4 + UX fix + UX fix-2 + Layer 2-PDF 完了 → Layer 5 / Layer 3 / Layer A への申し送り
 
 > 直近完了レイヤ:
 > - Layer 0: PR #1 → `claude/organize-system-architecture-KXG4i` にマージ済
@@ -62,22 +62,35 @@ PR #5 で Route A のスマホ UX (起点ボタン到達性 + sticky footer) を
 
 判断記録: `docs/route-a-step2-position-fallback-decisions.md`
 
+## Layer 2-PDF で実装したこと
+
+- ✅ `@react-pdf/renderer` 4.x 導入 (React 19 サポート版)
+- ✅ Step4 に「PDF を準備」ボタン → React.lazy で `PdfDownloadButton` 読込 → 「PDF をダウンロード」(`<PDFDownloadLink>`) で横向き A4 PDF 生成
+- ✅ 単一モード 3 ページ / 並列モード 5 ページ (ドラフト別連続: p1=A+B / p2=A生地 / p3=A刺繍 / p4=B生地 / p5=B刺繍)
+- ✅ 日本語フォント Noto Sans JP Regular + Bold WOFF を `@fontsource/noto-sans-jp` から postinstall で `public/fonts/` にコピー (`.gitignore` 済、リポサイズ膨張なし)
+- ✅ `generatePdfFileName(data, secondary?)` でファイル名規則 `{productCode}_{type}{_revision}.pdf` (空時 `spec` フォールバック、並列時 `_vs_` 介入)
+- ✅ 既存 `window.print()` 縦向きはフォールバックボタンとして並存
+- ✅ Vitest は構造テスト (vi.mock で react-pdf primitives を div 化) で 9 ケース、PDF バイナリは生成しない
+- ✅ メインバンドル 207KB に変化なし (PDF chunk = 1.4MB は遅延ロード、初回 Step4 表示は 0 影響)
+
+判断記録: `docs/layer2-pdf-decisions.md`
+
 ---
 
-## Layer 2-PDF (横向き A4 PDF 出力) への申し送り
+## Layer 5 (プロジェクトライフサイクル) への申し送り
 
 ### 着手前に確定したいこと
 
-1. PDF ライブラリの選定 (jsPDF / react-pdf / Puppeteer 経由 / `window.print()` 強化)
-2. 横向き A4 が必要なテンプレート (サンプル指示書 / 最終仕様書 / 並列出力時のみ?)
-3. ファイル命名規則 (`{productCode}_{documentType}_{ordinal?}_{date}.pdf` 等)
-4. 並列出力 (Layer 4 Task 8) の本格レイアウト最適化 (左右並列 / 1 ページにまとめる / 2 ページに分けて連結)
+1. ライフサイクル状態 (draft / issued / approved / archived 等) の体系
+2. 状態遷移を駆動するアクション (発行 / 承認 / 却下 / 再発行) と権限境界
+3. 履歴・監査ログの保存先 (現状の自由テキスト `revisionHistory` を構造化するか、別ストアに記録するか)
+4. PDF 発行履歴の保存 (`generatePdfFileName` で命名されたファイル群を IndexedDB に履歴保存するか / 都度生成し続けるか)
 
-### Layer 2-PDF 着手時に活用できる Layer 4 の成果
+### Layer 5 着手時に活用できる Layer 0 〜 2-PDF の成果
 
-- `documentType` / `sampleRevision` で出力ファイル名・ヘッダーを分岐できる
-- `sampleArrangement` のフィールドが既に揃っているので PDF 用の専用テンプレを別途作る必要なし
-- 並列出力モードのトグル + secondary picker は既にあるので、PDF 側は「2 案を 1 ページにまとめるか 2 ページに分けるか」のレイアウト判断だけ
+- `documentType` / `sampleRevision` / `originRoute` がスキーマに揃っており、状態フラグを追加するだけでメタデータ層は揃う
+- `migrateSpecData` のマイグレーション機構が確立 (旧ドラフトに新フィールドを補完するパターン)
+- HTML プレビュー (Step4) と PDF 出力 (`SpecSheetPdf`) の重複を将来統合する場合、共通の中間表現を抽出するタイミングは Layer 5 が適切
 
 ---
 
@@ -110,7 +123,7 @@ PR #5 で Route A のスマホ UX (起点ボタン到達性 + sticky footer) を
 ## Layer 4 PR 時点の動作確認
 
 - `npm run lint`: 0 エラー
-- `npm test`: **124 件全 pass** (Layer 4 の 90 件 + Layer 6 hotfix で +10 + UX fix で +15 + UX fix-2 で +9)
+- `npm test`: **139 件全 pass** (Layer 4 の 90 件 + Layer 6 hotfix で +10 + UX fix で +15 + UX fix-2 で +9 + Layer 2-PDF で +15)
 - `npm run build`: 型エラー 0
 - `npm run dev`: HTTP 200 (smoke)
 

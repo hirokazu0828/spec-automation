@@ -27,3 +27,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Layer 2-PDF: Noto Sans JP fonts are downloaded by scripts/download-fonts.ts
+# (postinstall hook) instead of committed to keep the repo small. See
+# docs/layer2-pdf-decisions.md §5.
+public/fonts/

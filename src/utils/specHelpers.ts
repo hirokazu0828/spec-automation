@@ -1,7 +1,41 @@
 import type { SpecOption, SpecParameter } from '../data/spec';
 import { specJson } from '../data/spec';
+import type { SpecData } from '../types';
 
 export type Lang = 'ja' | 'en';
+
+/**
+ * Builds the PDF download filename per Layer 2-PDF spec:
+ *   {productCode}_{type}{_revision}.pdf
+ * with `secondary` injecting `_vs_{secondaryProductCode}` after the primary
+ * code when the parallel-output mode is on. Empty productCodes fall back to
+ * the literal "spec" so we never produce a leading underscore.
+ *
+ * Examples:
+ *   sample rev=1, code='KOD-001'         → 'KOD-001_sample_1.pdf'
+ *   final, code='KOD-001'                → 'KOD-001_final.pdf'
+ *   sample rev=2, code='KOD-001', sec='KOD-002' → 'KOD-001_vs_KOD-002_sample_2.pdf'
+ *   sample rev=1, code=''                → 'spec_sample_1.pdf'
+ *
+ * `secondary` accepts the minimum `{ productCode: string }` shape so callers
+ * don't have to thread the full DraftEnvelope through.
+ */
+export function generatePdfFileName(
+  data: Pick<SpecData, 'productCode' | 'documentType' | 'sampleRevision'>,
+  secondary?: { productCode: string },
+): string {
+  const fallback = (code: string | undefined): string =>
+    code && code.trim() !== '' ? code.trim() : 'spec';
+  const primary = fallback(data.productCode);
+  const codePart = secondary
+    ? `${primary}_vs_${fallback(secondary.productCode)}`
+    : primary;
+  const typePart =
+    data.documentType === 'sample'
+      ? `sample_${data.sampleRevision ?? 1}`
+      : 'final';
+  return `${codePart}_${typePart}.pdf`;
+}
 
 /**
  * Returns the options list for a top-level parameter from the master JSON.
