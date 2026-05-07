@@ -1,5 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { PrinterIcon, ArrowPathIcon, ArrowLeftIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+
+// Lazy-loaded so the ~1.5MB @react-pdf/renderer bundle (incl. fontkit/pdfkit)
+// only loads when the user opts into PDF download. See
+// docs/layer2-pdf-decisions.md §8.
+const PdfDownloadButton = lazy(() => import('./Step4/pdf/PdfDownloadButton'));
 import type { SpecData, SampleArrangement } from '../types';
 import { specJson } from '../data/spec';
 import {
@@ -236,6 +241,7 @@ function PrintHeader({ data, pageNum, totalPages }: { data: SpecData; pageNum: n
 export default function Step4({ data, updateData, draftId, drafts, loadDraft, onReset, onBack }: Props) {
   const { showToast, ToastView } = useToast();
   const [secondaryId, setSecondaryId] = useState<string>('');
+  const [pdfRequested, setPdfRequested] = useState(false);
   const secondaryEnabled = !!secondaryId;
   const secondaryDraft = useMemo(
     () => (secondaryId ? loadDraft(secondaryId) : null),
@@ -907,25 +913,44 @@ export default function Step4({ data, updateData, draftId, drafts, loadDraft, on
       )}
 
       {/* Global Buttons */}
-      <div className="pt-6 flex justify-between print:hidden">
+      <div className="pt-6 flex flex-wrap justify-between gap-3 print:hidden">
         <button
           onClick={onBack}
           className="bg-white border text-gray-700 hover:bg-gray-50 font-bold py-3 px-6 rounded-lg shadow-sm transition-colors flex items-center gap-2"
         >
           <ArrowLeftIcon className="w-5 h-5" /> 戻る
         </button>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-3 justify-end">
           <button
             onClick={onReset}
             className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow transition-colors flex items-center gap-2"
           >
             <ArrowPathIcon className="w-5 h-5" /> 最初からやり直す
           </button>
+          {pdfRequested ? (
+            <Suspense
+              fallback={
+                <span className="inline-flex items-center gap-2 bg-emerald-600/70 text-white font-bold py-3 px-6 rounded-lg shadow">
+                  <ArrowPathIcon className="w-5 h-5 animate-spin" /> PDF生成中...
+                </span>
+              }
+            >
+              <PdfDownloadButton primary={data} secondary={secondaryDraft?.data ?? null} />
+            </Suspense>
+          ) : (
+            <button
+              onClick={() => setPdfRequested(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow transition-colors flex items-center gap-2"
+            >
+              <ArrowPathIcon className="w-5 h-5" /> PDF を準備
+            </button>
+          )}
           <button
             onClick={handlePrint}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg shadow transition-colors flex items-center gap-2"
+            title="ブラウザの印刷ダイアログ (縦向き、フォールバック)"
           >
-            <PrinterIcon className="w-5 h-5" /> 印刷・PDF出力
+            <PrinterIcon className="w-5 h-5" /> 印刷
           </button>
         </div>
       </div>

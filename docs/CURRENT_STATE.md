@@ -290,7 +290,22 @@ Step3 マウント時に `loadImage(draftId)` で復元、生成成功時に `sa
 2. **PAGE 2: 生地仕様 (布料)** — 改訂履歴 (編集可) / 縫製注意事項 (textarea) / 寸法 5 項目 (mm、master 標準値プレースホルダー + 「標準値で埋める」ボタン + 範囲外バッジ) / 製品写真 (最大 6 枚 / 初期 3 枠) / 部位別仕様表 (8 部位まで追加可、A-Z ラベル自動)
 3. **PAGE 3: 刺繍・プリント・高周波 (刺绣・印刷等)** — 刺繍テーブル (技法/糸種/糸番号・カラー名/サイズ mm/配置)、技法と糸種は master `embroidery` / `thread_type` 駆動、追加可、行頭は番号自動、縫製注意事項 (PAGE 2 と**同じ `data.sewingNotes` を共有**)
 
-**並列出力モード** *(Layer 4 Task 8)*: ヘッダー直下のチェックボックス + ドラフトピッカー。ON にして 2 つ目のドラフトを選ぶと、印刷時にプライマリの 3 ページ後ろに secondary draft の概要 (read-only パラメーター抜粋) が page-break で連結される。詳細レイアウト最適化と横向き対応は Layer 2-PDF 持ち越し。
+**並列出力モード** *(Layer 4 Task 8)*: ヘッダー直下のチェックボックス + ドラフトピッカー。ON にして 2 つ目のドラフトを選ぶと、印刷時にプライマリの 3 ページ後ろに secondary draft の概要 (read-only パラメーター抜粋) が page-break で連結される。Layer 2-PDF で本格レイアウト最適化と横向き対応に移行 (下記 PDF 出力経路)。
+
+#### 横向き A4 PDF 出力 *(Layer 2-PDF)*
+
+**`@react-pdf/renderer` 4.x** を導入。Step4 のフッターに「PDF を準備」ボタンを追加 → 押下で React.lazy chunk を読み込み → 「PDF をダウンロード」(`<PDFDownloadLink>`) が表示される。
+
+| 単一モード | 並列モード |
+|---|---|
+| 3 ページ (PAGE 1/2/3) | 5 ページ (p1=A+B 並列パラメーター → p2=A 生地 → p3=A 刺繍 → p4=B 生地 → p5=B 刺繍 / **ドラフト別連続**) |
+
+- 全ページ A4 横向き (`size='A4' orientation='landscape'`)
+- 日本語フォント: Noto Sans JP Regular + Bold WOFF (`/public/fonts/`、`@fontsource/noto-sans-jp` から postinstall コピー)
+- ファイル名: `generatePdfFileName(data, secondary?)` で `{productCode}_{type}{_revision}.pdf`、空時 `spec` フォールバック、並列時 `_vs_` 介入
+- 既存 `window.print()` ボタン (縦向き) は別ボタンとしてフォールバック維持
+- バンドル: `@react-pdf/renderer` (~1.5MB) は React.lazy で **PDF ボタン押下時のみ**ロード — 既存ユーザの初回 Step4 表示は 0 影響
+- 判断記録: `docs/layer2-pdf-decisions.md`
 
 **印刷用 CSS**: `print:` Tailwind プレフィックス + 末尾の `<style>{`@media print {...}`}</style>`。背景色保持 (`-webkit-print-color-adjust: exact`)、`page-break-before/after`、テーブル罫線維持。
 
@@ -443,7 +458,7 @@ PutterSample
 
 | ファイル | 件数 | 内容 |
 |---|---|---|
-| `src/utils/specHelpers.test.ts` | 27 | `getLabel`, `getColorHex`, `getOptions`, `getDimensionDefault`/`Range`/`isDimensionOutOfRange`, `getShapeByAlias`, `getOptionValueByAlias` *(Layer 6 hotfix)* |
+| `src/utils/specHelpers.test.ts` | 33 | `getLabel`, `getColorHex`, `getOptions`, `getDimensionDefault`/`Range`/`isDimensionOutOfRange`, `getShapeByAlias`, `getOptionValueByAlias` *(Layer 6 hotfix)*, `generatePdfFileName` *(Layer 2-PDF)* |
 | `src/components/SampleBook/AuthGate.test.tsx` | 3 | 未認証フォーム表示、誤パスワード alert、正パスワード通過 |
 | `src/components/SampleBook/sampleHelpers.test.ts` *(Layer 2)* | 3 | `getSampleClosureTypes` / `getSampleDecorationTypes` の動的算出 + 重複除去 + 空入力 |
 | `src/components/SampleBook/SampleBook.test.tsx` *(Layer 6 hotfix)* | 5 | pick モード時のカード button 表示 / browse モードで非表示 / onPickSample なしで非表示 / button click で modal 開かず / カード body click でモーダル開く |
@@ -457,7 +472,8 @@ PutterSample
 | `src/components/Home/RouteSelector.test.tsx` *(Layer 6 + 4)* | 5 | A/B/C 各カードのレンダリングとクリックハンドラ、Route B 無効化、Route C ラジオ既定値 + Route C ラジオ切替 *(Layer 4)* |
 | `src/components/Home/DraftPickerModal.test.tsx` *(Layer 6 + 4)* | 5 | 空状態 / 行選択+確認 (inherit) / 確認ボタン disabled / 「最終仕様書として作成」ラジオ (sample 起点限定) / 閉じるボタン |
 | `src/components/Step1.test.tsx` *(Layer 6)* | 5 | OriginBadge: 旧ドラフト (バッジなし) / Route A / Route B with lookup / Route B fallback / Route C |
-| 合計 | **124** | 全 pass |
+| `src/components/Step4/pdf/SpecSheetPdf.test.tsx` *(Layer 2-PDF)* | 9 | A4 landscape / 単一 3 ページ / 並列 5 ページ / 並列 PAGE 1 が A+B 並列 / SAMPLE 手配欄の sample-only 表示 / ヘッダー文言 sample / final / ドラフト別連続のページ順 / `p.X/Y` カウンタ |
+| 合計 | **139** | 全 pass |
 
 ### 手厚い箇所
 - 純関数 (`applyProposal`, `getLabel`, `buildImagePrompt`)
@@ -485,7 +501,7 @@ PutterSample
 
 | 議題 | 実装状況 | 場所 / 補足 |
 |---|---|---|
-| 横向き A4 PDF 出力 | ❌ 未実装 | `Step4.tsx:592` `@page { size: A4 }` で**縦向き固定**。`size: A4 landscape` 指定なし。PDF ライブラリも未導入 (`window.print()` のみ) |
+| 横向き A4 PDF 出力 | ✅ 実装済 *(Layer 2-PDF)* | `@react-pdf/renderer` 4.x で `src/components/Step4/pdf/SpecSheetPdf.tsx` を新規追加、全ページ横向き、`generatePdfFileName` で命名、React.lazy で遅延ロード。`window.print()` 縦向きはフォールバックとして並存。詳細 `docs/layer2-pdf-decisions.md` |
 | サンプル指示書 vs 最終仕様書 (テンプレ切替) | ✅ 実装済 *(Layer 4)* | `SpecData.documentType` ('sample'\|'final') + `sampleRevision` + `promoteRevision` / `promoteToFinal` + Step4 ヘッダー駆動 + SAMPLE 手配欄 + DraftList バッジ。詳細 `docs/document-type-decisions.md` |
 | 3 ルート起点判定 (A/B/C) | ✅ 実装済 *(Layer 6)* | `SpecData.originRoute` + `createDraft(route, seed)` + Home の `RouteSelector` + `DraftPickerModal` + Step1 の `OriginBadge`。詳細 `docs/route-design-decisions.md` |
 | マスタ DB 分離 | △ 部分的 | `src/data/spec/index.ts` で `domains` Record + `DomainKey = 'putter-cover'` の枠は用意済。実体は putter-cover.json 1 件のみ。コード側ではどこも `specJson` 直 import (= 単一ドメイン固定) で、ドメイン切替 UI / state 不在 |

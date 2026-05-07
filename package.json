@@ -10,10 +10,13 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "postinstall": "tsx scripts/download-fonts.ts || echo '[postinstall] font download failed; PDF rendering will fall back to default fonts. Re-run: npm run download:fonts'",
+    "download:fonts": "tsx scripts/download-fonts.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@react-pdf/renderer": "^4.5.0",
     "form-data": "^4.0.1",
     "idb-keyval": "^6.2.1",
     "node-fetch": "^3.3.2",
@@ -22,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@fontsource/noto-sans-jp": "^5.2.9",
     "@tailwindcss/vite": "^4.2.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
