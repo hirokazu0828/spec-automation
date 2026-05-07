@@ -1,4 +1,4 @@
-# Layer 0 + Layer 2 + Layer 6 + Layer 4 + Layer 6 UX fix 完了 → Layer 2-PDF / Layer 3 / Layer A への申し送り
+# Layer 0 + Layer 2 + Layer 6 + Layer 4 + Layer 6 UX fix + Layer 6 UX fix-2 完了 → Layer 2-PDF / Layer 3 / Layer A への申し送り
 
 > 直近完了レイヤ:
 > - Layer 0: PR #1 → `claude/organize-system-architecture-KXG4i` にマージ済
@@ -39,7 +39,7 @@
 
 ## Layer 6 UX fix で実装したこと
 
-PR #5 で Route A のスマホ UX (起点ボタン到達性 + sticky footer) を直し、本 PR で **Step2 到達後の認知負荷**を解消:
+PR #5 で Route A のスマホ UX (起点ボタン到達性 + sticky footer) を直し、PR #6 で **Step2 到達後の認知負荷**を解消:
 
 - ✅ Route A で Step2 マウント時に `generateProposals()` を自動発火 (5 提案カードが即時表示)
 - ✅ Step2 ヘッダー直上に origin 別ガイドバナー (Route A: 「サンプル「{番号}」を起点に〜」、Route B: 「ドラフト「{productCode}」を複製〜」、Route C / undefined: 非表示)
@@ -48,6 +48,19 @@ PR #5 で Route A のスマホ UX (起点ボタン到達性 + sticky footer) を
 - ✅ Route B / C / undefined では従来通り (バナー以外何も変わらない)
 
 判断記録: `docs/route-a-step2-ux-decisions.md`
+
+## Layer 6 UX fix-2 で実装したこと
+
+タブナビ「常に許可」設計のため Step1 で position 未選択のまま Step2 へ飛んでしまう詰まりを解消:
+
+- ✅ Step2 の `isPositionMissing` 派生状態 (`!data.position || data.position.trim() === ''`)
+- ✅ amber 系の `<PositionMissingBanner>` (「ポジションが未設定です」+「STEP1 に戻る」ボタン、`min-h-[44px]`)
+- ✅ position 未設定時は Route A/B の青系 `<GuideBanner>` より優先表示 (排他)
+- ✅ Step2 に `onStepChange?: (step) => void` prop を追加、App.tsx の既存 `goStep` を渡してワンタップで Step1 復帰
+- ✅ 全 originRoute (A/B/C/undefined) で同じ振る舞い
+- ✅ Route A の auto-gen は元から `data.position` を gate にしていたので変更なし、テストで保証
+
+判断記録: `docs/route-a-step2-position-fallback-decisions.md`
 
 ---
 
@@ -97,7 +110,7 @@ PR #5 で Route A のスマホ UX (起点ボタン到達性 + sticky footer) を
 ## Layer 4 PR 時点の動作確認
 
 - `npm run lint`: 0 エラー
-- `npm test`: **115 件全 pass** (Layer 4 の 90 件 + Layer 6 hotfix で +10 + UX fix で +15)
+- `npm test`: **124 件全 pass** (Layer 4 の 90 件 + Layer 6 hotfix で +10 + UX fix で +15 + UX fix-2 で +9)
 - `npm run build`: 型エラー 0
 - `npm run dev`: HTTP 200 (smoke)
 
