@@ -1,10 +1,12 @@
-# Layer 0 + 2 + 6 + 4 + UX fix + UX fix-2 + Layer 2-PDF 完了 → Layer 5 / Layer 3 / Layer A への申し送り
+# Layer 0 + 2 + 6 + 4 + UX fix + UX fix-2 + Layer 2-PDF + Layer 2-PDF-perf 完了 → Layer 5 / Layer 3 / Layer A への申し送り
 
 > 直近完了レイヤ:
 > - Layer 0: PR #1 → `claude/organize-system-architecture-KXG4i` にマージ済
 > - Layer 2 (B: コード参照の一元化): PR #2 → 同上にマージ済
 > - Layer 6 (3 ルート起点判定 A/B/C): PR #3 → 同上にマージ済
-> - Layer 4 (サンプル指示書テンプレート): `claude/layer4-document-type` (本 PR)
+> - Layer 4 (サンプル指示書テンプレート): PR #7 → 同上にマージ済
+> - Layer 2-PDF (横向き A4 PDF 出力): PR #8 → 同上にマージ済
+> - Layer 2-PDF-perf (フォントサブセット化で生成 ~10s → ~1-2s): `claude/layer2-pdf-perf` (本 PR)
 
 ---
 
@@ -75,6 +77,21 @@ PR #5 で Route A のスマホ UX (起点ボタン到達性 + sticky footer) を
 
 判断記録: `docs/layer2-pdf-decisions.md`
 
+## Layer 2-PDF-perf で実装したこと
+
+PR #8 マージ後、Step4 の PDF 生成が実機で **~10〜12 秒**かかる問題を解消:
+
+- ✅ `subset-font` (wasm hb-subset) + `joyo-kanji` を devDeps に追加
+- ✅ `scripts/data/charset.ts` で `BUSINESS_CHARSET` (~2400 文字: ASCII + かな + 全角記号 + 常用漢字 2136 + 業務固有語) を定義
+- ✅ `scripts/subset-fonts.ts` で フル WOFF (1380/1396 KB) → サブセット WOFF (451/457 KB、約 -67%) を出力
+- ✅ `package.json` の `postinstall` を `download-fonts.ts && subset-fonts.ts` の連結に変更 (両方とも冪等)
+- ✅ `src/components/Step4/pdf/fonts.ts` の `Font.register` を `-subset.woff` 版に切替
+- ✅ `.gitignore` のコメントを subset 版にも対応するよう更新 (`public/fonts/` ディレクトリ単位の ignore は据え置き)
+- ✅ Vitest 12 ケース追加 (`scripts/data/charset.test.ts` 6 + `scripts/subset-fonts.test.ts` 6)
+- ✅ PDF 生成の体感: **~10〜12s → ~1〜2s** (目視ストップウォッチ計測)
+
+判断記録: `docs/layer2-pdf-perf-decisions.md`
+
 ---
 
 ## Layer 5 (プロジェクトライフサイクル) への申し送り
@@ -120,12 +137,12 @@ PR #5 で Route A のスマホ UX (起点ボタン到達性 + sticky footer) を
 
 ---
 
-## Layer 4 PR 時点の動作確認
+## Layer 2-PDF-perf PR 時点の動作確認
 
 - `npm run lint`: 0 エラー
-- `npm test`: **139 件全 pass** (Layer 4 の 90 件 + Layer 6 hotfix で +10 + UX fix で +15 + UX fix-2 で +9 + Layer 2-PDF で +15)
+- `npm test`: **151 件全 pass** (139 件 + Layer 2-PDF-perf で +12: charset 6 + subset-fonts 6)
 - `npm run build`: 型エラー 0
-- `npm run dev`: HTTP 200 (smoke)
+- `npm run download:fonts && npm run subset-fonts`: 冪等 (2 回目以降 skip)、`/public/fonts/` に 4 ファイル (フル + subset × Regular/Bold)
 
 ### Desktop 側で要再確認のポイント
 

@@ -11,8 +11,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "postinstall": "tsx scripts/download-fonts.ts || echo '[postinstall] font download failed; PDF rendering will fall back to default fonts. Re-run: npm run download:fonts'",
-    "download:fonts": "tsx scripts/download-fonts.ts"
+    "postinstall": "tsx scripts/download-fonts.ts && tsx scripts/subset-fonts.ts || echo '[postinstall] font download/subset failed; PDF rendering will fall back to default fonts. Re-run: npm run download:fonts && npm run subset-fonts'",
+    "download:fonts": "tsx scripts/download-fonts.ts",
+    "subset-fonts": "tsx scripts/subset-fonts.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -43,8 +44,10 @@
     "fake-indexeddb": "^6.2.0",
     "globals": "^17.4.0",
     "image-js": "^0.36.0",
+    "joyo-kanji": "^0.2.1",
     "jsdom": "^29.1.0",
     "postcss": "^8.5.8",
+    "subset-font": "^2.5.0",
     "tailwindcss": "^4.2.2",
     "tsx": "^4.20.0",
     "typescript": "~5.9.3",

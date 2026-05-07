@@ -1,6 +1,7 @@
 # 現状実装レポート
 
-> 作成日: 2026-05-03 / 対象コミット: `claude/organize-system-architecture-KXG4i` (HEAD = `312d367`)
+> 作成日: 2026-05-03 / 最終更新: 2026-05-07 (Layer 2-PDF-perf)
+> 対象コミット: `claude/organize-system-architecture-KXG4i` ベース + Layer 2-PDF-perf
 > 目的: Layer 2〜6 の実装に着手する前の現状把握。
 
 ---
@@ -301,11 +302,11 @@ Step3 マウント時に `loadImage(draftId)` で復元、生成成功時に `sa
 | 3 ページ (PAGE 1/2/3) | 5 ページ (p1=A+B 並列パラメーター → p2=A 生地 → p3=A 刺繍 → p4=B 生地 → p5=B 刺繍 / **ドラフト別連続**) |
 
 - 全ページ A4 横向き (`size='A4' orientation='landscape'`)
-- 日本語フォント: Noto Sans JP Regular + Bold WOFF (`/public/fonts/`、`@fontsource/noto-sans-jp` から postinstall コピー)
+- 日本語フォント: Noto Sans JP Regular + Bold WOFF (`/public/fonts/`、`@fontsource/noto-sans-jp` から postinstall コピー → `subset-font` で **BUSINESS_CHARSET (~2400 文字)** にサブセット化、各 ~450 KB)
 - ファイル名: `generatePdfFileName(data, secondary?)` で `{productCode}_{type}{_revision}.pdf`、空時 `spec` フォールバック、並列時 `_vs_` 介入
 - 既存 `window.print()` ボタン (縦向き) は別ボタンとしてフォールバック維持
 - バンドル: `@react-pdf/renderer` (~1.5MB) は React.lazy で **PDF ボタン押下時のみ**ロード — 既存ユーザの初回 Step4 表示は 0 影響
-- 判断記録: `docs/layer2-pdf-decisions.md`
+- 判断記録: `docs/layer2-pdf-decisions.md` *(Layer 2-PDF)*, `docs/layer2-pdf-perf-decisions.md` *(Layer 2-PDF-perf, フォントサブセット化で生成時間 ~10s → ~1-2s)*
 
 **印刷用 CSS**: `print:` Tailwind プレフィックス + 末尾の `<style>{`@media print {...}`}</style>`。背景色保持 (`-webkit-print-color-adjust: exact`)、`page-break-before/after`、テーブル罫線維持。
 
@@ -473,7 +474,9 @@ PutterSample
 | `src/components/Home/DraftPickerModal.test.tsx` *(Layer 6 + 4)* | 5 | 空状態 / 行選択+確認 (inherit) / 確認ボタン disabled / 「最終仕様書として作成」ラジオ (sample 起点限定) / 閉じるボタン |
 | `src/components/Step1.test.tsx` *(Layer 6)* | 5 | OriginBadge: 旧ドラフト (バッジなし) / Route A / Route B with lookup / Route B fallback / Route C |
 | `src/components/Step4/pdf/SpecSheetPdf.test.tsx` *(Layer 2-PDF)* | 9 | A4 landscape / 単一 3 ページ / 並列 5 ページ / 並列 PAGE 1 が A+B 並列 / SAMPLE 手配欄の sample-only 表示 / ヘッダー文言 sample / final / ドラフト別連続のページ順 / `p.X/Y` カウンタ |
-| 合計 | **139** | 全 pass |
+| `scripts/data/charset.test.ts` *(Layer 2-PDF-perf)* | 6 | ASCII / Hiragana / Katakana 全網羅、業務固有漢字、重複なし、>2000 chars |
+| `scripts/subset-fonts.test.ts` *(Layer 2-PDF-perf)* | 6 | Regular/Bold subset の存在 / フル WOFF より顕著に小さい / <1MB |
+| 合計 | **151** | 全 pass |
 
 ### 手厚い箇所
 - 純関数 (`applyProposal`, `getLabel`, `buildImagePrompt`)
