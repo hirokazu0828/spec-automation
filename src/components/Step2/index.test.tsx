@@ -34,7 +34,11 @@ function makeData(overrides: Partial<SpecData>): SpecData {
   };
 }
 
-function renderStep2(data: SpecData, draftLookup?: (id: string) => DraftEnvelope | null) {
+function renderStep2(
+  data: SpecData,
+  draftLookup?: (id: string) => DraftEnvelope | null,
+  onStepChange?: (step: 1 | 2 | 3 | 4) => void,
+) {
   return render(
     <Step2
       data={data}
@@ -42,6 +46,7 @@ function renderStep2(data: SpecData, draftLookup?: (id: string) => DraftEnvelope
       onNext={() => {}}
       onBack={() => {}}
       draftLookup={draftLookup}
+      onStepChange={onStepChange}
     />,
   );
 }
@@ -149,5 +154,60 @@ describe('Step2 guide banner', () => {
     expect(screen.getByText(/起点にしています/)).toBeInTheDocument();
     await user.click(screen.getByLabelText('ガイドを閉じる'));
     expect(screen.queryByText(/起点にしています/)).toBeNull();
+  });
+});
+
+describe('Step2 position-missing fallback banner', () => {
+  it('position が空文字の時にフォールバックバナーが表示される', () => {
+    renderStep2(makeData({ originRoute: 'C', position: '' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('ポジションが未設定です');
+  });
+
+  it('position が undefined の時にフォールバックバナーが表示される', () => {
+    // initialSpecData.position is '' so we cast to simulate the legacy shape.
+    renderStep2(makeData({ originRoute: 'C', position: undefined as unknown as string }));
+    expect(screen.getByRole('alert')).toHaveTextContent('ポジションが未設定です');
+  });
+
+  it('position が空白のみの時にもフォールバックバナーが表示される', () => {
+    renderStep2(makeData({ originRoute: 'A', originSampleId: 'BRG-001', position: '  ' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('ポジションが未設定です');
+  });
+
+  it('position 設定済の時はフォールバックバナーは表示されない', () => {
+    renderStep2(makeData({ originRoute: 'C', position: 'standard' }));
+    expect(screen.queryByText('ポジションが未設定です')).toBeNull();
+  });
+
+  it('フォールバック表示時は Route A ガイドバナーが出ない (優先順位)', () => {
+    renderStep2(makeData({ originRoute: 'A', originSampleId: 'BRG-001', position: '' }));
+    expect(screen.getByText('ポジションが未設定です')).toBeInTheDocument();
+    expect(screen.queryByText(/起点にしています/)).toBeNull();
+  });
+
+  it('フォールバック表示時は Route B ガイドバナーが出ない (優先順位)', () => {
+    renderStep2(makeData({ originRoute: 'B', originDraftId: 'src-1', position: '' }));
+    expect(screen.getByText('ポジションが未設定です')).toBeInTheDocument();
+    expect(screen.queryByText(/複製しています/)).toBeNull();
+  });
+
+  it('「STEP1 に戻る」ボタンクリックで onStepChange(1) が呼ばれる', async () => {
+    const onStepChange = vi.fn();
+    const user = userEvent.setup();
+    renderStep2(makeData({ originRoute: 'C', position: '' }), undefined, onStepChange);
+    await user.click(screen.getByRole('button', { name: 'STEP1 に戻る' }));
+    expect(onStepChange).toHaveBeenCalledTimes(1);
+    expect(onStepChange).toHaveBeenCalledWith(1);
+  });
+
+  it('onStepChange が未指定なら「STEP1 に戻る」ボタンは描画されない', () => {
+    renderStep2(makeData({ originRoute: 'C', position: '' }));
+    expect(screen.getByText('ポジションが未設定です')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'STEP1 に戻る' })).toBeNull();
+  });
+
+  it('position が空でも generateProposals は自動実行されない (Route A 含む、回帰防止)', () => {
+    renderStep2(makeData({ originRoute: 'A', originSampleId: 'BRG-001', position: '' }));
+    expect(mockGenerateProposals).not.toHaveBeenCalled();
   });
 });

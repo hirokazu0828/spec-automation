@@ -324,6 +324,7 @@ function App() {
                 onNext={handleNext}
                 onBack={handleBack}
                 draftLookup={loadDraft}
+                onStepChange={goStep}
               />
             )}
             {view.step === 3 && (
