@@ -150,3 +150,25 @@
 5. **テスト整備 (Step1/Step3/Step4 と useStep2Proposals)**
    現状 26 件、`Home`/`useStep2Proposals`/`generateImage`/`SampleBook` のカバレッジゼロ。Layer 2 でマスタ操作 UI を作るときに足元が緩いと厳しいので、**Layer 2 のスキーマ確定後**に着手するのが効率的。
    - **見積もり**: 1〜1.5 日。
+
+---
+
+## B. 画像生成 API のセキュリティ (Layer 3b で記録、後続 Layer で対処)
+
+### B-1. `/api/generate-image` が無認証で叩ける
+
+**観測**: `api/generate-image.ts` (Vercel Function) は **`req.method === 'POST'` だけをチェック**して `process.env.OPENAI_API_KEY` で OpenAI に転送する。フロント側で `window.confirm()` の確認モーダルは出るが、**サーバ側で認証はしていない** (`api/generate-image.ts:11-18`)。
+
+**リスク**:
+- アプリの URL を知っている誰もが `curl` で `/api/generate-image` を直接叩ける
+- レートリミットなし → OpenAI 課金が短時間で膨れ上がるリスク
+- アプリ全体は `AuthGate` (`VITE_APP_PASSWORD`) で守られているが、API 側はその防御を共有していない (`AuthGate` は **クライアント側 sessionStorage 認証** で API には到達しない)
+
+**スコープ判断**: Layer 3b はプロンプトテンプレートの整備が主目的。API 認証は別 Layer で扱う。
+
+**後続 Layer 案**:
+- フロントが既に持つ `VITE_APP_PASSWORD` を `/api/generate-image` 呼び出し時の `Authorization: Bearer <password>` ヘッダに乗せ、サーバ側で照合する最小実装
+- もしくは Vercel の Edge Middleware で IP / Cookie ベースのレート制限を追加
+- 完全な認証 (Auth0 / Vercel Auth など) は業務環境の認証基盤決定後
+
+**Layer 3b では: 何もしない**。本 Issue は記録のみ。
