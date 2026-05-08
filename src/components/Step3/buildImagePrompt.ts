@@ -1,6 +1,7 @@
-import type { SpecData } from '../../types';
+import type { SpecData, TemplateAngle } from '../../types';
 import { specJson } from '../../data/spec';
 import { getLabel } from '../../utils/specHelpers';
+import { ANGLE_PROMPT_PHRASES } from '../../data/templates/helpers';
 
 const SHAPE_DESC: Record<string, string> = {
   pin: 'a slim blade-style golf putter cover',
@@ -8,10 +9,14 @@ const SHAPE_DESC: Record<string, string> = {
   neo_mallet: 'a large neo-mallet golf putter cover',
 };
 
-export function buildImagePrompt(data: Pick<SpecData,
-  'headShape' | 'bodyFabric' | 'bodyColor' | 'embroidery' | 'hardwareFinish' | 'lining' | 'closure' | 'piping'
->): string {
+export function buildImagePrompt(
+  data: Pick<SpecData,
+    'headShape' | 'bodyFabric' | 'bodyColor' | 'embroidery' | 'hardwareFinish' | 'lining' | 'closure' | 'piping'
+  >,
+  angle?: TemplateAngle,
+): string {
   const shape = SHAPE_DESC[data.headShape] ?? 'a golf putter cover';
+  const anglePhrase = angle ? ANGLE_PROMPT_PHRASES[angle] : null;
 
   const fabricEn = getLabel(specJson.parameters.body_fabric, data.bodyFabric, 'en');
   const colorEn = getLabel(specJson.parameters.body_color, data.bodyColor, 'en');
@@ -19,8 +24,11 @@ export function buildImagePrompt(data: Pick<SpecData,
   const hardwareEn = getLabel(specJson.parameters.hardware_finish, data.hardwareFinish, 'en');
   const closureEn = getLabel(specJson.parameters.closure, data.closure, 'en');
 
+  const subject = anglePhrase
+    ? `${shape} (${anglePhrase})`
+    : shape;
   const phrases: string[] = [
-    `Apply realistic surface design to ${shape} silhouette in the input image.`,
+    `Apply realistic surface design to ${subject} silhouette in the input image.`,
     'Strictly preserve the silhouette and outline shape of the input.',
   ];
 
