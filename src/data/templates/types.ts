@@ -51,6 +51,17 @@ export type TemplateMetadata = {
   notes?: string;
 };
 
+/**
+ * Layer 3b: per-angle English phrase the image-generation prompt appends to
+ * tell gpt-image-1 which view the line-art represents. Optional because
+ * `helpers.getAnglePromptPhrase` falls back to the global `ANGLE_PROMPT_PHRASES`
+ * default when a template doesn't override the phrase. Kept on the catalog
+ * entry (rather than a single global map) so a future category — e.g. a head
+ * cover with a `top` angle — can ship its own English phrasing without
+ * polluting the putter wording.
+ */
+export type TemplateAnglePromptPhrases = Partial<Record<TemplateAngle, string>>;
+
 export type TemplateEntry = {
   id: string;
   category: string;
@@ -58,6 +69,16 @@ export type TemplateEntry = {
   displayName: string;
   displayNameEn?: string;
   aliases: string[];
+  /**
+   * Layer 3b: noun phrase that names the silhouette in image-generation
+   * prompts. Substituted into "Apply realistic surface design to <X>
+   * silhouette ...". Distinct from `displayNameEn` (UI heading) so the
+   * UI label and the prompt-tuned wording can evolve independently.
+   * Optional — `buildImagePrompt` falls back to a generic phrase.
+   */
+  promptShapeDescription?: string;
+  /** See `TemplateAnglePromptPhrases`. */
+  anglePromptPhrases?: TemplateAnglePromptPhrases;
   baseImages: TemplateBaseImages;
   defaultDimensions: TemplateDimensions;
   parts: TemplatePart[];

@@ -84,9 +84,15 @@ export const ANGLE_DISPLAY_NAMES: Record<TemplateAngle, string> = {
 };
 
 /**
- * English angle phrase that the image-generation prompt appends so gpt-image-1
- * understands which view the line-art represents. Keep these short and
- * unambiguous; the prompt already specifies "studio product photography".
+ * Default English angle phrase that the image-generation prompt appends so
+ * gpt-image-1 understands which view the line-art represents. Used as a
+ * fallback when a catalog entry omits `anglePromptPhrases` for a given angle.
+ *
+ * Layer 3b moved per-template overrides into `catalog.json`
+ * (`templates[].anglePromptPhrases`) so a future category (e.g. a head cover
+ * with a `top` angle) can ship its own English phrasing without polluting the
+ * putter wording. `getAnglePromptPhrase` resolves catalog → fallback in that
+ * order.
  */
 export const ANGLE_PROMPT_PHRASES: Record<TemplateAngle, string> = {
   front: 'front view',
@@ -94,3 +100,62 @@ export const ANGLE_PROMPT_PHRASES: Record<TemplateAngle, string> = {
   back: 'back view (opening side)',
   side_heel: 'heel-side view',
 };
+
+/**
+ * Resolves the English angle phrase for a template, preferring the
+ * per-template override in `catalog.json` and falling back to the global
+ * `ANGLE_PROMPT_PHRASES` when the template doesn't customise the angle.
+ *
+ * Accepts an unknown templateId / undefined so callers don't need to guard.
+ */
+export function getAnglePromptPhrase(
+  templateId: string | undefined,
+  angle: TemplateAngle,
+): string {
+  if (templateId) {
+    const template = getTemplateById(templateId);
+    const override = template?.anglePromptPhrases?.[angle];
+    if (override) return override;
+  }
+  return ANGLE_PROMPT_PHRASES[angle];
+}
+
+/**
+ * Layer 3b: brand-position prompt phrases. Keys mirror the master
+ * `parameters.position.options[].value` (`luxury` / `standard` / `casual`),
+ * which Step1 already constrains via radio buttons (see `Step1.tsx:195-228`).
+ *
+ * Translation rules — none of these phrases reference price tier or use the
+ * literal words "luxury" / "premium": such words push gpt-image-1 to invent
+ * extra brand marks. We translate the position into material feel, color
+ * palette, and ornament density instead.
+ */
+export const POSITION_PROMPT_PHRASES: Record<'luxury' | 'standard' | 'casual', string> = {
+  luxury:
+    'Refined matte surface with subtle tonal contrast, restrained small logo placement, precise fine stitching, and a quiet harmonious color palette suggesting careful craftsmanship.',
+  standard:
+    'Balanced everyday textile finish with a clearly visible mid-sized brand logo, moderate stitching density, and a versatile two-tone color palette appealing to a broad audience.',
+  casual:
+    'Energetic sporty surface treatment with bright vivid color blocking, playful contrasting accents, a bold graphic accent, and a relaxed lightweight athletic feel.',
+};
+
+/**
+ * Returns the position-specific prompt phrase, or null when the position is
+ * empty / unknown so `buildImagePrompt` can skip the line cleanly.
+ */
+export function getPositionPromptPhrase(position: string | undefined): string | null {
+  if (!position) return null;
+  if (position in POSITION_PROMPT_PHRASES) {
+    return POSITION_PROMPT_PHRASES[position as keyof typeof POSITION_PROMPT_PHRASES];
+  }
+  return null;
+}
+
+/**
+ * Negative-style guard tacked onto the end of the positive prompt because
+ * gpt-image-1's edit/generation endpoints don't accept a `negative_prompt`
+ * field. Listed here (rather than inline in `buildImagePrompt`) so the
+ * wording can be tuned without touching the prompt assembly logic.
+ */
+export const NEGATIVE_PROMPT_PHRASE =
+  'Avoid text artifacts, plastic glare, or visible seams that break the silhouette.';

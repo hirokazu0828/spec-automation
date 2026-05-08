@@ -1,7 +1,7 @@
 # 現状実装レポート
 
-> 作成日: 2026-05-03 / 最終更新: 2026-05-08 (Layer 3a)
-> 対象コミット: `main` 統合済み + Layer 3a (型カタログ + アングル選択 UI)
+> 作成日: 2026-05-03 / 最終更新: 2026-05-08 (Layer 3b)
+> 対象コミット: `main` 統合済み + Layer 3a (型カタログ + アングル選択 UI) + Layer 3b (プロンプトテンプレート)
 > 目的: Layer 2〜6 の実装に着手する前の現状把握。
 
 ---
@@ -476,9 +476,10 @@ PutterSample
 | `src/components/Step4/pdf/SpecSheetPdf.test.tsx` *(Layer 2-PDF)* | 9 | A4 landscape / 単一 3 ページ / 並列 5 ページ / 並列 PAGE 1 が A+B 並列 / SAMPLE 手配欄の sample-only 表示 / ヘッダー文言 sample / final / ドラフト別連続のページ順 / `p.X/Y` カウンタ |
 | `scripts/data/charset.test.ts` *(Layer 2-PDF-perf)* | 6 | ASCII / Hiragana / Katakana 全網羅、業務固有漢字、重複なし、>2000 chars |
 | `scripts/subset-fonts.test.ts` *(Layer 2-PDF-perf)* | 6 | Regular/Bold subset の存在 / フル WOFF より顕著に小さい / <1MB |
-| `src/data/templates/helpers.test.ts` *(Layer 3a)* | 12 | カタログ全件 / id / subType / headShape ブリッジ / category / 完成のみフィルタ / hasAngle / getAvailableAngles / メタデータ / 部位 A-F / ラベルマップ |
+| `src/data/templates/helpers.test.ts` *(Layer 3a + 3b)* | 22 | (3a 12 件) + (3b 10 件: catalog 全 template の `anglePromptPhrases` / `promptShapeDescription` / `getAnglePromptPhrase` 2 件 / `getPositionPromptPhrase` 5 件 / NEGATIVE_PROMPT_PHRASE 1 件) |
 | `src/components/Step3/index.test.tsx` *(Layer 3a)* | 8 | テンプレ select / blade 4 アングル / アングル切替 / pending バナー + 3 アングル disable / blade 切替 CTA / SVG フォールバック |
-| 合計 | **171** | 全 pass |
+| `src/components/Step3/buildImagePrompt.test.ts` *(Layer 3a + 3b)* | 20 | (3a 4 件 を 3b で再構成) shape 統合 3 件 + 属性 4 件 + angle 6 件 + position 4 件 + ネガ 1 件 + lining 文混入 / 不混入 / templateId override / 未知 position skip 等 |
+| 合計 | **197** | 全 pass |
 
 ### 手厚い箇所
 - 純関数 (`applyProposal`, `getLabel`, `buildImagePrompt`)

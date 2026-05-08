@@ -8,6 +8,13 @@
       "displayName": "パター用ブレード型（ピンタイプ）",
       "displayNameEn": "Putter cover, blade type (pin)",
       "aliases": ["pin", "ピン", "ブレード", "blade"],
+      "promptShapeDescription": "a slim blade-style golf putter cover with a narrow elongated head shape",
+      "anglePromptPhrases": {
+        "front": "front view",
+        "side_toe": "toe-side view",
+        "back": "back view (opening side)",
+        "side_heel": "heel-side view"
+      },
       "baseImages": {
         "front": "/templates/putter-blade/front.png",
         "side_toe": "/templates/putter-blade/side_toe.png",
@@ -59,6 +66,13 @@
       "displayName": "パター用セミマレット型",
       "displayNameEn": "Putter cover, semi-mallet type",
       "aliases": ["セミマレット", "semi_mallet"],
+      "promptShapeDescription": "a semi-mallet style golf putter cover with a moderately rounded head shape",
+      "anglePromptPhrases": {
+        "front": "front view",
+        "side_toe": "toe-side view",
+        "back": "back view (opening side)",
+        "side_heel": "heel-side view"
+      },
       "baseImages": {},
       "defaultDimensions": {
         "length": 180,
@@ -91,6 +105,13 @@
       "displayName": "パター用フルマレット型",
       "displayNameEn": "Putter cover, full mallet type",
       "aliases": ["フルマレット", "マレット", "full_mallet", "mallet"],
+      "promptShapeDescription": "a large full-mallet style golf putter cover with a substantially rounded back-weighted head shape",
+      "anglePromptPhrases": {
+        "front": "front view",
+        "side_toe": "toe-side view",
+        "back": "back view (opening side)",
+        "side_heel": "heel-side view"
+      },
       "baseImages": {},
       "defaultDimensions": {
         "length": 200,
