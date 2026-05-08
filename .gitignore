@@ -27,3 +27,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Layer 2-PDF: Noto Sans JP fonts are downloaded by scripts/download-fonts.ts
+# and subsetted by scripts/subset-fonts.ts (both run via postinstall) instead
+# of committed, to keep the repo small. The directory holds:
+#   NotoSansJP-{Regular,Bold}.woff           (full ~1.4 MB, source for subset)
+#   NotoSansJP-{Regular,Bold}-subset.woff    (~450 KB, what the PDF loads)
+# See docs/layer2-pdf-decisions.md §5 and docs/layer2-pdf-perf-decisions.md.
+public/fonts/

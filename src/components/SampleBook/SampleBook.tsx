@@ -1,6 +1,9 @@
 import { useState, useMemo, useEffect } from 'react'
 import type { PutterSample } from './types'
+import type { DocumentType } from '../../types'
 import samplesData from '../../data/samples.json'
+import { getOptions, getShapeByAlias } from '../../utils/specHelpers'
+import { getSampleClosureTypes, getSampleDecorationTypes } from './sampleHelpers'
 
 const SAMPLES = samplesData as PutterSample[]
 const IMAGE_BASE = '/images/'
@@ -64,7 +67,15 @@ function DetailRow({ label, value }: { label: string; value: string | null | und
   )
 }
 
-function SampleCard({ sample, onClick }: { sample: PutterSample; onClick: () => void }) {
+function SampleCard({
+  sample,
+  onClick,
+  onQuickPick,
+}: {
+  sample: PutterSample
+  onClick: () => void
+  onQuickPick?: (s: PutterSample) => void
+}) {
   const [imgError, setImgError] = useState(false)
   const shapeStyle = SHAPE_STYLES[sample.shape.head_type] ?? SHAPE_STYLES['ブレード']
   const icon = SHAPE_ICONS[sample.shape.head_type] ?? '◻'
@@ -131,13 +142,50 @@ function SampleCard({ sample, onClick }: { sample: PutterSample; onClick: () => 
           <SpecRow label="開閉方式" value={sample.closure.type} />
           <SpecRow label="装飾" value={sample.decoration.type} />
         </div>
+
+        {onQuickPick && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onQuickPick(sample)
+            }}
+            aria-label={`${sample.sample_number} を起点に新規作成`}
+            style={{
+              display: 'block',
+              width: '100%',
+              minHeight: 44,
+              marginTop: 12,
+              padding: '10px 12px',
+              borderRadius: 8,
+              border: 'none',
+              background: '#4f46e5',
+              color: '#ffffff',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              textAlign: 'center',
+            }}
+          >
+            [A] このサンプルを起点に作成 →
+          </button>
+        )}
       </div>
     </div>
   )
 }
 
-function Modal({ sample, onClose }: { sample: PutterSample; onClose: () => void }) {
+function Modal({
+  sample,
+  onClose,
+  onPickSample,
+}: {
+  sample: PutterSample
+  onClose: () => void
+  onPickSample?: (s: PutterSample, documentType: DocumentType) => void
+}) {
   const [imgError, setImgError] = useState(false)
+  const [pickDocType, setPickDocType] = useState<DocumentType>('sample')
   const icon = SHAPE_ICONS[sample.shape.head_type] ?? '◻'
 
   useEffect(() => {
@@ -156,18 +204,22 @@ function Modal({ sample, onClose }: { sample: PutterSample; onClose: () => void 
       aria-label={sample.item_name}
       style={{
         position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
-        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-        padding: '24px 16px', zIndex: 1000, overflowY: 'auto',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '16px', zIndex: 1000,
       }}
     >
       <div style={{
         background: 'var(--color-background-primary)',
         border: '0.5px solid var(--color-border-tertiary)',
-        borderRadius: 12, width: '100%', maxWidth: 540, overflow: 'hidden',
+        borderRadius: 12, width: '100%', maxWidth: 540,
+        maxHeight: 'calc(100vh - 32px)',
+        display: 'flex', flexDirection: 'column',
+        overflow: 'hidden',
       }}>
         <div style={{
           padding: '16px 20px', borderBottom: '0.5px solid var(--color-border-tertiary)',
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12,
+          flex: '0 0 auto',
         }}>
           <div>
             <div style={{ fontSize: 15, fontWeight: 500, lineHeight: 1.4 }}>{sample.item_name}</div>
@@ -184,7 +236,7 @@ function Modal({ sample, onClose }: { sample: PutterSample; onClose: () => void 
           </button>
         </div>
 
-        <div style={{ padding: '16px 20px' }}>
+        <div style={{ padding: '16px 20px', overflowY: 'auto', flex: '1 1 auto', WebkitOverflowScrolling: 'touch' }}>
           <div style={{
             width: '100%', height: 220, background: 'var(--color-background-secondary)',
             borderRadius: 8, overflow: 'hidden', marginBottom: 16,
@@ -246,21 +298,91 @@ function Modal({ sample, onClose }: { sample: PutterSample; onClose: () => void 
             </div>
           )}
         </div>
+
+        {onPickSample && (
+          <div
+            style={{
+              padding: '12px 20px',
+              borderTop: '0.5px solid var(--color-border-tertiary)',
+              background: 'var(--color-background-primary)',
+              flex: '0 0 auto',
+            }}
+          >
+            <fieldset style={{ marginBottom: 8, fontSize: 13 }}>
+              <legend style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-secondary)', marginBottom: 4 }}>
+                出力タイプ
+              </legend>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name={`sample-doctype-${sample.sample_number}`}
+                    value="sample"
+                    checked={pickDocType === 'sample'}
+                    onChange={() => setPickDocType('sample')}
+                  />
+                  <span>サンプル指示書</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name={`sample-doctype-${sample.sample_number}`}
+                    value="final"
+                    checked={pickDocType === 'final'}
+                    onChange={() => setPickDocType('final')}
+                  />
+                  <span>最終仕様書</span>
+                </label>
+              </div>
+            </fieldset>
+            <button
+              type="button"
+              onClick={() => onPickSample(sample, pickDocType)}
+              style={{
+                width: '100%', minHeight: 44, fontSize: 14, fontWeight: 600,
+                padding: '10px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
+                background: '#4f46e5', color: '#ffffff',
+              }}
+            >
+              このサンプルを起点に新規作成 →
+            </button>
+            <p style={{ fontSize: 11, color: 'var(--color-text-tertiary)', marginTop: 6, textAlign: 'center' }}>
+              形状とブランド名を引き継いで Step1 を起動します
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-export default function SampleBook() {
+interface SampleBookProps {
+  /**
+   * When provided, each sample's modal shows a primary "起点に新規作成" button.
+   * When `mode === 'pick'`, a top banner clarifies that the user is picking a
+   * sample as a starting point for Route A.
+   */
+  onPickSample?: (sample: PutterSample, documentType: DocumentType) => void
+  mode?: 'browse' | 'pick'
+}
+
+export default function SampleBook({ onPickSample, mode = 'browse' }: SampleBookProps = {}) {
   const [query, setQuery] = useState('')
-  const [filterShape, setFilterShape] = useState('')
+  const [filterShape, setFilterShape] = useState('') // master head_shape value, e.g. 'pin'
   const [filterClosure, setFilterClosure] = useState('')
   const [filterDecor, setFilterDecor] = useState('')
   const [selected, setSelected] = useState<PutterSample | null>(null)
 
+  const shapeOptions = useMemo(() => getOptions('head_shape'), [])
+  const closureOptions = useMemo(() => getSampleClosureTypes(SAMPLES), [])
+  const decorationOptions = useMemo(() => getSampleDecorationTypes(SAMPLES), [])
+
   const filtered = useMemo(() => {
     return SAMPLES.filter(s => {
-      if (filterShape && s.shape.head_type !== filterShape) return false
+      if (filterShape) {
+        const masterValue = getShapeByAlias(s.shape.head_type)
+        if (masterValue !== filterShape) return false
+      }
       if (filterClosure && s.closure.type !== filterClosure) return false
       if (filterDecor && s.decoration.type !== filterDecor) return false
       if (query) {
@@ -279,6 +401,21 @@ export default function SampleBook() {
 
   return (
     <div style={{ padding: '24px 0' }}>
+      {mode === 'pick' && (
+        <div
+          style={{
+            marginBottom: 16,
+            padding: '12px 16px',
+            background: '#EEF2FF',
+            border: '1px solid #C7D2FE',
+            borderRadius: 8,
+            fontSize: 13,
+            color: '#3730A3',
+          }}
+        >
+          <strong>[A] サンプル帳から作成</strong>: 起点となるサンプルを選んでください。詳細を開いて「起点に新規作成」を押すと Step1 に進みます。
+        </div>
+      )}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
         <input
           type="text"
@@ -289,19 +426,19 @@ export default function SampleBook() {
         />
         <select value={filterShape} onChange={e => setFilterShape(e.target.value)} style={selectStyle}>
           <option value="">形状：すべて</option>
-          {['ブレード','フルマレット','セミマレット','スクエアマレット','ネオマレット'].map(v => (
-            <option key={v}>{v}</option>
+          {shapeOptions.map(o => (
+            <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
         <select value={filterClosure} onChange={e => setFilterClosure(e.target.value)} style={selectStyle}>
           <option value="">開閉：すべて</option>
-          {['マグネット','ベルクロ','FIDLOCK','ベルト'].map(v => (
+          {closureOptions.map(v => (
             <option key={v}>{v}</option>
           ))}
         </select>
         <select value={filterDecor} onChange={e => setFilterDecor(e.target.value)} style={selectStyle}>
           <option value="">装飾：すべて</option>
-          {['刺繍','プリント','複合','なし'].map(v => (
+          {decorationOptions.map(v => (
             <option key={v}>{v}</option>
           ))}
         </select>
@@ -317,12 +454,27 @@ export default function SampleBook() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
           {filtered.map((s, i) => (
-            <SampleCard key={`${s.sample_number}-${i}`} sample={s} onClick={() => setSelected(s)} />
+            <SampleCard
+              key={`${s.sample_number}-${i}`}
+              sample={s}
+              onClick={() => setSelected(s)}
+              onQuickPick={
+                mode === 'pick' && onPickSample
+                  ? (s) => onPickSample(s, 'sample')
+                  : undefined
+              }
+            />
           ))}
         </div>
       )}
 
-      {selected && <Modal sample={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <Modal
+          sample={selected}
+          onClose={() => setSelected(null)}
+          onPickSample={onPickSample}
+        />
+      )}
     </div>
   )
 }

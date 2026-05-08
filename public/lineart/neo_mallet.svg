@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <rect width="1024" height="1024" fill="#ffffff"/>
+  <!-- Neo-mallet (oversized) putter cover outline (larger, almost square) -->
+  <path
+    d="M 160 280
+       Q 160 200 260 180
+       L 760 180
+       Q 870 180 880 280
+       L 880 760
+       Q 880 840 800 850
+       L 230 850
+       Q 150 840 150 760
+       L 150 320
+       Q 150 300 160 280
+       Z"
+    fill="none"
+    stroke="#222222"
+    stroke-width="6"
+    stroke-linejoin="round"
+  />
+  <!-- Stitch fold indication -->
+  <path
+    d="M 220 250 L 820 250"
+    fill="none"
+    stroke="#666666"
+    stroke-width="2"
+    stroke-dasharray="6 6"
+  />
+</svg>

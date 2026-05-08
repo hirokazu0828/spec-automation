@@ -14,17 +14,20 @@
         {
           "value": "pin",
           "label": "ピン型（ブレード型）",
-          "en": "pin type blade putter cover"
+          "en": "pin type blade putter cover",
+          "aliases": ["ブレード", "ピン", "ピン型", "ブレード型", "blade", "pin"]
         },
         {
           "value": "mallet",
           "label": "マレット型",
-          "en": "mallet type putter cover"
+          "en": "mallet type putter cover",
+          "aliases": ["マレット", "マレット型", "セミマレット", "mallet", "semi-mallet"]
         },
         {
           "value": "neo_mallet",
           "label": "ネオマレット（大型マレット）",
-          "en": "neo mallet large oversized putter cover"
+          "en": "neo mallet large oversized putter cover",
+          "aliases": ["ネオマレット", "ネオ", "フルマレット", "大型マレット", "neo", "full-mallet"]
         }
       ]
     },
@@ -160,7 +163,8 @@
         {
           "value": "ten_uron",
           "label": "天ウーロン",
-          "feature": "傷防止・静電気防止"
+          "feature": "傷防止・静電気防止",
+          "aliases": ["天ウーロン", "テンウーロン", "テンダーロン", "デンザーロン", "天竹ーロン", "テンウーロン、メッシュ", "天ウーロン、メッシュ", "テンダーロン、メッシュ", "デンザーロン・メッシュ", "天竹ーロン、メッシュ"]
         },
         {
           "value": "poly_smooth",
@@ -205,7 +209,14 @@
       ],
       "ng_rules": [
         {
-          "condition": "knit素材 AND (pu_10 OR pu_15)",
+          "condition": "knit素材 AND pu_10",
+          "match": { "body_fabric_type": "knit", "piping": "pu_10" },
+          "message": "縫製ストレスが発生します。ポリエステルテープ8mmを推奨",
+          "severity": "高"
+        },
+        {
+          "condition": "knit素材 AND pu_15",
+          "match": { "body_fabric_type": "knit", "piping": "pu_15" },
           "message": "縫製ストレスが発生します。ポリエステルテープ8mmを推奨",
           "severity": "高"
         }
@@ -241,7 +252,8 @@
         {
           "condition": "magnet_only",
           "message": "パターカバーにマグネット単独は落下リスクあり。ワイヤーまたはゴム式を使用",
-          "severity": "高"
+          "severity": "高",
+          "note": "現状 closure.options に magnet 値がないため match は未設定 (将来追加時に付与)"
         }
       ]
     },
@@ -285,6 +297,34 @@
           "value": "silicon",
           "label": "シリコンパッチ",
           "en": "with silicone patch logo"
+        },
+        {
+          "value": "print",
+          "label": "プリント",
+          "en": "with printed graphic logo"
+        }
+      ]
+    },
+    "thread_type": {
+      "label": "糸種",
+      "type": "select",
+      "required": false,
+      "note": "刺繍テーブルの 1 行ごとに選択。embroidery と独立",
+      "options": [
+        {
+          "value": "standard",
+          "label": "標準刺繍糸",
+          "en": "standard polyester embroidery thread"
+        },
+        {
+          "value": "metallic",
+          "label": "メタリック糸",
+          "en": "metallic embroidery thread"
+        },
+        {
+          "value": "ginnan",
+          "label": "銀杏",
+          "en": "ginnan specialty silk-like embroidery thread"
         }
       ]
     },
@@ -321,13 +361,15 @@
       ],
       "ng_rules": [
         {
-          "condition": "gold_embroidery AND black_nickel",
-          "message": "ポジションが混在しています。ゴールド系金具を推奨",
-          "severity": "高"
+          "condition": "white_body AND gold",
+          "match": { "body_color": "white", "hardware_finish": "gold" },
+          "message": "ホワイト系本体×ゴールドはコントラスト過剰になる場合があります",
+          "severity": "中"
         },
         {
           "condition": "white_body AND black_nickel",
-          "message": "コントラスト過剰です。ソフトニッケルまたは艶なしシルバーを推奨",
+          "match": { "body_color": "white", "hardware_finish": "black_nickel" },
+          "message": "ホワイト系本体×黒ニッケルはコントラスト過剰になる場合があります",
           "severity": "中"
         }
       ]
@@ -340,57 +382,68 @@
         {
           "value": "black",
           "label": "ブラック",
-          "en": "matte black colorway"
+          "en": "matte black colorway",
+          "aliases": ["黒", "BLACK", "Black", "ブラック"]
         },
         {
           "value": "white",
           "label": "ホワイト",
-          "en": "clean white colorway"
+          "en": "clean white colorway",
+          "aliases": ["白", "WHITE", "White", "ホワイト"]
         },
         {
           "value": "gray",
           "label": "グレー",
-          "en": "gray colorway"
+          "en": "gray colorway",
+          "aliases": ["灰", "グレー", "GRAY", "Gray", "GREY", "Grey", "ねず", "鼠"]
         },
         {
           "value": "light_gray",
           "label": "ライトグレー",
-          "en": "light gray colorway"
+          "en": "light gray colorway",
+          "aliases": ["ライトグレー", "L.GRAY", "L.Gray", "Light Gray", "LIGHT GRAY", "薄灰", "浅灰"]
         },
         {
           "value": "navy",
           "label": "ネイビー",
-          "en": "deep navy colorway"
+          "en": "deep navy colorway",
+          "aliases": ["紺", "ネイビー", "NAVY", "Navy", "NAVY(紺)", "デジカモ NAVY(紺) ナイロン"]
         },
         {
           "value": "black_navy",
           "label": "ブラックネイビー",
-          "en": "black navy colorway"
+          "en": "black navy colorway",
+          "aliases": ["黒紺", "ブラックネイビー", "BLACK NAVY"]
         },
         {
           "value": "sax_blue",
           "label": "サックスブルー",
-          "en": "sax blue colorway"
+          "en": "sax blue colorway",
+          "aliases": ["サックス", "サックスブルー", "Sax", "SAX", "Sax Blue", "水色", "ライトブルー", "浅青"]
         },
         {
           "value": "burgundy",
           "label": "エンジ（バーガンディ）",
-          "en": "burgundy colorway"
+          "en": "burgundy colorway",
+          "aliases": ["エンジ", "バーガンディ", "Burgundy", "BURGUNDY", "ワインレッド", "ワイン"]
         },
         {
           "value": "pink",
           "label": "ピンク",
-          "en": "soft pink colorway"
+          "en": "soft pink colorway",
+          "aliases": ["桃", "ピンク", "PINK", "Pink"]
         },
         {
           "value": "green",
           "label": "グリーン",
-          "en": "bright green colorway"
+          "en": "bright green colorway",
+          "aliases": ["緑", "グリーン", "GREEN", "Green", "PC.GREEN", "PC GREEN", "PC.Green", "GREEN（緑）"]
         },
         {
           "value": "red",
           "label": "レッド",
-          "en": "red colorway"
+          "en": "red colorway",
+          "aliases": ["赤", "レッド", "RED", "Red"]
         }
       ]
     }
@@ -777,13 +830,5 @@
       "body_color": "black",
       "price": "¥800〜¥1,200"
     }
-  ],
-  "midjourney": {
-    "suffix": "product photography, pure white background, soft diffused lighting, sharp focus, 8k resolution, commercial product shot --ar 4:3 --style raw --v 6",
-    "shape_en": {
-      "pin": "pin type blade putter cover",
-      "mallet": "mallet type putter cover",
-      "neo_mallet": "neo mallet large oversized putter cover"
-    }
-  }
+  ]
 }

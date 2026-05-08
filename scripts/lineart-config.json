@@ -1,0 +1,13 @@
+{
+  "shapes": {
+    "pin": "BRG-2109-P911_p1.jpg",
+    "mallet": "BRG-2111-P1006_p1.jpg",
+    "neo_mallet": "BRG-2109-P897_p1.jpg"
+  },
+  "options": {
+    "size": 1024,
+    "lowThreshold": 10,
+    "highThreshold": 30,
+    "gaussianBlur": 1.1
+  }
+}

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <rect width="1024" height="1024" fill="#ffffff"/>
+  <!-- Mallet-style putter cover outline (more rounded, taller) -->
+  <path
+    d="M 220 360
+       Q 220 260 320 240
+       L 720 240
+       Q 820 240 850 340
+       L 850 700
+       Q 850 770 780 780
+       L 270 780
+       Q 200 770 200 700
+       L 200 410
+       Q 200 380 220 360
+       Z"
+    fill="none"
+    stroke="#222222"
+    stroke-width="6"
+    stroke-linejoin="round"
+  />
+  <!-- Stitch fold indication -->
+  <path
+    d="M 260 320 L 780 320"
+    fill="none"
+    stroke="#666666"
+    stroke-width="2"
+    stroke-dasharray="6 6"
+  />
+</svg>
