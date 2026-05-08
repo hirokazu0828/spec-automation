@@ -12,6 +12,7 @@ import type { SpecData, DocumentType } from './types';
 import { useSpecDrafts, type WizardStep, type DraftEnvelope } from './hooks/useSpecDrafts';
 import type { DocTypeOverride } from './components/Home/DraftPickerModal';
 import { getShapeByAlias, getOptionValueByAlias } from './utils/specHelpers';
+import { getTemplateByHeadShape } from './data/templates/helpers';
 import { ArrowLeftIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import './index.css';
 
@@ -87,12 +88,14 @@ function App() {
       const colorSource = sample.outer_material?.color || sample.color_scheme?.main_color || '';
       const bodyColor = getOptionValueByAlias('body_color', colorSource) ?? '';
       const lining = getOptionValueByAlias('lining', sample.lining_material?.fabric ?? '') ?? '';
+      const templateId = getTemplateByHeadShape(headShape)?.id;
       const seed: Partial<SpecData> = {
         originSampleId: sample.sample_number,
         headShape,
         brandName: sample.client ?? '',
         ...(bodyColor ? { bodyColor } : {}),
         ...(lining ? { lining } : {}),
+        ...(templateId ? { templateId } : {}),
         ...applyDocType(documentType),
       };
       startWizardFromSeed('A', seed);

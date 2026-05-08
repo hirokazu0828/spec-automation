@@ -1,11 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
-import { CpuChipIcon, SparklesIcon, ArrowPathIcon, TrashIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
-import type { SpecData } from '../../types';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { CpuChipIcon, SparklesIcon, ArrowPathIcon, TrashIcon, ArrowUpTrayIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import type { SpecData, TemplateAngle } from '../../types';
 import { useToast } from '../Toast';
 import { buildImagePrompt } from './buildImagePrompt';
 import { generateImage, fetchAsBase64 } from './generateImage';
 import { saveImage, loadImage, deleteImage } from '../../lib/imageStore';
 import { deriveUploadSource, imageSourceLabel, readFileAsDataUrl } from './imageSource';
+import {
+  ALL_ANGLES,
+  ANGLE_DISPLAY_NAMES,
+  getAllTemplates,
+  getAvailableAngles,
+  getTemplateByHeadShape,
+  getTemplateById,
+  hasAngle,
+} from '../../data/templates/helpers';
+import type { TemplateEntry } from '../../data/templates/types';
 
 interface Props {
   data: SpecData;
@@ -15,7 +25,7 @@ interface Props {
   onBack: () => void;
 }
 
-const LINEART_PATH: Record<string, string> = {
+const FALLBACK_LINEART_PATH: Record<string, string> = {
   pin: '/lineart/pin.svg',
   mallet: '/lineart/mallet.svg',
   neo_mallet: '/lineart/neo_mallet.svg',
@@ -27,6 +37,33 @@ export default function Step3({ data, updateData, draftId, onNext, onBack }: Pro
   const [isGenerating, setIsGenerating] = useState(false);
   const [insertToSheet, setInsertToSheet] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const allTemplates = useMemo(() => getAllTemplates(), []);
+  const headShapeFallback = useMemo(
+    () => getTemplateByHeadShape(data.headShape),
+    [data.headShape],
+  );
+  const template: TemplateEntry | undefined = data.templateId
+    ? getTemplateById(data.templateId)
+    : headShapeFallback;
+  const availableAngles = useMemo(
+    () => (template ? getAvailableAngles(template) : []),
+    [template],
+  );
+  const isPendingLineart = template?.metadata.lineArtStatus === 'pending_lineart';
+
+  // The angle to render. We never render a stored angle that the current
+  // template doesn't have — so picking a pending template after using
+  // 'side_toe' on blade still shows a valid (front) image.
+  const activeAngle: TemplateAngle =
+    data.selectedAngle && template && hasAngle(template, data.selectedAngle)
+      ? data.selectedAngle
+      : (availableAngles[0] ?? 'front');
+
+  const lineartSrc = template?.baseImages[activeAngle]
+    ?? FALLBACK_LINEART_PATH[data.headShape]
+    ?? '';
+  const promptPreview = buildImagePrompt(data, template ? activeAngle : undefined);
 
   useEffect(() => {
     let cancelled = false;
@@ -40,12 +77,18 @@ export default function Step3({ data, updateData, draftId, onNext, onBack }: Pro
 
   const sourceLabel = imageSourceLabel(data.imageSource);
 
-  const lineartSrc = LINEART_PATH[data.headShape] ?? '';
-  const promptPreview = buildImagePrompt(data);
+  const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const nextId = e.target.value || undefined;
+    updateData({ templateId: nextId, selectedAngle: undefined });
+  };
+
+  const handleAngleChange = (angle: TemplateAngle) => {
+    updateData({ selectedAngle: angle });
+  };
 
   const handleGenerate = async () => {
     if (!lineartSrc) {
-      showToast('ヘッド形状が未設定のため線図を読み込めません', 'error');
+      showToast('テンプレートが未選択のため線図を読み込めません', 'error');
       return;
     }
     const ok = window.confirm('OpenAI で画像を生成します（数十円程度）。よろしいですか？');
@@ -106,9 +149,13 @@ export default function Step3({ data, updateData, draftId, onNext, onBack }: Pro
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'アップロードに失敗', 'error');
     } finally {
-      // Reset the input so the same file can be re-selected after toast.
       e.target.value = '';
     }
+  };
+
+  const handleSwitchToBlade = () => {
+    updateData({ templateId: 'putter-blade', selectedAngle: 'front' });
+    showToast('ブレード型テンプレートに切り替えました');
   };
 
   return (
@@ -119,21 +166,100 @@ export default function Step3({ data, updateData, draftId, onNext, onBack }: Pro
         <CpuChipIcon className="w-16 h-16 mx-auto text-indigo-500 mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 mb-2">AIデザイン画像生成</h2>
         <p className="text-gray-600">
-          線図シルエットを土台に、STEP2 の素材・色・刺繍指示を踏まえてアプリ内で画像を生成します。
+          型を選んでアングルを切り替え、STEP2 の素材・色・刺繍指示を踏まえてアプリ内で画像を生成します。
         </p>
+      </div>
+
+      {/* テンプレート選択 + アングルタブ */}
+      <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <label className="text-sm font-bold text-gray-700 sm:w-32 shrink-0" htmlFor="template-select">
+            型テンプレート
+          </label>
+          <select
+            id="template-select"
+            value={template?.id ?? ''}
+            onChange={handleTemplateChange}
+            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="">（自動: STEP1 のヘッド形状）</option>
+            {allTemplates.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.displayName}
+                {t.metadata.lineArtStatus === 'pending_lineart' ? '（線画準備中）' : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {isPendingLineart && (
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 flex items-start gap-3">
+            <ExclamationTriangleIcon className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+            <div className="flex-1 text-sm">
+              <p className="font-bold text-amber-900">線画準備中</p>
+              <p className="text-amber-800 mt-1">
+                {template?.displayName}
+                の線画は Phase B で整備予定です。今は前面アングルのみ利用でき、表示中の線図は SVG フォールバックです。
+              </p>
+              <button
+                onClick={handleSwitchToBlade}
+                className="mt-2 inline-flex items-center text-xs font-bold text-amber-900 underline hover:text-amber-700 min-h-[44px] sm:min-h-0"
+              >
+                ブレード型に切り替える
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <span className="text-sm font-bold text-gray-700 sm:w-32 shrink-0">アングル</span>
+          <div className="flex flex-wrap gap-2">
+            {ALL_ANGLES.map((angle) => {
+              // Pending templates only let the user pick `front` (the SVG
+              // fallback covers it); a complete template enables every angle
+              // it actually has a PNG for.
+              const enabled = template
+                ? isPendingLineart
+                  ? angle === 'front'
+                  : hasAngle(template, angle)
+                : angle === 'front';
+              const selected = activeAngle === angle;
+              return (
+                <button
+                  key={angle}
+                  type="button"
+                  onClick={() => handleAngleChange(angle)}
+                  disabled={!enabled}
+                  aria-pressed={selected}
+                  className={`min-h-[44px] sm:min-h-0 px-3 py-2 rounded-lg text-xs font-bold border transition-colors ${
+                    selected
+                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                      : enabled
+                        ? 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                        : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  {ANGLE_DISPLAY_NAMES[angle]}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden shadow-sm">
           <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
             <h3 className="font-bold text-gray-700 text-sm">線図テンプレート</h3>
-            <span className="text-xs text-gray-500">{data.headShape || '(未設定)'}</span>
+            <span className="text-xs text-gray-500">
+              {template ? `${template.displayName} / ${ANGLE_DISPLAY_NAMES[activeAngle]}` : '(未設定)'}
+            </span>
           </div>
           <div className="aspect-square flex items-center justify-center bg-white p-4">
             {lineartSrc ? (
               <img
                 src={lineartSrc}
-                alt={`${data.headShape} 線図`}
+                alt={`${template?.displayName ?? data.headShape} ${ANGLE_DISPLAY_NAMES[activeAngle]} 線図`}
                 className="max-w-full max-h-full object-contain"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.opacity = '0.3';

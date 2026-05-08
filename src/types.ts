@@ -1,6 +1,9 @@
 export type DocumentType = 'sample' | 'final';
 export type ImageSource = 'generated' | 'manual' | 'photo';
 
+export type { TemplateAngle } from './data/templates/types';
+import type { TemplateAngle } from './data/templates/types';
+
 export type SampleArrangement = {
   shippingDate?: string;
   quantities: {
@@ -101,6 +104,21 @@ export type SpecData = {
   sampleArrangement?: SampleArrangement;
   /** Where the product image came from (Layer 3 will refine this). */
   imageSource?: ImageSource;
+
+  /**
+   * Layer 3a: id of the line-art template (`putter-blade` etc.) used by
+   * Step3. Optional — drafts created before Layer 3a fall back to deriving
+   * the template from `headShape` at render time. Set explicitly when the
+   * user picks a different template than the one auto-suggested by their
+   * shape choice.
+   */
+  templateId?: string;
+  /**
+   * Layer 3a: the angle whose line-art is currently displayed in Step3.
+   * Defaults to 'front'. Persisted so re-opening the draft restores the
+   * user's last view.
+   */
+  selectedAngle?: TemplateAngle;
 };
 
 export type ProposalBase = {

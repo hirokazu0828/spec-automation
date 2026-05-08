@@ -1,0 +1,120 @@
+{
+  "version": "1.0",
+  "templates": [
+    {
+      "id": "putter-blade",
+      "category": "putter",
+      "subType": "blade",
+      "displayName": "パター用ブレード型（ピンタイプ）",
+      "displayNameEn": "Putter cover, blade type (pin)",
+      "aliases": ["pin", "ピン", "ブレード", "blade"],
+      "baseImages": {
+        "front": "/templates/putter-blade/front.png",
+        "side_toe": "/templates/putter-blade/side_toe.png",
+        "back": "/templates/putter-blade/back.png",
+        "side_heel": "/templates/putter-blade/side_heel.png"
+      },
+      "defaultDimensions": {
+        "length": 180,
+        "width": 150,
+        "depth": 80,
+        "unit": "mm",
+        "noted": "W180×H150×D80mm"
+      },
+      "parts": [
+        { "code": "A", "name": "本体生地", "description": "カバーの主要面" },
+        { "code": "B", "name": "切替", "description": "本体上部の切替部分" },
+        { "code": "C", "name": "裏地", "description": "内側の素材" },
+        { "code": "D", "name": "留め具", "description": "マグネット / スナップ等" },
+        { "code": "E", "name": "テープ / 縁巻き", "description": "周囲の縁取り" },
+        { "code": "F", "name": "装飾 / 金具", "description": "ワッペン / D菅等" }
+      ],
+      "recommendedDefaults": {
+        "bodyFabric": "pu_smooth",
+        "lining": "ten_uron",
+        "closure": "magnetic"
+      },
+      "sampleReferences": [
+        "BRG-2109-P911",
+        "BRG-2109-P925",
+        "BRG-2111-P1017",
+        "BRG-2111-P1038",
+        "BRG-2506-P2226",
+        "BRG-2509-P2313",
+        "BRG-2509-P2320"
+      ],
+      "metadata": {
+        "source": "FTN-2503-P088 (FOURTEEN TSUNOJI)",
+        "createdBy": "manual",
+        "createdAt": "2026-05-07",
+        "lineArtStatus": "complete",
+        "logoTreatment": "placeholder",
+        "notes": "FOURTEEN TSUNOJI のピン型線図を素材として、ロゴをプレースホルダー化。サンプル帳のブレード型13件のうち寸法・confidence高の7件を sampleReferences に記録。"
+      }
+    },
+    {
+      "id": "putter-semi-mallet",
+      "category": "putter",
+      "subType": "semi_mallet",
+      "displayName": "パター用セミマレット型",
+      "displayNameEn": "Putter cover, semi-mallet type",
+      "aliases": ["セミマレット", "semi_mallet"],
+      "baseImages": {},
+      "defaultDimensions": {
+        "length": 180,
+        "width": 150,
+        "depth": 100,
+        "unit": "mm",
+        "noted": "標準寸法は要確認 (Phase B で確定)"
+      },
+      "parts": [
+        { "code": "A", "name": "本体生地", "description": "カバーの主要面" },
+        { "code": "B", "name": "切替", "description": "本体上部の切替部分" },
+        { "code": "C", "name": "裏地", "description": "内側の素材" },
+        { "code": "D", "name": "留め具", "description": "マグネット / スナップ等" },
+        { "code": "E", "name": "テープ / 縁巻き", "description": "周囲の縁取り" },
+        { "code": "F", "name": "装飾 / 金具", "description": "ワッペン / D菅等" }
+      ],
+      "sampleReferences": [],
+      "metadata": {
+        "source": null,
+        "createdBy": "pending",
+        "createdAt": null,
+        "lineArtStatus": "pending_lineart",
+        "notes": "サンプル帳に9件のセミマレット型サンプルあり。代表選定 + 線画化は Phase B で実施。"
+      }
+    },
+    {
+      "id": "putter-full-mallet",
+      "category": "putter",
+      "subType": "full_mallet",
+      "displayName": "パター用フルマレット型",
+      "displayNameEn": "Putter cover, full mallet type",
+      "aliases": ["フルマレット", "マレット", "full_mallet", "mallet"],
+      "baseImages": {},
+      "defaultDimensions": {
+        "length": 200,
+        "width": 130,
+        "depth": 110,
+        "unit": "mm",
+        "noted": "標準寸法は要確認 (Phase B で確定)"
+      },
+      "parts": [
+        { "code": "A", "name": "本体生地", "description": "カバーの主要面" },
+        { "code": "B", "name": "切替", "description": "本体上部の切替部分" },
+        { "code": "C", "name": "裏地", "description": "内側の素材" },
+        { "code": "D", "name": "留め具", "description": "マグネット / スナップ等" },
+        { "code": "E", "name": "テープ / 縁巻き", "description": "周囲の縁取り" },
+        { "code": "F", "name": "装飾 / 金具", "description": "ワッペン / D菅等" }
+      ],
+      "sampleReferences": [],
+      "metadata": {
+        "source": null,
+        "createdBy": "pending",
+        "createdAt": null,
+        "lineArtStatus": "pending_lineart",
+        "notes": "サンプル帳に27件のフルマレット型サンプルあり (最多)。代表選定 + 線画化は Phase B で実施。"
+      }
+    }
+  ]
+}
