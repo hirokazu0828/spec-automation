@@ -5,19 +5,30 @@ import Step3 from './index';
 import { initialSpecData } from '../../types';
 import type { SpecData } from '../../types';
 
-// IndexedDB mocks: loadImage resolves null so the "no generated image yet"
-// branch renders, save/delete are spies.
+// IndexedDB mocks. Layer 3b-fix-step3-improvements adds per-angle accessors;
+// load* resolves "no images yet" so the placeholder UI renders.
 vi.mock('../../lib/imageStore', () => ({
   loadImage: vi.fn(async () => null),
   saveImage: vi.fn(async () => {}),
   deleteImage: vi.fn(async () => {}),
+  loadAngleImage: vi.fn(async () => null),
+  loadAllAngleImages: vi.fn(async () => ({})),
+  saveAngleImage: vi.fn(async () => {}),
+  deleteAngleImage: vi.fn(async () => {}),
 }));
 
 // We don't actually call OpenAI in tests — the generate path is exercised
-// only enough to verify the prompt + base64 wiring.
+// only enough to verify the prompt + base64 wiring. Bulk fn returns 4 ok'd
+// dataUrls so the post-success state can be exercised when needed.
 vi.mock('./generateImage', () => ({
   generateImage: vi.fn(async () => ({ ok: true, dataUrl: 'data:image/png;base64,xxx' })),
   fetchAsBase64: vi.fn(async () => 'xxx'),
+  generateImagesForAllAngles: vi.fn(async () => [
+    { angle: 'front', ok: true, dataUrl: 'data:image/png;base64,front' },
+    { angle: 'side_toe', ok: true, dataUrl: 'data:image/png;base64,side_toe' },
+    { angle: 'back', ok: true, dataUrl: 'data:image/png;base64,back' },
+    { angle: 'side_heel', ok: true, dataUrl: 'data:image/png;base64,side_heel' },
+  ]),
 }));
 
 function makeData(overrides: Partial<SpecData>): SpecData {
@@ -125,5 +136,50 @@ describe('Step3 template + angle selection', () => {
     const imgs = await waitFor(() => screen.getAllByRole('img'));
     const lineart = imgs.find((i) => (i as HTMLImageElement).src.includes('/lineart/mallet.svg'));
     expect(lineart).toBeTruthy();
+  });
+});
+
+describe('Step3 4-angle bulk UX (Layer 3b-fix-step3-improvements)', () => {
+  it('renders the bulk-generate button enabled for a complete template', () => {
+    renderStep3(makeData({ headShape: 'pin' }));
+    const btn = screen.getByRole('button', { name: '4 アングル一括生成' });
+    expect(btn).toBeInTheDocument();
+    expect(btn).toBeEnabled();
+  });
+
+  it('renders one re-generate button per angle (4 tiles)', () => {
+    renderStep3(makeData({ headShape: 'pin' }));
+    for (const label of ['正面（表側）', '側面（トウ側）', '後面（開口部）', '側面（ヒール側）']) {
+      expect(screen.getByLabelText(`${label} を再生成`)).toBeInTheDocument();
+    }
+  });
+
+  it('disables the bulk-generate button on pending_lineart templates', () => {
+    renderStep3(makeData({ headShape: 'mallet', templateId: 'putter-semi-mallet' }));
+    expect(screen.getByRole('button', { name: '4 アングル一括生成' })).toBeDisabled();
+  });
+
+  it('confirm modal text for bulk generation includes "4 アングル" and "約 25 円"', async () => {
+    const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    renderStep3(makeData({ headShape: 'pin' }));
+    await user.click(screen.getByRole('button', { name: '4 アングル一括生成' }));
+    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    const arg = confirmSpy.mock.calls[0][0] as string;
+    expect(arg).toContain('4 アングル');
+    expect(arg).toContain('約 25 円');
+    confirmSpy.mockRestore();
+  });
+
+  it('confirm modal text for single re-generate includes "1 アングル" and "約 6 円"', async () => {
+    const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    renderStep3(makeData({ headShape: 'pin' }));
+    await user.click(screen.getByLabelText('正面（表側） を再生成'));
+    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    const arg = confirmSpy.mock.calls[0][0] as string;
+    expect(arg).toContain('1 アングル');
+    expect(arg).toContain('約 6 円');
+    confirmSpy.mockRestore();
   });
 });

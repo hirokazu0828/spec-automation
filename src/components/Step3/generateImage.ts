@@ -1,8 +1,19 @@
+import type { TemplateAngle } from '../../types';
+import { ALL_ANGLES } from '../../data/templates/types';
+
 export type GenerateImageOptions = {
   prompt: string;
   imageBase64?: string;
   quality?: 'low' | 'medium' | 'high';
   endpoint?: string;
+  /**
+   * Layer 3b-fix-step3-improvements: opt-in model override forwarded to the
+   * server allowlist. Defaults to the server's own default ('gpt-image-1').
+   * Kept here so a future gpt-image-2 reopening (see
+   * `docs/layer3b-step3-improvements-decisions.md` §future-work) only needs
+   * to flip a flag.
+   */
+  model?: 'gpt-image-1' | 'gpt-image-2';
 };
 
 type ImagePayloadItem = { b64_json?: string; url?: string };
@@ -10,6 +21,11 @@ type ImagePayloadItem = { b64_json?: string; url?: string };
 export type GenerateImageResult =
   | { ok: true; dataUrl: string }
   | { ok: false; error: string };
+
+export type AngleGenerateResult = { angle: TemplateAngle } & GenerateImageResult;
+
+const RATE_LIMIT_RE = /429|rate[ _-]?limit|too many requests/i;
+const SEQUENTIAL_FALLBACK_DELAY_MS = 500;
 
 export async function generateImage(opts: GenerateImageOptions): Promise<GenerateImageResult> {
   const endpoint = opts.endpoint ?? '/api/generate-image';
@@ -21,6 +37,7 @@ export async function generateImage(opts: GenerateImageOptions): Promise<Generat
         prompt: opts.prompt,
         imageBase64: opts.imageBase64,
         quality: opts.quality ?? 'medium',
+        ...(opts.model ? { model: opts.model } : {}),
       }),
     });
     if (!res.ok) {
@@ -40,6 +57,54 @@ export async function generateImage(opts: GenerateImageOptions): Promise<Generat
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : '通信エラー' };
   }
+}
+
+/**
+ * Layer 3b-fix-step3-improvements: bulk-generate images for the requested
+ * angles in parallel via `Promise.all`. On any 429-style rate-limit response,
+ * retry only the failed angles sequentially with a 500ms inter-call delay
+ * (everything that succeeded in the parallel pass is kept as-is).
+ *
+ * The `buildOne` callback is invoked once per angle so the caller can vary
+ * the prompt and image-base64 per angle. This keeps `generateImagesForAllAngles`
+ * a thin orchestration layer; prompt assembly stays in `buildImagePrompt`.
+ */
+export async function generateImagesForAllAngles(
+  buildOne: (angle: TemplateAngle) => Promise<GenerateImageOptions>,
+  angles: ReadonlyArray<TemplateAngle> = ALL_ANGLES,
+): Promise<AngleGenerateResult[]> {
+  // Phase 1 — issue all requests in parallel.
+  const parallel = await Promise.all(
+    angles.map(async (angle): Promise<AngleGenerateResult> => {
+      const opts = await buildOne(angle);
+      const r = await generateImage(opts);
+      return { angle, ...r };
+    }),
+  );
+
+  // Bail early if every angle succeeded, or if the failures aren't rate-limits
+  // (other errors aren't worth retrying — the call site surfaces them in the
+  // per-angle tile).
+  const hadRateLimit = parallel.some(
+    (r) => r.ok === false && RATE_LIMIT_RE.test(r.error ?? ''),
+  );
+  if (!hadRateLimit) return parallel;
+
+  // Phase 2 — retry only the failed angles, sequentially, with a fixed delay.
+  const out = parallel.slice();
+  let firstRetry = true;
+  for (let i = 0; i < out.length; i++) {
+    const cur = out[i];
+    if (cur.ok) continue;
+    if (!firstRetry) {
+      await new Promise((resolve) => setTimeout(resolve, SEQUENTIAL_FALLBACK_DELAY_MS));
+    }
+    firstRetry = false;
+    const opts = await buildOne(cur.angle);
+    const r = await generateImage(opts);
+    out[i] = { angle: cur.angle, ...r };
+  }
+  return out;
 }
 
 export async function fetchAsBase64(url: string): Promise<string> {

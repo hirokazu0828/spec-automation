@@ -1,7 +1,7 @@
 # 現状実装レポート
 
-> 作成日: 2026-05-03 / 最終更新: 2026-05-08 (Layer 3b)
-> 対象コミット: `main` 統合済み + Layer 3a (型カタログ + アングル選択 UI) + Layer 3b (プロンプトテンプレート)
+> 作成日: 2026-05-03 / 最終更新: 2026-05-10 (Layer 3b-fix-step3-improvements)
+> 対象コミット: `main` + Layer 3b-fix-step3-improvements (4 アングル一括生成 + opt-in model param)
 > 目的: Layer 2〜6 の実装に着手する前の現状把握。
 
 ---
@@ -477,9 +477,10 @@ PutterSample
 | `scripts/data/charset.test.ts` *(Layer 2-PDF-perf)* | 6 | ASCII / Hiragana / Katakana 全網羅、業務固有漢字、重複なし、>2000 chars |
 | `scripts/subset-fonts.test.ts` *(Layer 2-PDF-perf)* | 6 | Regular/Bold subset の存在 / フル WOFF より顕著に小さい / <1MB |
 | `src/data/templates/helpers.test.ts` *(Layer 3a + 3b)* | 22 | (3a 12 件) + (3b 10 件: catalog 全 template の `anglePromptPhrases` / `promptShapeDescription` / `getAnglePromptPhrase` 2 件 / `getPositionPromptPhrase` 5 件 / NEGATIVE_PROMPT_PHRASE 1 件) |
-| `src/components/Step3/index.test.tsx` *(Layer 3a)* | 8 | テンプレ select / blade 4 アングル / アングル切替 / pending バナー + 3 アングル disable / blade 切替 CTA / SVG フォールバック |
+| `src/components/Step3/index.test.tsx` *(Layer 3a + 3b-fix-step3-improvements)* | 13 | (3a 8 件 維持) + (3b-fix 5 件: 一括生成ボタン enable / 4 タイル再生成ボタン / pending での bulk disabled / bulk modal "約 25 円" / single modal "約 6 円") |
 | `src/components/Step3/buildImagePrompt.test.ts` *(Layer 3a + 3b)* | 20 | (3a 4 件 を 3b で再構成) shape 統合 3 件 + 属性 4 件 + angle 6 件 + position 4 件 + ネガ 1 件 + lining 文混入 / 不混入 / templateId override / 未知 position skip 等 |
-| 合計 | **197** | 全 pass |
+| `src/components/Step3/generateImage.test.ts` *(Layer 3b-fix-step3-improvements)* | 7 | `generateImagesForAllAngles` の並列発射 3 件 + 非 429 エラー隔離 2 件 + 429 sequential fallback 2 件 |
+| 合計 | **209** | 全 pass |
 
 ### 手厚い箇所
 - 純関数 (`applyProposal`, `getLabel`, `buildImagePrompt`)
