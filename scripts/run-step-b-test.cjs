@@ -1,23 +1,29 @@
 /**
- * Layer 3b-fix-step3-improvements: Phase 1.5 step B 用の手動 test call スクリプト。
+ * Layer 3b-fix-step3-improvements: gpt-image-2 切替検証用の手動 test call スクリプト。
  *
- * ローカルから 1 回だけ Vercel Preview の `/api/generate-image` を叩いて
- * gpt-image-2 が動くか確認する。Claude Code セッションのサンドボックス
- * は (a) `OPENAI_API_KEY` を持たないため直接 OpenAI に call できず、
- * (b) `*.vercel.app` が host allowlist に入っていないため Preview にも
- * curl で到達できない。よってユーザがローカルから実行する。
+ * **現状**: Layer 3b-fix-step3-improvements の本実装では default model は
+ * `gpt-image-1` のまま据え置き、4 アングル一括生成 UX を優先実装した
+ * (詳細 `docs/layer3b-step3-improvements-decisions.md`)。本スクリプトは
+ * 将来 gpt-image-2 切替検証を再開する際に **そのまま使える状態で残置** する。
  *
- * 使い方:
- *   node scripts/run-step-b-test.cjs
+ * **将来再開する場合の手順**:
+ *   1. cd /path/to/spec-automation
+ *   2. git checkout main && git pull
+ *   3. PREVIEW_URL='https://...' node scripts/run-step-b-test.cjs
+ *   4. 結果次第で `api/generate-image.ts` の DEFAULT_MODEL を 'gpt-image-2'
+ *      に変更する小 PR を起こす
+ *
+ * このスクリプトはローカルから 1 回だけ Vercel Preview の `/api/generate-image`
+ * を叩いて gpt-image-2 が動くか確認するもの。Claude Code セッションのサンドボックス
+ * は (a) `OPENAI_API_KEY` を持たないため直接 OpenAI に call できず、(b)
+ * `*.vercel.app` が host allowlist に入っていないため Preview にも curl で
+ * 到達できない。よってユーザがローカルから実行する。
  *
  * オプション環境変数:
- *   PREVIEW_URL  既定: claude/layer3b-step3-improvements ブランチの最新 Preview URL
+ *   PREVIEW_URL  既定: 過去の検証時に取得した Preview URL (古ければ上書き必須)
  *
  * 実行 1 回で gpt-image-2 medium 1024x1024 を 1 枚生成する。コスト約 ¥8。
  * 結果は /tmp/step-b-result.json に保存され、要約が標準出力に出る。
- *
- * 結果ファイルの中身を Claude Code セッションに貼り付けて、step B 完了報告
- * とすること。
  */
 const fs = require('node:fs');
 const path = require('node:path');
